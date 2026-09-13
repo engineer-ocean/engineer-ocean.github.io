@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>门级仿真的时间都花在哪了：一次 profiling 记录 — Ocean</title>
+<meta name="description" content="把一次完整的门级仿真跑程拆成读入、反标、编译、求值、检查五个阶段，看每一段的耗时分布，以及优化应该从哪里下手。">
+<link rel="canonical" href="https://engineer-ocean.github.io/blog/posts/gls-profiling-notes.html">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/img/favicon.svg">
+<link rel="stylesheet" href="/assets/css/style.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('yy-theme');
+    if (t !== 'dark' && t !== 'light') {
+      t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</head>
+
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">EO</span>
+        <span>Ocean</span>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/#about">关于</a></li>
+        <li><a href="/#focus">方向</a></li>
+        <li><a href="/#experience">经历</a></li>
+        <li><a href="/#work">领域知识</a></li>
+        <li><a href="/blog/" class="is-active">技术笔记</a></li>
+        <li><a href="/#contact">联系</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="icon-btn" type="button" data-theme-toggle aria-label="切换主题" title="切换主题">
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.3A8.6 8.6 0 1 1 9.7 3.5a6.9 6.9 0 0 0 10.8 10.8z"/></svg>
+        </button>
+        <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="打开菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/></svg>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<article>
+  <header class="article-head">
+    <div class="prose-wrap">
+      <p class="breadcrumb"><a href="/">首页</a> <span>/</span> <a href="/blog/">技术笔记</a> <span>/</span></p>
+      <h1>门级仿真的时间都花在哪了：一次 profiling 记录</h1>
+      <p class="article-desc">
+        仿真器的商业壁垒在性能与生态，不在功能完备性。所以性能这件事必须有人做，
+        而且要用数字说话。下面是把一次完整门级跑程拆成五个阶段之后的观察。
+      </p>
+      <div class="article-bar">
+        <span>2026-07-29</span>
+        <span class="dot">·</span>
+        <span>8 分钟阅读</span>
+        <span class="dot sep-hide">·</span>
+        <span>GLS / 性能 / Profiling</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="article-body">
+    <div class="prose-wrap">
+      <div class="prose">
+
+        <p>
+          做性能优化最容易犯的错是凭直觉。仿真器尤其如此 —— 一个"看起来"很重的字符串处理
+          可能在整体里只占 2%，而一段不起眼的查表代码占了 30%。
+          所以第一件事永远是把跑程拆开，量一遍。
+        </p>
+
+        <h2>一、拆成哪五段</h2>
+
+        <p>一次完整的门级仿真跑程，我按执行语义切成五段：</p>
+
+        <ol>
+          <li><strong>读入与精化</strong> —— 解析网表、展开层次、建立内部数据结构</li>
+          <li><strong>反标</strong> —— 读 SDF、匹配实例与路径、把延迟写进内部模型</li>
+          <li><strong>编译 / 代码生成</strong> —— 把网表转成可执行的内部表示（解释或生成代码）</li>
+          <li><strong>求值与调度</strong> —— 事件驱动的仿真主体：求值、更新、推进时间</li>
+          <li><strong>检查</strong> —— 时序检查、断言、以及与之相关的记录与报告</li>
+        </ol>
+
+        <p>
+          划分的依据是<strong>它们各自能被独立优化</strong>。前三段是一次性的（随设计规模线性或超线性增长），
+          后两段是随仿真时长累积的。这个区别很重要：一次性开销和累积开销的优化策略完全不同。
+        </p>
+
+        <h2>二、几个值得注意的观察</h2>
+
+        <h3>阶段分布强烈依赖跑程时长，不能只看一次</h3>
+
+        <p>
+          跑 100 个周期时，前三段可能占掉一半以上；跑几十万个周期时，
+          它们几乎可以忽略。所以<strong>"哪一段最慢"这个问题本身没有答案</strong> ——
+          必须先说明仿真跑了多久、设计多大。任何性能数字脱离这两个参数都是无意义的。
+        </p>
+
+        <h3>反标阶段的成本常常被低估</h3>
+
+        <p>
+          SDF 匹配不是简单的哈希查找。同一个实例在 SDF 里可能有多条针对不同条件的条目，
+          匹配需要考虑时序条件（<code>COND</code>）、边沿对（<code>posedge</code> / <code>negedge</code>）、
+          以及实例名的层次映射。当 SDF 体积远大于网表规模时（这在带大量
+          <code>INTERCONNECT</code> 条目的场景下很常见），这一段会成为明显的瓶颈。
+        </p>
+
+        <p>
+          还有一个隐蔽成本：<em>匹配失败的处理</em>。SDF 里写了但网表里没有的条目，
+          通常会以警告形式输出。如果条目数量在十万级，光是格式化与输出这些警告的开销就很可观 ——
+          而这部分开销在 profiling 里很容易被归到"IO"里被忽略。
+        </p>
+
+        <h3>求值阶段的成本结构取决于设计特征</h3>
+
+        <p>
+          事件驱动的求值成本大致由三件事决定：事件数量、每个事件的平均激活扇出、
+          以及调度队列的管理开销。有些设计事件少但每条路径极长（组合逻辑深），
+          有些设计事件多但每条极短。前者的优化点在求值本身，后者在调度与队列。
+        </p>
+
+        <p>这两类设计的优化方向几乎相反，这也是为什么必须分设计看数字。</p>
+
+        <h3>检查阶段不便宜，而且对它做优化会改变结果</h3>
+
+        <p>
+          时序检查需要维护每个被检查点的历史值（用于判断边沿、判断稳定窗口）。
+          这些状态的维护成本随被检查点的数量与仿真时长增长。
+        </p>
+
+        <p>
+          麻烦的是，对检查逻辑的任何优化都可能改变 X 的处理行为与边界情况下的判定。
+          所以我认为这一段应该<strong>明确区分"只影响速度"的优化与"可能影响结果"的优化</strong>，
+          后者必须配回归验证，不能靠单元测试覆盖。
+        </p>
+
+        <h2>三、优化应该从哪里下手</h2>
+
+        <p>按我目前的判断，性价比顺序大致是这样：</p>
+
+        <table>
+          <thead>
+            <tr><th>方向</th><th>预期收益</th><th>风险</th><th>适用前提</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>前置阶段的数据结构与查找优化</td>
+              <td>中—高（一次性）</td>
+              <td>低</td>
+              <td>跑程较短，或设计规模很大</td>
+            </tr>
+            <tr>
+              <td>事件调度与队列管理</td>
+              <td>高（累积）</td>
+              <td>中</td>
+              <td>事件密度高、仿真周期长</td>
+            </tr>
+            <tr>
+              <td>求值内核（编译 / 代码生成）</td>
+              <td>高（累积）</td>
+              <td>高</td>
+              <td>求值确实占主导，且已有可靠回归</td>
+            </tr>
+            <tr>
+              <td>检查逻辑本身</td>
+              <td>中</td>
+              <td>高（可能改结果）</td>
+              <td>检查是被验证的瓶颈段</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          我倾向的推进顺序是从上往下。原因不是收益最大化，而是<strong>风险最小化</strong>：
+          先把低风险的部分吃掉，用它们带来的时间余量去做后面的硬活，
+          同时在这个过程中把回归基础设施建起来 —— 后面那两步没有可靠的回归是做不了的。
+        </p>
+
+        <h2>四、几条方法上的注意事项</h2>
+
+        <ul>
+          <li>
+            <strong>区分墙钟时间与 CPU 时间。</strong>门级仿真常伴随大量波形 dump，
+            IO 可能吞掉相当比例的墙钟时间。如果不区分，会把 IO 瓶颈误判成内核瓶颈，
+            然后去优化一个本来不慢的地方。
+          </li>
+          <li>
+            <strong>波形 dump 的粒度本身是个变量。</strong>把 dump 关掉再跑一遍，
+            得到的数字才有可比性。很多"性能问题"其实只是 dump 配置不同。
+          </li>
+          <li>
+            <strong>固定一切除了被测项之外的东西。</strong>设计、激励、SDF、编译选项、机器负载。
+            性能测量的信噪比通常比我们以为的低。
+          </li>
+          <li>
+            <strong>记录仪器本身的开销。</strong>细粒度的 profiling 会显著改变运行特征，
+            导致观察者效应。粗粒度先定位，再对可疑区域做细粒度。
+          </li>
+        </ul>
+
+        <h2>五、为什么这件事值得认真做</h2>
+
+        <p>
+          功能完备性是可以补齐的 —— 别人有的特性，追上只是时间问题。
+          但性能不是：它来自长期的、系统性的工程积累，而且一旦落后，
+          改起来是伤筋动骨的。客户在评估仿真器时，跑一个真实设计的墙钟时间
+          通常比特性清单更有说服力。
+        </p>
+
+        <p>
+          所以我的看法是：<strong>性能不是"优化项目"，而是产品定位问题。</strong>
+          它需要一个持续的责任人，而不是一次性的攻坚。
+          这也是我愿意把时间放在这里的原因 —— 它属于那种做完了会一直有价值的事。
+        </p>
+
+        <hr>
+
+        <p style="font-size:15px;color:var(--muted);">
+          本文只讨论方法论与阶段划分，不涉及任何具体实现、版本或性能数据。
+        </p>
+
+      </div>
+    </div>
+  </div>
+</article>
+
+<div class="prose-wrap">
+  <div class="article-foot">
+    <a class="btn" href="/blog/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H6M11 18l-6-6 6-6"/></svg>
+      返回技术笔记
+    </a>
+    <a href="mailto:yyang16@126.com">就这篇内容交流 →</a>
+  </div>
+</div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <span>© <span data-year>2026</span> Ocean</span>
+    <ul class="footer-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/blog/">技术笔记</a></li>
+      <li><a href="/notes/vlsi2/">VLSI 2 讲义</a></li>
+      <li><a href="mailto:yyang16@126.com">Email</a></li>
+    </ul>
+    <span class="footer-note">Hosted on GitHub Pages</span>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

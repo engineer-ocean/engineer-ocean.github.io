@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDF 反标与 STA 时序结果对不上？七类常见根因 — Ocean</title>
+<meta name="description" content="从工艺角降额、串扰处理、时钟树建模，到 SDF 覆盖边界、负延迟与 borrow 语义、参考点定义，逐项拆开静态时序分析与门级仿真的建模差异。">
+<link rel="canonical" href="https://engineer-ocean.github.io/blog/posts/sdf-sta-consistency.html">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/img/favicon.svg">
+<link rel="stylesheet" href="/assets/css/style.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('yy-theme');
+    if (t !== 'dark' && t !== 'light') {
+      t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</head>
+
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">EO</span>
+        <span>Ocean</span>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/#about">关于</a></li>
+        <li><a href="/#focus">方向</a></li>
+        <li><a href="/#experience">经历</a></li>
+        <li><a href="/#work">领域知识</a></li>
+        <li><a href="/blog/" class="is-active">技术笔记</a></li>
+        <li><a href="/#contact">联系</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="icon-btn" type="button" data-theme-toggle aria-label="切换主题" title="切换主题">
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.3A8.6 8.6 0 1 1 9.7 3.5a6.9 6.9 0 0 0 10.8 10.8z"/></svg>
+        </button>
+        <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="打开菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/></svg>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<article>
+  <header class="article-head">
+    <div class="prose-wrap">
+      <p class="breadcrumb"><a href="/">首页</a> <span>/</span> <a href="/blog/">技术笔记</a> <span>/</span></p>
+      <h1>SDF 反标与 STA 时序结果对不上？七类常见根因</h1>
+      <p class="article-desc">
+        静态时序分析报违例、门级仿真却跑过 —— 或者反过来。这通常不是"哪个工具不准"，
+        而是两者在建模的东西根本不是同一个。把差异逐项归位，比争论谁对更有用。
+      </p>
+      <div class="article-bar">
+        <span>2026-08-24</span>
+        <span class="dot">·</span>
+        <span>12 分钟阅读</span>
+        <span class="dot sep-hide">·</span>
+        <span>STA / SDF / 一致性</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="article-body">
+    <div class="prose-wrap">
+      <div class="prose">
+
+        <p>
+          先立一个前提：<strong>STA 与 GLS 的结果对不上是默认状态，"对上了"才是需要解释的。</strong>
+        </p>
+
+        <p>
+          原因是两者在计算的对象不同。STA 是静态的、基于图的：它把所有结构上存在的路径都算一遍，
+          不需要激励，用降额（derate）建模统计分布。GLS 是动态的、基于事件的：
+          它只算激励真正激活了的路径，用 SDF 给出的确定性数值。
+        </p>
+
+        <p>
+          一个算"所有可能"，一个算"实际发生"。差异从建模假设层面就存在了。
+          所以目标不应该是让两边数值相等，而是<strong>能解释每一条差异的成因</strong>。
+          能解释的叫工程判断，不能解释的叫风险。
+        </p>
+
+        <p>
+          下面是我在排查这类问题时整理的七类根因，大致按出现频率排序。
+        </p>
+
+        <h2>一、工艺角与降额建模不匹配</h2>
+
+        <p>
+          STA 在一个工艺角上运行时，往往还会额外施加 OCV / AOCV / POCV（LVF）降额。
+          这些降额建模的是片上偏差与统计分布，是人为加上的余量。
+        </p>
+
+        <p>
+          而 SDF 只对应一个具体的角，<em>不包含任何降额</em>。当一条路径在 STA 里违例、
+          在 GLS 里却宽松得很，最常见的解释就是：违例完全来自降额，GLS 那边根本没有对应的延迟量。
+        </p>
+
+        <p>需要核查的东西：</p>
+        <ul>
+          <li>STA 运行时实际生效的 derate 值（包括 clock 与 data 的分别设置）</li>
+          <li>SDF 头部的 <code>PROCESS</code> / <code>TEMPERATURE</code> / <code>VOLTAGE</code> 标注，与 STA 的角是否真的对应</li>
+          <li>是否混用了不同角生成的库与 SDF</li>
+        </ul>
+
+        <h2>二、串扰与噪声的处理方式不同</h2>
+
+        <p>
+          开了信号完整性（SI）分析的 STA 会计算串扰引起的 delta delay，
+          而这个延迟取决于相邻网络的翻转情况 —— 也就是说，它<em>本身就是激励相关的</em>。
+        </p>
+
+        <p>
+          而 SDF 是确定性的：它把每一级的延迟写成固定数值。
+          如果这个 SDF 来自不带 SI 的分析，或者来自一次固定余量的估算，
+          那么两边在耦合严重的网络上会有系统性偏差。
+        </p>
+
+        <p>
+          实务上的做法是把 SI 的 delta delay 预折进 SDF 的数值里 —— 但这会丢掉激励相关性，
+          等于用一个悲观常量替代了一个条件量。知道这个取舍存在，比不知道要好得多。
+        </p>
+
+        <h2>三、时钟树与网络延迟的建模时点不同</h2>
+
+        <p>
+          这条我认为是"两边差一个数量级"最容易被忽略的原因。
+        </p>
+
+        <p>
+          CTS 之前的 STA 用理想时钟，时钟延迟只是一个假设的 latency。
+          CTS 之后 STA 用真实的时钟树。而 GLS 里时钟延迟来自 SDF 的
+          <code>INTERCONNECT</code> 条目。
+        </p>
+
+        <blockquote>
+          如果手上的 SDF 是 CTS 之前生成的，那么时钟网络的延迟在门级仿真里<b>完全缺失</b>。
+          此时运行的 GLS 既不是在验证真实时序，也不是在验证 STA 的结论，
+          而是在验证一个既不真实也不一致的中间态。
+        </blockquote>
+
+        <p>
+          确认方式很直接：检查 SDF 生成时点与 CTS 的先后关系，
+          以及 SDF 里是否存在时钟网络上的 <code>INTERCONNECT</code> 条目。
+        </p>
+
+        <h2>四、SDF 的覆盖边界</h2>
+
+        <p>
+          SDF 是增量格式：它只覆盖它包含的条目，没写的部分由仿真器用默认行为处理 ——
+          通常是零延迟或者库的默认值。
+        </p>
+
+        <p>
+          这意味着一个覆盖不全的 SDF 会让门级仿真"看起来又快又干净"。
+          它的时序检查报告是绿色的，但这个绿色没有意义，
+          因为设计里很大一部分路径被当成了零延迟的理想连线。
+        </p>
+
+        <p>应该常备的一项检查：统计设计中有多少 instance 与 timing path 被 SDF 实际覆盖。
+          把覆盖率当作一个必须记录在报告里的数字。</p>
+
+        <h2>五、负延迟与 notifier 语义</h2>
+
+        <p>
+          SDF 的 <code>IOPATH</code> 允许负延迟值，用于表达某些非单调的时序关系。
+          负延迟在数学上是合法的，但它对仿真器的调度提出了要求：
+          一个输出不能"早于"输入变化 —— 实现上必须有一个下限约束。
+        </p>
+
+        <p>
+          更麻烦的是 notifier 的交互。当负延迟把一次脉冲压缩到零宽甚至负宽时，
+          仿真器要不要因为 notifier 而把输出置为 X，这个行为在不同实现之间不一致。
+          这是同一份 SDF 在不同仿真器上给出不同报告的一个具体来源。
+        </p>
+
+        <p>相关的还有 delay 模型的选择：transport 还是 inertial，会直接改变窄脉冲是被保留还是被滤掉。</p>
+
+        <h2>六、时间借用与 latch 语义</h2>
+
+        <p>
+          对 latch-based 的设计，STA 会做 time borrowing 分析：一条路径的负 slack
+          可以借用下一级的时间，只要下一级还没关窗。这是图论层面的分析，
+          基准是各级的到达时间与关窗时刻。
+        </p>
+
+        <p>
+          GLS 里 latch 的透明性是真实的：仿真器按事件顺序求值，borrowing 是否"成功"
+          取决于实际的信号到达时间。两者判定的基准不同，在多级 latch 串联的场景下
+          会产生累积偏移。
+        </p>
+
+        <p>
+          这类差异特别难归因，因为它在两边都"正确"。我的做法是先用 latch 级数少、
+          结构清晰的路径验证流程本身是否对齐，再去看复杂路径。
+        </p>
+
+        <h2>七、参考点与路径端点的定义不同</h2>
+
+        <p>
+          STA 的 launch / capture 参考点是库里 timing arc 的端点，
+          通常就是寄存器的某个 pin。GLS 里检查的是仿真器内部的检查时刻。
+        </p>
+
+        <p>以下几个问题都会导致几十 ps 量级的偏移：</p>
+        <ul>
+          <li>clock-to-Q 是否已经包含在 SDF 的 <code>IOPATH</code> 里，还是需要另外叠加</li>
+          <li>极性（unateness）的处理是否一致 —— 反相路径上的边沿该取哪个</li>
+          <li>时钟路径的延迟在两边是否按同样的方式折算到检查里</li>
+        </ul>
+
+        <p>
+          几十 ps 在今天的工艺节点上足以翻转结论。而这类偏移往往有个特征：
+          它是<strong>系统性偏移</strong>，在所有路径上同号出现。看到这个特征，
+          就应该直接怀疑参考点定义，而不是去查某一条路径的延迟。
+        </p>
+
+        <h2>一个可复现的对照流程</h2>
+
+        <p>
+          一次比对全部路径是没用的 —— 差异会淹没在噪声里。可行的顺序是：
+        </p>
+
+        <ol>
+          <li>
+            <strong>冻结输入。</strong>同一份网表、同一套库、同一份 SDF、同一个角。
+            任何一项不同，后面的对比都不成立。
+          </li>
+          <li>
+            <strong>先对参考点，再对数值。</strong>挑一条结构最简单、长度适中的路径，
+            把两边的端点定义手工核对一遍。这一步不过，后面全白做。
+          </li>
+          <li>
+            <strong>逐级比延迟。</strong>把这条路径每一级的延迟从 SDF 里提取出来，
+            与 STA 的逐级延迟报告对照。差异通常会在某一级上集中出现 ——
+            那一级就是根因所在，而不是整条路径有问题。
+          </li>
+          <li>
+            <strong>归类。</strong>把找到的差异归到上面七类中的某一类。
+            分类的意义是：一旦某类差异被确认过一次，后面遇到直接对照即可，不用重新排查。
+          </li>
+          <li>
+            <strong>只对差异条目做归因。</strong>不要试图解释全部报告。
+          </li>
+        </ol>
+
+        <h2>最后一条经验</h2>
+
+        <p>
+          不要期望两者数值相等。它们建模的东西本来就不同，
+          强行让它们相等，意味着你要放弃其中一方的建模能力。
+        </p>
+
+        <p>
+          真正要交付的不是一份"两边一致"的结论，而是一份<strong>差异说明</strong>：
+          哪些差异来自建模假设（可接受、需记录），哪些来自配置错误（必须修），
+          哪些来自未知来源（必须查清）。
+        </p>
+
+        <p>
+          前两类是工程判断，第三类是风险。把第三类清零，这件事就算做完了。
+        </p>
+
+        <hr>
+
+        <p style="font-size:15px;color:var(--muted);">
+          文中不涉及任何具体设计、工具或版本。如果你的实践里还有第八类根因，欢迎邮件补充。
+        </p>
+
+      </div>
+    </div>
+  </div>
+</article>
+
+<div class="prose-wrap">
+  <div class="article-foot">
+    <a class="btn" href="/blog/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H6M11 18l-6-6 6-6"/></svg>
+      返回技术笔记
+    </a>
+    <a href="mailto:yyang16@126.com">就这篇内容交流 →</a>
+  </div>
+</div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <span>© <span data-year>2026</span> Ocean</span>
+    <ul class="footer-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/blog/">技术笔记</a></li>
+      <li><a href="/notes/vlsi2/">VLSI 2 讲义</a></li>
+      <li><a href="mailto:yyang16@126.com">Email</a></li>
+    </ul>
+    <span class="footer-note">Hosted on GitHub Pages</span>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

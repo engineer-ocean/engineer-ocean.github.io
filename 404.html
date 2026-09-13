@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 — 页面不存在 | Ocean</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('yy-theme');
+    if (t !== 'dark' && t !== 'light') {
+      t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</head>
+
+<body>
+<main id="main">
+  <section class="hero" style="min-height:78vh;display:grid;align-items:center;">
+    <div class="wrap">
+      <span class="eyebrow">HTTP 404</span>
+      <h1 class="hero-name" style="font-size:clamp(32px,5.4vw,48px);">
+        这条路径上没有信号
+        <span class="cn">Page not found</span>
+      </h1>
+      <p class="hero-lede" style="max-width:520px;">
+        请求的页面不存在，或者链接已经失效。可能是某篇笔记被移动了位置。
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="/">
+          回到首页
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn" href="/blog/">技术笔记</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <span>© <span data-year>2026</span> Ocean</span>
+    <ul class="footer-links">
+      <li><a href="/">首页</a></li>
+      <li><a href="/blog/">技术笔记</a></li>
+      <li><a href="/notes/vlsi2/">VLSI 2 讲义</a></li>
+    </ul>
+    <span class="footer-note">Hosted on GitHub Pages</span>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

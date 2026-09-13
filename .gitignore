@@ -1,0 +1,10 @@
+# 本地开发脚本与截图产物，不参与部署
+.dev/
+
+# WorkBuddy 工作区数据（记忆、技能等），不参与部署
+.workbuddy/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini

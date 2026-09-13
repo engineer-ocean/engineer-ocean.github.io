@@ -1,0 +1,3411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VLSI 2 中文课堂讲义 · 从网表到完整 SoC</title>
+<meta name="description" content="VLSI 2 中文课堂讲义：从 RTL、逻辑综合与门级网表，到 ICT / LEF / DEF / LIB / SDF / GDS 等交换格式，再到 VCD、WGL 与 PPA 收口。十二个章节、一百六十余张课件配图。">
+<link rel="canonical" href="https://engineer-ocean.github.io/notes/vlsi2/">
+<meta name="robots" content="index,follow">
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#f4f6f9;color:#1f2733;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+ font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.layout{display:flex;max-width:1400px;margin:0 auto;gap:28px;padding:0 20px}
+
+/* ---- sidebar ---- */
+#side{width:280px;flex:0 0 280px;position:sticky;top:0;height:100vh;overflow-y:auto;
+ padding:24px 8px 60px 0;border-right:1px solid #e2e7ef;background:#f4f6f9}
+#side::-webkit-scrollbar{width:6px}
+#side::-webkit-scrollbar-thumb{background:#c9d2df;border-radius:3px}
+.side-title{font-size:13px;font-weight:700;color:#7b8798;letter-spacing:.14em;margin:0 0 12px 12px;text-transform:uppercase}
+.side-list{list-style:none;margin:0;padding:0}
+.toc-top>a,.toc-ch>a{display:block;padding:7px 12px;border-radius:7px;color:#3c4a5d;text-decoration:none;font-size:14px;line-height:1.5}
+.toc-top>a{font-weight:600;background:#e7ecf4;margin-bottom:6px}
+.toc-ch>a{border-left:3px solid transparent}
+.toc-no{display:inline-block;width:24px;color:#a3aec0;font-variant-numeric:tabular-nums;font-size:12px}
+.toc-top>a:hover,.toc-ch>a:hover{background:#e9edf4;color:#1a5fb4}
+.toc-ch>a.active{background:#e3ecfb;color:#1a5fb4;font-weight:600;border-left-color:#1a5fb4}
+.toc-sub{list-style:none;margin:2px 0 8px;padding:0 0 0 39px;display:none}
+.toc-ch.open>.toc-sub{display:block}
+.toc-sub li a{display:block;padding:4px 6px;font-size:13px;color:#66748a;text-decoration:none;border-left:1px solid #dde3ec}
+.toc-sub li a:hover{color:#1a5fb4}
+
+/* ---- content ---- */
+main{flex:1 1 auto;min-width:0;padding:36px 0 120px}
+.cover{background:linear-gradient(135deg,#1b3a6b 0%,#2f6fbd 100%);color:#fff;border-radius:16px;
+ padding:44px 48px;margin-bottom:34px;box-shadow:0 12px 34px rgba(27,58,107,.24)}
+.cover h1{margin:0 0 10px;font-size:30px;line-height:1.35;letter-spacing:.5px}
+.cover .sub{font-size:17px;opacity:.94;margin:0 0 20px}
+.cover .src{font-size:13.5px;opacity:.82;line-height:1.9;margin:0}
+.cover .chips{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;
+ padding:4px 13px;font-size:12.5px}
+
+.chapter{background:#fff;border:1px solid #e4e9f2;border-radius:14px;padding:38px 46px;margin:0 0 30px;
+ box-shadow:0 2px 10px rgba(24,45,80,.05)}
+.ch-head{border-bottom:2px solid #eef2f8;padding-bottom:18px;margin-bottom:22px}
+.ch-no{display:inline-block;background:#1b3a6b;color:#fff;font-size:13px;font-weight:700;
+ padding:3px 12px;border-radius:6px;letter-spacing:.06em;margin-bottom:10px}
+.ch-head h2{margin:0;font-size:26px;line-height:1.4;color:#16233a}
+.ch-meta{margin:10px 0 0;font-size:13.5px;color:#7b8798}
+.lead{background:#f2f7fd;border-left:4px solid #2f6fbd;border-radius:0 10px 10px 0;padding:16px 20px;margin:0 0 26px;color:#28405f;font-size:15.5px}
+h3{font-size:20px;color:#16233a;margin:34px 0 14px;padding-left:12px;border-left:4px solid #2f6fbd;line-height:1.5}
+h4{font-size:16.5px;color:#28405f;margin:22px 0 10px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:24px}
+li{margin:5px 0}
+b{color:#14263f}
+code{background:#f0f3f8;border:1px solid #e2e7ef;border-radius:4px;padding:1px 5px;font-size:13.5px;
+ font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;color:#b3284a}
+
+.tbl{width:100%;border-collapse:collapse;margin:18px 0 22px;font-size:14.5px}
+.tbl th{background:#eef2f8;color:#16233a;font-weight:600;text-align:left;padding:10px 12px;border:1px solid #dfe5ef}
+.tbl td{padding:9px 12px;border:1px solid #e6ebf3;vertical-align:top}
+.tbl tbody tr:nth-child(even){background:#fafbfd}
+
+.note,.warn{border-radius:10px;padding:14px 18px;margin:18px 0;font-size:15px}
+.note{background:#f3f9f4;border:1px solid #cfe6d5;color:#245c34}
+.warn{background:#fff8ec;border:1px solid #f0d9a8;color:#6d4a08}
+.takeaway{background:#f7f9fc;border:1px dashed #c3cfdf;border-radius:10px;padding:16px 20px 8px;margin:22px 0 0}
+.takeaway ol{margin:0 0 8px;padding-left:22px}
+
+figure{margin:22px 0 26px;text-align:center}
+figure img{max-width:100%;height:auto;border:1px solid #e2e7ef;border-radius:10px;background:#fff;cursor:zoom-in;box-shadow:0 1px 6px rgba(20,40,80,.07)}
+figcaption{font-size:13.5px;color:#68758a;margin-top:9px;line-height:1.65;text-align:center}
+.fig-row{display:flex;gap:18px;flex-wrap:wrap}
+.fig-row figure{flex:1 1 300px;min-width:0;margin:18px 0 22px}
+
+.code-block{margin:20px 0 24px;border:1px solid #dde3ec;border-radius:10px;overflow:hidden;background:#fbfcfe}
+.code-title{background:#eef2f8;color:#28405f;font-size:13px;font-weight:600;padding:8px 14px;border-bottom:1px solid #dde3ec}
+.code-block pre{margin:0;padding:14px 16px;overflow-x:auto}
+.code-block code{background:none;border:none;padding:0;color:#22314a;font-size:13.2px;line-height:1.7}
+
+#top{position:fixed;right:26px;bottom:26px;width:44px;height:44px;border-radius:50%;border:1px solid #d5dde9;
+ background:#fff;color:#2f6fbd;font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(20,40,80,.14);display:none}
+#lb{position:fixed;inset:0;background:rgba(12,20,34,.86);display:none;align-items:center;justify-content:center;z-index:99;cursor:zoom-out}
+#lb img{max-width:96vw;max-height:94vh;border-radius:6px;background:#fff}
+footer{text-align:center;color:#8b96a8;font-size:13px;padding:30px 0 60px}
+
+@media(max-width:1080px){
+ .layout{flex-direction:column;padding:0 14px;gap:0}
+ #side{position:static;width:auto;flex:none;height:auto;max-height:none;border-right:none;border-bottom:1px solid #e2e7ef;padding:18px 0}
+ .toc-sub{display:none!important}
+ .chapter{padding:24px 20px}
+ .cover{padding:30px 24px}
+ .cover h1{font-size:24px}
+}
+@media print{
+ #side,#top,#lb{display:none}
+ body{background:#fff}
+ .chapter{box-shadow:none;border:none;page-break-inside:auto;padding:0 0 20px}
+ figure{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav id="side">
+    <p class="side-title">目录</p>
+    <p style="margin:-4px 0 14px 12px"><a href="/" style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:#3c4a5d;text-decoration:none;border:1px solid #d8e0ea;background:#fff;border-radius:100px;padding:4px 11px">← 返回站点首页</a></p>
+    <ul class="side-list">
+<li class="toc-top"><a href="#overview">总览 · 课程地图</a></li>
+<li class="toc-ch"><a href="#ch01"><span class="toc-no">01</span>引言：从 RTL 到一颗芯片，以及为什么需要开源 EDA 流程</a><ul class="toc-sub"><li><a href="#ch01-1">1.1 这门课的落点：亲手把一个 RTL 变成芯片</a></li><li><a href="#ch01-2">1.2 为什么要有开源 EDA 流程：哪些环节曾经是封闭的</a></li><li><a href="#ch01-3">1.3 芯片是一门大生意：产业图谱与参与者</a></li><li><a href="#ch01-4">1.4 摩尔定律与登纳德缩放：为什么&quot;更小&quot;曾经等于&quot;更快更省电&quot;</a></li><li><a href="#ch01-5">1.5 一颗芯片要花多少钱：一次性成本与单颗成本</a></li><li><a href="#ch01-6">1.6 制造经济学：晶圆厂、良率与&quot;小批量怎么办&quot;</a></li><li><a href="#ch01-7">1.7 开源硬件的三个方面：设计、工具、制造</a></li><li><a href="#ch01-8">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch02"><span class="toc-no">02</span>RTL：SystemVerilog 回顾</a><ul class="toc-sub"><li><a href="#ch02-1">2.1 为什么需要硬件描述语言</a></li><li><a href="#ch02-2">2.2 模块、端口与层次实例化</a></li><li><a href="#ch02-3">2.3 数据类型、四值逻辑与 tri-state</a></li><li><a href="#ch02-4">2.4 向量、常量与命名约定</a></li><li><a href="#ch02-5">2.5 组合逻辑建模</a></li><li><a href="#ch02-6">2.6 时序逻辑与 always 语句</a></li><li><a href="#ch02-7">2.7 状态机（FSM）模板</a></li><li><a href="#ch02-8">2.8 常见不可综合或可综合但易错写法</a></li><li><a href="#ch02-9">2.9 RTL 与门级网表的关系</a></li><li><a href="#ch02-10">2.10 数据通路与控制器：分离但同模块</a></li><li><a href="#ch02-11">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch03"><span class="toc-no">03</span>逻辑综合与门级网表：从 RTL 走向物理实现的第一步</a><ul class="toc-sub"><li><a href="#ch03-1">3.1 本讲定位：RTL 之后，为什么必须落到门级网表</a></li><li><a href="#ch03-2">3.2 示例 SoC「Croc」：一个小而全的片上系统</a></li><li><a href="#ch03-3">3.3 用 CMOS 搭建任意布尔函数</a></li><li><a href="#ch03-4">3.4 门延迟从哪来：驱动能力与负载的平衡</a></li><li><a href="#ch03-5">3.5 逻辑综合三步：翻译、优化、映射</a></li><li><a href="#ch03-6">3.6 时序基础一：传播/污染延迟与建立/保持时间</a></li><li><a href="#ch03-7">3.7 时序基础二：时钟周期、关键路径与输入/输出约束</a></li><li><a href="#ch03-8">3.8 门级网表的形态与阅读方法</a></li><li><a href="#ch03-9">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch04"><span class="toc-no">04</span>IC 制造工艺：从硅片到芯片</a><ul class="toc-sub"><li><a href="#ch04-1">4.1 为什么要先看制造：约束的源头在这里</a></li><li><a href="#ch04-2">4.2 导体、绝缘体、半导体：三种材料的取舍</a></li><li><a href="#ch04-3">4.3 掺杂：真正让半导体有用的东西</a></li><li><a href="#ch04-4">4.4 晶体管：一个受电压控制的开关，以及它为什么要越做越小</a></li><li><a href="#ch04-5">4.5 光刻与&quot;涂—曝—显—做—洗&quot;循环</a></li><li><a href="#ch04-6">4.6 掩模：逻辑掩模与物理掩模，以及为什么可以省成本</a></li><li><a href="#ch04-7">4.7 逐层搭建：从阱到高层金属</a></li><li><a href="#ch04-8">4.8 ICT 文件：金属叠层决定了寄生参数</a></li><li><a href="#ch04-9">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch05"><span class="toc-no">05</span>LEF：标准单元与布线层</a><ul class="toc-sub"><li><a href="#ch05-1">5.1 后端设计的抽象层次：晶体管之上只看互连</a></li><li><a href="#ch05-2">5.2 金属互连层：从晶体管到三维布线</a></li><li><a href="#ch05-3">5.3 曼哈顿布线与轨道节距</a></li><li><a href="#ch05-4">5.4 标准单元的物理结构：等高、电源轨与引脚</a></li><li><a href="#ch05-5">5.5 宏单元与 SRAM：无法塞进标准单元行的块</a></li><li><a href="#ch05-6">5.6 LEF 文件：把物理信息交给后端工具</a></li><li><a href="#ch05-7">5.7 从 LEF 中快速提取信息</a></li><li><a href="#ch05-8">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch06"><span class="toc-no">06</span>DEF 与布图规划</a><ul class="toc-sub"><li><a href="#ch06-1">6.1 从网表到芯片：布图规划要回答什么</a></li><li><a href="#ch06-2">6.2 芯片面积与核心利用率</a></li><li><a href="#ch06-3">6.3 I/O 环与焊盘设计</a></li><li><a href="#ch06-4">6.4 电源规划：环、条带与网格</a></li><li><a href="#ch06-5">6.5 ESD 保护结构</a></li><li><a href="#ch06-6">6.6 封装形式与先进集成</a></li><li><a href="#ch06-7">6.7 DEF：布图信息的文本表达</a></li><li><a href="#ch06-8">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch07"><span class="toc-no">07</span>LIB：时序、时钟树与工艺角</a><ul class="toc-sub"><li><a href="#ch07-1">7.1 SETUP 与 HOLD：同步设计仅有的两条时序条件</a></li><li><a href="#ch07-2">7.2 STA：为什么不能用功能仿真查时序</a></li><li><a href="#ch07-3">7.3 时钟分布的挑战与时钟树</a></li><li><a href="#ch07-4">7.4 时钟树的演进与插入延迟的副作用</a></li><li><a href="#ch07-5">7.5 skew、jitter 与 latency：三个量、三种来源</a></li><li><a href="#ch07-6">7.6 时钟策略：单边、双边与两相锁存器</a></li><li><a href="#ch07-7">7.7 工艺角：把&quot;变化&quot;变成可签核的边界</a></li><li><a href="#ch07-8">7.8 Liberty（LIB）时序库解剖</a></li><li><a href="#ch07-9">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch08"><span class="toc-no">08</span>寄生效应、信号完整性与 SDF 反标</a><ul class="toc-sub"><li><a href="#ch08-1">8.1 寄生参数：芯片上&quot;没要&quot;的四种元件</a></li><li><a href="#ch08-2">8.2 互连的电阻与电容：截面和距离决定一切</a></li><li><a href="#ch08-3">8.3 电迁移：大电流把金属&quot;吹走&quot;</a></li><li><a href="#ch08-4">8.4 IR 压降、地弹与电源网络</a></li><li><a href="#ch08-5">8.5 串扰与信号完整性</a></li><li><a href="#ch08-6">8.6 闩锁与器件老化：可靠性的两条线</a></li><li><a href="#ch08-7">8.7 SDF：把提取出的真实延迟反标回仿真</a></li><li><a href="#ch08-8">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch09"><span class="toc-no">09</span>GDS：布局、布线、芯片收尾与 GDSII 文件</a><ul class="toc-sub"><li><a href="#ch09-1">9.1 本讲在流程中的位置与目标</a></li><li><a href="#ch09-2">9.2 布局：把成千上万个单元摆进行里</a></li><li><a href="#ch09-3">9.3 布线：全局布线与详细布线</a></li><li><a href="#ch09-4">9.4 芯片收尾与签核：填充单元、天线单元、DRC 与 LVS</a></li><li><a href="#ch09-5">9.5 GDS2 / GDSII：只描述几何的二进制格式</a></li><li><a href="#ch09-6">9.6 layer–purpose 对：几何如何对应到掩模</a></li><li><a href="#ch09-7">9.7 层次化、阵列、旋转与镜像</a></li><li><a href="#ch09-8">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch10"><span class="toc-no">10</span>功耗分析与 VCD：动态功耗、漏电流与基于仿真的活动估计</a><ul class="toc-sub"><li><a href="#ch10-1">10.1 工艺微缩已经变成&quot;功耗受限&quot;</a></li><li><a href="#ch10-2">10.2 先分清：我们关心的是功率还是能量</a></li><li><a href="#ch10-3">10.3 CMOS 电路的能量到底耗在哪：四条路径</a></li><li><a href="#ch10-4">10.4 翻转率与活动因子：动态功耗公式</a></li><li><a href="#ch10-5">10.5 短路电流、静态负载与漏电流</a></li><li><a href="#ch10-6">10.6 总能量与总功耗：公式简单，各项却互相牵制</a></li><li><a href="#ch10-7">10.7 VDD 与 Vth 的拉锯：过驱动、效率最优点与体偏置</a></li><li><a href="#ch10-8">10.8 消灭浪费：时钟门控、输入静默、DVFS 与电源门控</a></li><li><a href="#ch10-9">10.9 为什么功耗估计需要 VCD</a></li><li><a href="#ch10-10">10.10 VCD 文件剖析：逐行读一个真实片段</a></li><li><a href="#ch10-11">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch11"><span class="toc-no">11</span>IC 测试与 WGL：故障模型、扫描链、ATPG、JTAG、BIST 与测试波形文件</a><ul class="toc-sub"><li><a href="#ch11-1">11.1 测试本质上是一道经济学题：十倍法则与失效的来源</a></li><li><a href="#ch11-2">11.2 良率、测试覆盖率与缺陷率：三个必须分清的指标</a></li><li><a href="#ch11-3">11.3 故障模型与 ATPG：固定故障、激活与传播</a></li><li><a href="#ch11-4">11.4 扫描链与可测性设计：让时序电路变得可测</a></li><li><a href="#ch11-5">11.5 参数波动、分档与测试成本：测试插在流程的哪个位置</a></li><li><a href="#ch11-6">11.6 存储器故障模型与 March 测试</a></li><li><a href="#ch11-7">11.7 内建自测试：LFSR、BIST 架构与 BILBO</a></li><li><a href="#ch11-8">11.8 JTAG / IEEE 1149.1 边界扫描</a></li><li><a href="#ch11-9">11.9 WGL：把测试波形写成文件</a></li><li><a href="#ch11-10">本讲要点</a></li></ul></li>
+<li class="toc-ch"><a href="#ch12"><span class="toc-no">12</span>PPA：如何规范地报告性能、功耗与面积</a><ul class="toc-sub"><li><a href="#ch12-1">12.1 两个世界：工业界与学术界如何看 PPA</a></li><li><a href="#ch12-2">12.2 一个例子：把 SHA-3 核加进接收机系统</a></li><li><a href="#ch12-3">12.3 面积：看似最简单，其实最难说清</a></li><li><a href="#ch12-4">12.4 速度：单位很多，含义各异</a></li><li><a href="#ch12-5">12.5 面积–速度权衡与 AT 曲线</a></li><li><a href="#ch12-6">12.6 实战：AES S 盒的设计空间探索</a></li><li><a href="#ch12-7">12.7 功耗与能量：单位、构成与测量的难处</a></li><li><a href="#ch12-8">12.8 复合指标的陷阱：以吞吐率/面积为例</a></li><li><a href="#ch12-9">12.9 收尾：一份合格的 PPA 报告长什么样</a></li><li><a href="#ch12-10">本讲要点</a></li></ul></li>
+    </ul>
+  </nav>
+  <main>
+    <header class="cover">
+      <h1>VLSI 2 中文课堂讲义<br>从网表到完整片上系统</h1>
+      <p class="sub">十二讲完整笔记 · 保留全部关键图表与原始文件格式片段</p>
+      <p class="src">原课件：VLSI 2: From Netlist to Complete System on Chip<br>
+      ETH Zürich ／ Luca Benini、Frank K. Gürkaynak ／ 2026 年春季学期<br>
+      共 695 页课件，整理为 12 讲，插图 160 张</p>
+      <div class="chips"><span class="chip">RTL</span><span class="chip">Netlist</span><span class="chip">LEF</span>
+      <span class="chip">DEF</span><span class="chip">LIB</span><span class="chip">SDF</span><span class="chip">GDS</span>
+      <span class="chip">VCD</span><span class="chip">WGL</span><span class="chip">PPA</span></div>
+    </header>
+
+<div class="chapter" id="overview">
+  <div class="ch-head">
+    <span class="ch-no">总览</span>
+    <h2>课程地图：从网表到完整 SoC</h2>
+    <p class="ch-meta">对应课件：VLSI 2: From Netlist to Complete System on Chip（ETH Zürich，Luca Benini / Frank K. Gürkaynak，2026 春）</p>
+  </div>
+
+  <div class="lead">
+    这门课回答一个问题：<b>手里有了一份门级网表之后，还要做多少事、经历哪些文件格式，才能得到一颗可以送去流片的芯片</b>。
+    它不教你设计晶体管，而是带你走完后端的整条链路——布图规划、布局布线、时序与寄生、功耗、测试、签核——
+    并且几乎每个环节都对应一种具体的工程文件格式。本讲义把 12 讲课件整理成连贯的中文笔记，
+    保留全部关键图表，以及 LEF / DEF / LIB / SDF / VCD / WGL / Verilog 等<b>原始语法片段</b>。
+  </div>
+
+  <h3>讲义的使用方式</h3>
+  <ul>
+    <li>每一讲独立成篇：开头交代它在流程中的位置与要解决的问题，中间按知识点展开，结尾给出「本讲要点」。</li>
+    <li>所有专业术语首次出现时给出中英对照；<b>代码与文件格式片段一律保留英文原文</b>，前后附中文逐句解释。</li>
+    <li>每张图都标注了它在原课件中的页码，方便回原课件核对。</li>
+    <li>本讲义严格依据课件内容整理，课件未涉及的内容不作补充。</li>
+  </ul>
+
+  <h3>十二讲主线</h3>
+  <table class="tbl">
+    <thead><tr><th>讲次</th><th>主题</th><th>这一讲解决什么问题</th></tr></thead>
+    <tbody>
+      <tr><td>1 · INTRO</td><td>引言与设计流程</td><td>为什么要关心后端流程、一颗芯片的真实成本结构、开源 EDA 的位置</td></tr>
+      <tr><td>2 · RTL</td><td>SystemVerilog 回顾</td><td>什么样的 RTL 写才是可综合的，RTL 与门级网表的对应关系</td></tr>
+      <tr><td>3 · Netlist</td><td>逻辑综合与时序基础</td><td>RTL 如何变成门级网表；建立/保持时间、关键路径从哪里来</td></tr>
+      <tr><td>4 · ICT</td><td>IC 制造工艺</td><td>工厂究竟做了什么，为什么这些工艺会反过来约束设计</td></tr>
+      <tr><td>5 · LEF</td><td>标准单元与布线层</td><td>后端眼中的单元长什么样，单元如何用 LEF 描述</td></tr>
+      <tr><td>6 · DEF</td><td>布图规划与封装</td><td>面积怎么定，I/O 环、电源网络、封装如何协同，DEF 如何描述布局</td></tr>
+      <tr><td>7 · LIB</td><td>时序库与时钟</td><td> Liberty 库怎么描述延迟，时钟树与工艺角如何进入时序计算</td></tr>
+      <tr><td>8 · SDF</td><td>寄生参数与反标</td><td>综合阶段的延迟为什么不可信，SDF 如何把真实延迟反标回网表</td></tr>
+      <tr><td>9 · GDS</td><td>布局布线与流片交付</td><td>最后一段流程、芯片收尾、DRC/LVS，以及 GDSII 文件本身</td></tr>
+      <tr><td>10 · VCD</td><td>功耗分析与 IR 压降</td><td>功耗怎么算、为什么需要仿真的翻转信息，以及电源网络为什么会失效</td></tr>
+      <tr><td>11 · WGL</td><td>IC 测试与 DFT</td><td>芯片造出来怎么测：故障模型、扫描链、ATPG、JTAG、BIST</td></tr>
+      <tr><td>12 · PPA</td><td>如何规范地报告 PPA</td><td>什么样的性能/功耗/面积数字才算有效，如何避免误导性的对比</td></tr>
+    </tbody>
+  </table>
+
+  <h3>贯穿全流程的文件格式</h3>
+  <p>这门课的一条暗线是<b>工程数据如何在工具之间传递</b>。下表列出每讲对应的核心文件格式，阅读时可以作为索引：</p>
+  <table class="tbl">
+    <thead><tr><th>格式</th><th>讲次</th><th>承载的内容</th></tr></thead>
+    <tbody>
+      <tr><td><b>RTL / SystemVerilog</b></td><td>2</td><td>寄存器传输级的行为描述，综合工具的输入</td></tr>
+      <tr><td><b>门级网表（Netlist）</b></td><td>3</td><td>综合输出的实例化连接关系，后端流程的起点</td></tr>
+      <tr><td><b>ICT</b></td><td>4</td><td>工艺的互连层结构、材料与电学参数</td></tr>
+      <tr><td><b>LEF</b></td><td>5</td><td>单元的抽象视图：尺寸、引脚位置、布线层与通孔规则、障碍物</td></tr>
+      <tr><td><b>DEF</b></td><td>6</td><td>实际设计：芯片轮廓、单元行、元件摆放、引脚与连线</td></tr>
+      <tr><td><b>LIB（Liberty）</b></td><td>7</td><td>单元的时序/功耗模型，以查找表形式给出</td></tr>
+      <tr><td><b>SDF / SPEF</b></td><td>8</td><td>反标用的延迟信息 / 提取出的寄生参数</td></tr>
+      <tr><td><b>GDSII</b></td><td>9</td><td>最终交付给晶圆厂的几何版图数据</td></tr>
+      <tr><td><b>VCD / SAIF</b></td><td>10</td><td>仿真产生的信号翻转活动，用于功耗分析</td></tr>
+      <tr><td><b>WGL</b></td><td>11</td><td>测试设备可读的测试波形与时序</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <b>注：</b>这些格式的分工很清晰——<b>LEF 描述「单元长什么样」、DEF 描述「单元摆在哪里」、LIB 描述「单元有多快」、SDF 描述「实际延迟是多少」、GDS 描述「最终几何图形」</b>。
+    把这条线串起来，后端流程就不再是一堆工具命令，而是同一份设计在不同抽象层次上的投影。
+  </div>
+</div>
+
+<section class="chapter" id="ch01">
+  <div class="ch-head">
+    <span class="ch-no">第 1 讲</span>
+    <h2>引言：从 RTL 到一颗芯片，以及为什么需要开源 EDA 流程</h2>
+    <p class="ch-meta">对应课件：01_Intro.pdf ｜ 关键词：ASIC、design flow、open-source EDA、PDK、non-recurring cost、yield、MPW</p>
+  </div>
+
+  <div class="lead">
+    这一讲是全课的入口。它先回答"为什么要学从网表到完整片上系统"：这门课要带你亲手走完把一段 RTL 变成一颗可制造芯片的全过程。
+    接着用很大篇幅算账——做芯片要花多少钱、钱花在哪、为什么这门生意极度偏爱大产量。
+    最后引出贯穿全学期的主线：把设计（RTL）、工具（EDA）与制造工艺（PDK）尽量开源，会怎样改变进入芯片设计的门槛。
+  </div>
+
+  <h3 id="ch01-1">1.1 这门课的落点：亲手把一个 RTL 变成芯片</h3>
+  <p>
+    这门课的主题是 ASIC（Application Specific Integrated Circuit，专用集成电路）的实用设计。"专用"意味着不追求通用处理器的面面俱到，而是针对一个具体用途，把集成电路的各方面都工程化优化一遍，从而得到"最快、最小、最省电"的实现。课程是动手的：两人一组，期末交一颗自己的芯片；<b>没有考试，成绩来自设计本身</b>，最好的几个会被送去制造，流片（tape-out）定在七月。
+  </p>
+  <p>
+    那么"从网表到完整片上系统"具体要做什么？VLSI1 已经给了你一段可综合的 RTL，本课从这里接手：把它映射到预先设计好的标准单元库（standard cell，细节留给 VLSI3），完成布图规划（floorplan）、决定 I/O 数量与摆放、做布局布线（place &amp; route），理解时序与寄生参数如何影响性能，学习降低功耗，最后接触芯片测试与可测性设计（design for test）。这些步骤被画成一条流程线，见图 1-1。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p005_page.jpg" alt="简化的 IC 设计流程：RTL 经综合得到网表，再经布局布线生成 GDS2，最终送晶圆厂制造" loading="lazy">
+    <figcaption><b>图 1-1</b> 简化的 IC 设计流程：RTL 与标准单元库、PDK 一起送入综合器得到网表，再结合第三方 IP 做布局布线，产出 GDS2 交给晶圆厂。来源：课件 p5</figcaption>
+  </figure>
+  <p>
+    这张图解释了后面所有成本与开源讨论的"骨架"。综合器（Synthesizer）不只要吃 RTL，还要同时吃两样东西：<b>库</b>（Library，有哪些单元可用）与 <b>PDK</b>（Process Design Kit，这个工艺能造出什么）；布局布线（P&amp;R）除网表外还需第三方 IP（3rd Party IP）与物理信息；一切最终收敛成 <b>GDS2</b>，交给晶圆厂（Fab）流片，而验证（Verification）贯穿全程。换句话说，一颗芯片不是"一段代码"，而是一条由代码、库、工艺数据与第三方模块组成的供应链。
+  </p>
+
+  <h3 id="ch01-2">1.2 为什么要有开源 EDA 流程：哪些环节曾经是封闭的</h3>
+  <p>
+    既然流程里有这么多环节，自然要问：<b>今天哪些环节是开放的？</b>课件用连续几页回答，结论很鲜明——目前真正开放的主要是 RTL。开放 RTL/HDL 已相当常见，但一旦往下走就处处受限：EDA 厂商限制工具产出（p7），晶圆厂不公开 PDK（p8），第三方 IP 授权又会限制整个设计的开源（p9）。也就是说，你可以公开设计代码，却可能既没有工具做下去、也没有工艺数据造出来，更没法把买来的 IP 一起共享。
+  </p>
+  <p>
+    转机出现在两个端点上：综合有了 Yosys，布局布线有了 OpenROAD，再加开源 PDK，"走向开放"才被补全，见图 1-2。这也是本课的立场——VLSI2 尽可能使用开放流程：开放 RTL（示例代码全部公开）、开放 PDK（IHP130 是少数可用的开源 PDK 之一，允许自由发表设计）、以及大部分环节的开源 EDA；剩下少数步骤暂用商业工具，待有替代或经验足够后再迁移。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p010_page.jpg" alt="把开源工具接入设计流程后的路线：开放 RTL、Yosys 综合、OpenROAD 布局布线、开源 PDK" loading="lazy">
+    <figcaption><b>图 1-2</b> 走向开放：Yosys（综合）、OpenROAD（布局布线）与开源 PDK 逐步补齐了此前封闭的环节。来源：课件 p10</figcaption>
+  </figure>
+  <div class="note"><b>注：</b>开放是分环节的。RTL 开放只让设计"看得见"，只有工具链与 PDK 也开放，别人才能<b>复现</b>并真正造出这颗芯片——可复现性，才是开源硬件与"把代码贴到网上"的根本区别。</div>
+
+  <h3 id="ch01-3">1.3 芯片是一门大生意：产业图谱与参与者</h3>
+  <p>
+    要理解本课为何强调成本，先看芯片产业有多大。Gartner 数据显示，2024 年全球半导体营收约 <b>6000 亿美元以上</b>（列入统计的全市场约 625,971 百万美元，同比增长 18.1%）。排名前列的厂商包括三星、Intel、NVIDIA、SK 海力士、高通等，见图 1-3。其中 NVIDIA 与 SK 海力士当年增速分别高达 83.6% 与 86.0%，可见这个市场既庞大又在剧烈变动。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p026_f0d7884698.jpg" alt="2024 年全球半导体厂商营收排名表，三星、Intel、NVIDIA 位居前三，全市场约 6260 亿美元" loading="lazy">
+    <figcaption><b>图 1-3</b> 2024 年全球半导体营收排名（单位：百万美元），全市场约 625,971（≈6260 亿）美元，同比增长 18.1%。来源：课件 p26</figcaption>
+  </figure>
+  <p>
+    从"靠 IC 赚钱"看，产业至少有四类角色：<b>晶圆代工</b>（Foundry，如 TSMC、Samsung、Intel、GlobalFoundries）；<b>设计与销售芯片的公司</b>，又分 IDM（Integrated Device Manufacturer，设计制造一体，如 Intel、Samsung、ST）与 Fabless（只设计不制造，如 Nvidia、Apple）；<b>制造支撑</b>（设备 ASML、Nikon，材料如晶圆、气体、光刻胶）；<b>设计支撑</b>（EDA 商 Synopsys、Cadence、Siemens/Mentor，IP 商 ARM、Verisilicon、Rambus 等）。
+  </p>
+  <p>
+    这个格局的后果是：<b>一颗成功的芯片背后往往站着许多家公司</b>，没有一家能包办全部环节（图 1-4）。图 1-5 展示了 IDM、晶圆代工、Fabless、IP 供应商等多种协作模式。为什么分工这么多？根源还是成本：既然建厂、买工具、养工程团队都极贵，把风险与投入拆散到不同角色就成了自然选择。
+  </p>
+  <div class="fig-row">
+    <figure>
+      <img src="img/01_Intro_p029_99930e3127.jpg" alt="一颗成功芯片的设计可能涉及众多参与方，包括设计公司、IP 供应商、EDA 供应商、晶圆厂等" loading="lazy">
+      <figcaption><b>图 1-4</b> 一颗成功芯片背后往往涉及众多参与方，没有任何一家公司包办全部环节。来源：课件 p29</figcaption>
+    </figure>
+    <figure>
+      <img src="img/01_Intro_p030_05718baa01.jpg" alt="多种公司协作模式对比，包括 IDM、晶圆代工、Fabless 等" loading="lazy">
+      <figcaption><b>图 1-5</b> 产业里存在多种协作模式（IDM、晶圆代工、Fabless、IP 供应商等），分工的根源是一次性成本过高。来源：课件 p30</figcaption>
+    </figure>
+  </div>
+
+  <h3 id="ch01-4">1.4 摩尔定律与登纳德缩放：为什么"更小"曾经等于"更快更省电"</h3>
+  <p>
+    接下来是历史趋势。摩尔定律始于 Gordon Moore 1965 年在 Electronics Letters 上的观察（1975 年在 IEDM 上修正）：集成电路上的晶体管数目（功能数）大约每两年翻一番。课件的评价相当克制：它<b>开始只是观察，后来变成自我实现的预言</b>，朗朗上口、方向明确，但并不精确，还"容易被取巧"（面积是否相同、算原型还是发布时间）。
+  </p>
+  <p>
+    真正让它有意思的是<b>登纳德缩放</b>（Dennard scaling，1974）：晶体管按比例缩小后，功耗密度可保持不变，于是频率提高、电压与功耗反而下降——"更小"长期同时意味着"更快、更省电"，这是产业几十年高速增长的动力。
+  </p>
+  <p>
+    但好事没有一直持续。图 1-6 是 Karl Rupp 整理的 50 年处理器趋势：晶体管数（橙色）继续翻倍，但主频（绿色）在 2005 年前后停止上升，单线程性能（蓝色）在 2010 年前后也趋于停滞——课件把这两处分别标注为<b>速度墙（Speed Wall）</b>与<b>功耗墙（Power Wall）</b>。作为补偿，逻辑核心数（黑色）自 2005 年起上升，即"多核时代"。这也解释了本课为何如此在意功耗：当频率不再免费增长，改善能耗就成了提升性能的主要杠杆。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p034_fa7950cdab.jpg" alt="1970 至 2020 年处理器趋势：晶体管数持续翻倍，但主频与单线程性能在 2005 至 2010 年前后趋于停滞" loading="lazy">
+    <figcaption><b>图 1-6</b> 50 年处理器趋势：晶体管数（橙）继续翻倍，而主频（绿）、单线程性能（蓝）与典型功耗（红）先后撞上"速度墙"与"功耗墙"。来源：课件 p34–p35</figcaption>
+  </figure>
+  <p>
+    与此同时，"XX nm 工艺"也需要澄清。图 1-7 表明，节点名字早已不对应任何单一物理尺寸：标成"10 nm"的节点，栅极间距其实约 64 nm、金属间距约 45 nm。节点数字更像一个<b>代际标签</b>，而非能拿卡尺去量的尺寸。课件还指出，只有极少数晶圆厂能做最先进节点，但<b>每个成熟节点上都仍有人在赚钱</b>；而当平面缩放越来越难，先进封装（packaging）开始承担"往一个系统里塞进更多晶体管"的任务。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p038_687a15e2e4.jpg" alt="10、7、5、3、2 nm 节点对应的金属轨道数、栅极间距与金属间距数值" loading="lazy">
+    <figcaption><b>图 1-7</b> "多少 nm"是代际标签而非某个物理尺寸：标注 10 nm 的节点，栅极间距其实约 64 nm、金属间距约 45 nm。来源：课件 p38</figcaption>
+  </figure>
+
+  <h3 id="ch01-5">1.5 一颗芯片要花多少钱：一次性成本与单颗成本</h3>
+  <p>
+    成本结构其实可以拆成两类，课件列得很清楚：<b>非经常性成本</b>（Non-recurring，付一次）包括工程人力、掩模版、晶圆厂成本、EDA 工具（通常按席位每年收费）、设计所需 IP 与公司运营开销；<b>经常性成本</b>（Recurring，每颗芯片都付）包括制造（原材料与加工）、测试（第 12 讲）、封装（第 6 讲），以及按销量计费的 IP 授权费。
+  </p>
+  <div class="code-block">
+    <div class="code-title">单颗芯片成本的基本分解（课件 p44）</div>
+    <pre><code>c = c0 / #ckts + c1
+
+c0     = non-recurring costs (pay once: engineering, masks, EDA, IP, overhead)
+c1     = recurring costs      (pay per IC: manufacturing, testing, packaging, IP royalty)
+#ckts  = number of ICs sold</code></pre>
+  </div>
+  <p>
+    这个公式点出了产业的要害：<b>c0 极其高昂（动辄数百万甚至数十亿美元），必须靠大量销售来摊薄</b>，同时还要压低 c1。课件直言，最新工艺上一个设计可能要花"数亿美元"（100s of MUSD），很大一部分花在验证与软件上，属典型的一次性成本——因此只有产量非常大的产品才值得这么干。图 1-8 给出按节点的设计成本：28 nm 约 4800 万美元，7 nm 约 2.49 亿，5 nm 约 4.49 亿，3 nm 约 5.81 亿，2 nm 约 7.25 亿美元。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p045_b5b7172df2.jpg" alt="按工艺节点统计的芯片设计成本柱状图，5nm 约 4.49 亿美元，3nm 约 5.81 亿美元，2nm 约 7.25 亿美元" loading="lazy">
+    <figcaption><b>图 1-8</b> 逐节点的芯片设计成本（数据源：Arm 2023 IPO 招股书，IBS 2022）。来源：课件 p45</figcaption>
+  </figure>
+  <p>
+    掩模版（mask set）是另一项绕不开的一次性支出，且随节点迅速膨胀。图 1-9 的表显示：1994 年 350 nm 工艺、4 层金属时，一套掩模版约 5–6 万美元；到 2004 年 90 nm、8 层金属时约 80 万–110 万美元；2009 年 45 nm、10 层金属时约 160 万–250 万美元；2014 年 22 nm、13 层金属时已经达到约 500 万美元。<b>二十年间，同一项支出涨了近百倍。</b>
+  </p>
+  <figure>
+    <img src="img/01_Intro_p046_646a67a0a1.jpg" alt="掩模版成本随年代与节点增长的表：1994 年 350nm 约 5 至 6 万美元，2014 年 22nm 约 500 万美元" loading="lazy">
+    <figcaption><b>图 1-9</b> 一套掩模版（mask set）的成本：从 1994 年 350 nm 的 5–6 万美元涨到 2014 年 22 nm 的约 500 万美元。来源：课件 p46</figcaption>
+  </figure>
+  <table class="tbl">
+    <thead><tr><th>成本类别</th><th>典型项目</th><th>什么时候付</th></tr></thead>
+    <tbody>
+      <tr><td>非经常性 c0</td><td>工程人力、掩模版、EDA 工具、设计 IP、公司运营</td><td>一次付清</td></tr>
+      <tr><td>经常性 c1</td><td>制造（材料 + 加工）、测试、封装、按销量计的 IP 授权</td><td>每颗芯片都付</td></tr>
+    </tbody>
+  </table>
+  <p>
+    那么 IP 生意是怎么来的？理由很实在：即便芯片里较小的一块，设计起来也很贵（贵在工程、工具与验证周期），于是就有公司专门出售"已验证的现成 IP"，通常是处理器核、内存控制器、外设这类模块。IP 分两类：<b>硬 IP</b>（Hard IP）物理设计已完成，与特定工艺绑定；<b>软 IP</b>（Soft IP）停留在 RTL 层，需要你自己映射到工艺上。授权也有两种模式：<b>买断</b>（一次性付清，属非经常性成本）或<b>按量抽成</b>（每卖一颗付一笔，属经常性成本）。
+  </p>
+
+  <h3 id="ch01-6">1.6 制造经济学：晶圆厂、良率与"小批量怎么办"</h3>
+  <p>
+    上面的推导有个前提：得先把厂建起来。图 1-10 的造价曲线显示，一座新晶圆厂造价超过 100 亿美元，先进节点（如 3 nm）单厂甚至可达约 200 亿美元。课件用一次简单估算量化它：按约 120 亿美元、满产产能每年 100 万片（约 8 万片/月）、分 6 年摊销，则仅折旧每年就要摊掉约 20 亿美元，<b>折合每片晶圆约 2000 美元</b>才能回本——前提还是这 6 年产能一直被填满。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p050_108711f5fa.jpg" alt="半导体晶圆厂造价曲线，以 2024 年美元计，先进晶圆厂造价升至约 200 亿美元" loading="lazy">
+    <figcaption><b>图 1-10</b> 一座新晶圆厂的造价已超过 100 亿美元（先进厂可达约 200 亿美元）——这笔钱最终要摊到每一片晶圆上。来源：课件 p50</figcaption>
+  </figure>
+  <p>
+    但造出来的芯片并非都能用，于是有两种良率。其一是<b>功能良率</b>（functional yield）：晶圆上总有一部分芯粒带制造缺陷，还有一部分在边缘、形状不完整，只有完好部分才是能卖的良品（图 1-11）。其二是<b>参数良率</b>（parametric yield）：能工作的芯片性能也参差不齐，可用"分级"（binning）处理——慢的便宜卖、快的贵卖。结果是：<b>一片晶圆上只有一部分面积的芯粒能变成可售出的好芯片。</b>
+  </p>
+  <figure>
+    <img src="img/01_Intro_p051_3d2bacf35b.jpg" alt="300mm 晶圆上的良率示意：绿色为好芯粒，红色为缺陷芯粒，金色为边缘不完整芯粒" loading="lazy">
+    <figcaption><b>图 1-11</b> 功能良率（functional yield）：晶圆上总有缺陷芯粒（红）与边缘不完整芯粒（金），只有绿色部分是能卖的良品。来源：课件 p51</figcaption>
+  </figure>
+  <p>
+    把上述因素合起来，课件给了一个完整例子：<b>90 nm 工艺、4mm×4mm 的芯片、300 mm 晶圆</b>。一次性成本合计约 <b>700 万美元</b>（工程 17 人年约 350 万、一套掩模版约 100 万、EDA 授权约 100 万、其余约 50 万）。单颗经常性成本约 <b>2.30 美元</b>：制造约 0.82 美元（空白晶圆 350 + 加工 2300 = 2650 美元；300 mm 晶圆受边缘效应影响良率约 82%，扣切割道后约得 3250 颗，2650 / 3250 ≈ 0.82），加封装与测试约 1.48 美元。
+  </p>
+  <p>
+    关键在于产量对这 700 万美元的摊薄。图 1-12 列出不同产量下的单颗成本：产量 1k 时，仅一次性成本就摊到每颗 7000 美元，单颗合计 7002 美元；100 万时降到 7.00 + 2.30 = 9.30 美元；1 亿时进一步降到 0.07 + 2.30 = <b>2.37 美元</b>。结论很重要：<b>只要能卖到数百万颗，一次性成本就不重要；但也正因如此，那些不起眼的经常性成本（测试、封装、面积、工序数）反而最关键。</b>
+  </p>
+  <figure>
+    <img src="img/01_Intro_p056_f340d32bf4.jpg" alt="90nm 成本随产量摊薄的表格，100 万产量时单颗 9.30 美元，1 亿产量时降至 2.37 美元" loading="lazy">
+    <figcaption><b>图 1-12</b> 成本随产量摊薄（90 nm、4mm×4mm 的例子）。来源：课件 p56</figcaption>
+  </figure>
+  <p>
+    现实难题是：如果产量<b>根本不高</b>怎么办？答案是<b>多项目晶圆</b>（Multi-Project Wafer，MPW）——把昂贵的掩模版与晶圆成本和其他团队<b>分摊共享</b>，见图 1-13，这也是学生项目与初创公司样片能负担得起的典型做法。产量不同、技术选择也不同：小批量适合 FPGA，大批量才划算用 ASIC 甚至全定制（full-custom）。作为大设计的参照，课件展示了 ETH 的 Occamy 芯片（216+1 个 RISC-V 处理器、70 mm²，GF 12LPP）。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p057_d247fd8e5d.jpg" alt="多项目晶圆（MPW）示意：多个设计共享一套掩模版与晶圆" loading="lazy">
+    <figcaption><b>图 1-13</b> 多项目晶圆（MPW）：小批量设计共享掩模版与晶圆，把昂贵的一次性成本分摊给多个项目。来源：课件 p57</figcaption>
+  </figure>
+
+  <h3 id="ch01-7">1.7 开源硬件的三个方面：设计、工具、制造</h3>
+  <p>
+    算完成本，课件回到开源的动机：把芯片成本拆成三块——<b>IP 费用 + EDA 费用 + 硅片费用</b>（Cost = IP€ + EDA€ + Si€，见图 1-14）。软件世界早已大量使用开源，硬件为什么不能？这正是本课要探索的方向。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p060_page.jpg" alt="开源硬件的成本构成：IP 费用加上 EDA 费用加上硅片费用" loading="lazy">
+    <figcaption><b>图 1-14</b> 开源硬件要砍掉的成本可以拆成三块：IP 费用 + EDA 费用 + 硅片费用。来源：课件 p60</figcaption>
+  </figure>
+  <p>
+    课件把开源硬件明确分成三个方面（图 1-15）：<b>设计</b>（RTL/HDL 描述已相当常见；原理图与物理设计也可能受工艺信息牵制）、<b>工具</b>（EDA，含前端综合、后端布局布线、验证仿真）、<b>制造</b>（PDK，含设计规则、用于寄生参数计算的层叠信息，以及用于仿真的器件模型/SPICE 参数）。三者内涵差别很大——设计开放不等于工艺开放。
+  </p>
+  <figure>
+    <img src="img/01_Intro_p061_page.jpg" alt="开源硬件的三个方面：设计（RTL）、工具（EDA）、制造（PDK）" loading="lazy">
+    <figcaption><b>图 1-15</b> 开源硬件的三个方面——设计、工具、制造，它们彼此相对独立，但端到端开源芯片需要三者齐备。来源：课件 p61</figcaption>
+  </figure>
+  <p>
+    一个关键但常被忽略的事实是：<b>这三个方面在很大程度上相互独立。</b>开源设计可以用商业 EDA 与闭源 PDK——ETH 的 PULP 团队做开源硬件已超过十年；反过来，开源 EDA 在闭源 PDK 上同样能用，因为工具对工艺（乃至对具体设计）"不可知"，只要拿到工艺文件就能把流程适配过去；开源 PDK 也能配商业工具。说到底，晶圆厂收到的是 GDS2，并不关心它用什么工具画出来。但<b>要做端到端、可复现的开源芯片，三个方面必须同时具备。</b>
+  </p>
+  <p>
+    最后是现实视角。开源硬件正在上升，ETH 是主要推动者之一（PULP Platform），也有组织在做支撑与维护（如 OpenHW）；开放的 RISC-V 指令集让开源实现成为可能；开源工艺文件也在增加，例如 SkyWater 130、GlobalFoundries 180，以及本课使用的 IHP 130 nm。课件对现状的分层判断是：设计层面已相当成熟，工具"足以完成相当规模的设计，但还需更多工作"，制造则"需要更多产量与更新的工艺"。本课以一个开源、经过硅验证的 SoC 模板（Croc）为起点：现代 SoC 很复杂（主机域加一个含多核 RISC-V、SPM、DMA、加速器的 PULP 集群），创新只发生在其中一部分，有了模板你就能把精力集中在真正需要创新的地方。
+  </p>
+
+  <h3 id="ch01-8">本讲要点</h3>
+  <div class="takeaway">
+    <ol>
+      <li><b>这门课是"做出来"而不是"考出来"的。</b>从 VLSI1 留下的 RTL 出发，你要亲自走完综合、布图规划、布局布线、时序与寄生分析、低功耗、可测性设计，最终交付一颗能送流片的芯片；流程中每个环节都依赖"代码 + 库 + PDK + 第三方 IP"。</li>
+      <li><b>芯片生意的本质是"一次性成本极高、单颗成本决定胜负"。</b>c = c0/#ckts + c1：一次性成本（工程、掩模版、EDA、IP）可高达数亿甚至数十亿美元，必须靠大产量摊薄——90 nm 的例子中，产量 1k 时单颗 7002 美元，1 亿时只剩 2.37 美元；一旦有量，测试、封装、面积、工序数这些微小的经常性成本反而最关键。产量不足时，可用 MPW 共享掩模版。</li>
+      <li><b>开源之所以重要，是因为它分三个方面，且缺一不可。</b>设计（RTL）、工具（EDA，如 Yosys、OpenROAD）、制造（PDK，如 IHP130、SkyWater 130）三者相对独立、可按现状混搭；但只有三者都开源，才能得到端到端、可复现的开源芯片。本课因此采用开源流程，并基于硅验证的 SoC 模板（Croc）集中做真正的创新。</li>
+    </ol>
+  </div>
+</section>
+<section class="chapter" id="ch02">
+  <div class="ch-head">
+    <span class="ch-no">第 2 讲</span>
+    <h2>RTL：SystemVerilog 回顾</h2>
+    <p class="ch-meta">对应课件：02_RTL.pdf ｜ 关键词：SystemVerilog、RTL、可综合子集、always_comb、always_ff、FSM</p>
+  </div>
+
+  <div class="lead">
+    本讲回顾硬件描述语言（HDL, Hardware Description Language）中用于数字电路 RTL 设计的 SystemVerilog 可综合子集：怎样把模块、组合逻辑、时序逻辑和状态机写成既可被仿真、又能被综合工具映射为门级网表的代码；并说明 RTL 与下一讲的 netlist 之间的衔接关系。
+  </div>
+
+  <h3 id="ch02-1">2.1 为什么需要硬件描述语言</h3>
+  <p>
+    在 HDL 出现之前，复杂数字电路只能用手绘原理图（schematic）描述。随着晶体管数量增长，图纸变得难以阅读、复用和修改，且任何一处改动都可能牵动整张图纸。HDL 最初的目的就是“用文字画原理图”：它保留端口连接、层次结构和布尔功能，同时可以用文本文件进行版本控制和参数化复用。SystemVerilog 更进一步把原本用于仿真的 Verilog 扩展成面向综合与验证的统一语言。
+  </p>
+  <p>
+    在数字设计流程中，RTL（Register Transfer Level，寄存器传输级）描述位于算法/架构与物理实现之间。RTL 不描述单个晶体管，而是描述“每个时钟沿，数据如何在寄存器之间转移、经过怎样的组合逻辑处理”。综合工具把 RTL 转换为门级网表（netlist），后者再进入布局布线。因此 RTL 代码既是设计意图的精确表达，也决定了后续 PPA（性能、功耗、面积）优化的起点。
+  </p>
+  <p>
+    HDL 描述有不同抽象层级：<b>结构化（structural）</b>描述只包含模块实例与连线，等价于网表；<b>行为级/RTL</b> 用 <code>always</code>、<code>assign</code> 等描述功能；<b>仿真模型</b> 则加入延迟、延迟文件等非综合信息，仅用于验证。本讲聚焦可综合的 RTL 子集。
+  </p>
+
+  <figure>
+    <img src="img/02_RTL_p004_1a5e6eb970.jpg" alt="早期数字电路手绘原理图" loading="lazy">
+    <figcaption><b>图 2-1</b> 手写原理图的复杂度促使 HDL 出现。来源：课件 p4</figcaption>
+  </figure>
+
+  <h3 id="ch02-2">2.2 模块、端口与层次实例化</h3>
+  <p>
+    SystemVerilog 的基本组织单元是 <b>模块（module）</b>。一个模块由名称、可选参数、端口列表和内部功能体组成。下面是一个典型顶层模块：用参数 <code>Width</code> 定义数据位宽，实例化两个名为 <code>i_reg_1</code> 与 <code>frank</code> 的 <code>ffs</code> 模块，再通过连续赋值把它们的输出做与、或，并用三态选择输出。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">顶层模块示例（课件 p5）</div>
+    <pre><code>module top #(
+  parameter int Width = 16
+) (
+  input  logic             clk_i,
+  input  logic             rst_ni,
+  input  logic             mode_i,
+  input  logic [Width-1:0] data_in_i,
+  output logic [Width-1:0] result_o
+);
+  logic [Width-1:0] first, second;
+  logic [Width-1:0] combine_and, combine_or;
+
+  ffs #(.Width(Width)) i_reg_1 (
+    .clk_i(clk_i), .rst_ni(rst_ni), .in_i(data_in_i), .out_o(first));
+  ffs #(.Width(Width)) frank (
+    .clk_i(clk_i), .rst_ni(rst_ni), .in_i(first),     .out_o(second));
+
+  assign combine_and = first & second;
+  assign combine_or  = first | second;
+  assign result_o    = mode_i ? combine_and : combine_or;
+endmodule // top</code></pre>
+  </div>
+
+  <p>
+    注意实例化采用“按名连接”（<code>.port(signal)</code>）而非按位置连接。按名连接允许被实例模块的端口顺序任意调整，调用端不必跟着改动，因此更 robust，是 ETH 推荐的写法。按位置连接（<code>ffs #(16) i_reg_1 (clk_i, rst_ni, data_in_i, first);</code>）在端口增多或修改时极易出错，应尽量避免。
+  </p>
+  <p>
+    参数（<code>parameter</code>）让同一个模块在不改动源码的情况下实例化为不同位宽。上例中 <code>ffs #(.Width(Width))</code> 把顶层参数传给子模块；若子模块使用默认值，也可以写成 <code>ffs i_reg_1 (...)</code>。课件同时强调“一个文件一个模块”：SystemVerilog 语法允许同一文件放多个模块，工具也不会报错，但按文件名定位模块能显著减少大型工程中的查找成本。
+  </p>
+
+  <h3 id="ch02-3">2.3 数据类型、四值逻辑与 tri-state</h3>
+  <p>
+    SystemVerilog 最常用的是 <code>logic</code> 类型，可综合设计中用它描述输入、输出和内部线网。<code>logic</code> 是 <code>wire</code> 与 <code>reg</code> 的“Cleaner”替代：它既可用于连续赋值，也可用于过程赋值，且不会给初学者造成“reg 一定是触发器”的误解。但 <code>logic</code> 只能有一个驱动源；如果信号需要被多个源驱动（如双向 tri-state 总线），则仍须用旧式 <code>wire</code>，因为 <code>wire</code> 内置多驱动解析（如 wired-OR、wired-AND 或 tri-state 三态）。
+  </p>
+  <p>
+    仿真时需要四个逻辑值：0、1、X、Z。<code>X</code> 表示冲突或未知（例如上电初始值、两个反相器驱动同一条线）；<code>Z</code> 表示高阻态，即该节点未被任何驱动器驱动。在总线共享场景中，同一时刻只允许一个设备写总线，其余设备置为 Z。
+  </p>
+
+  <figure>
+    <img src="img/02_RTL_p020_page.jpg" alt="四值逻辑 0、1、X、Z 的物理含义" loading="lazy">
+    <figcaption><b>图 2-2</b> 四值逻辑：X 为冲突/未知，Z 为高阻态。来源：课件 p20</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/02_RTL_p022.jpg" alt="Tri-state 总线：CPU 与内存共享总线" loading="lazy">
+    <figcaption><b>图 2-3</b> Tri-state 总线：任一时刻仅一个设备驱动，其余呈高阻 Z。来源：课件 p22</figcaption>
+  </figure>
+
+  <p>
+    下面是用 <code>wire</code> 实现 tri-state 驱动器的代码片段。单个驱动器用 <code>assign Qq_DZ = SelB_S ? ~Bb_D : 1'bZ;</code> 把 Z 赋给输出；合并总线 <code>Com_DZ</code> 则需用 <code>wire</code>，因为有两个 <code>assign</code> 同时驱动它。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">Tri-state 驱动器（课件 p35）</div>
+    <pre><code>// separate pieces of bus, not connected
+logic Aa_D, Bb_D;
+logic Qq_DZ, Pp_DZ;
+logic SelA_S, SelB_S;
+assign Qq_DZ = SelB_S ? ~Bb_D : 1'bZ;
+assign Pp_DZ = SelA_S ? ~Aa_D : 1'bZ;
+
+// combined tri-state bus, connected
+logic  Aa_D, Bb_D;
+wire   Com_DZ;
+logic  SelA_S, SelB_S;
+assign Com_DZ = SelB_S ? ~Bb_D : 1'bZ;
+assign Com_DZ = SelA_S ? ~Aa_D : 1'bZ;</code></pre>
+  </div>
+
+  <figure>
+    <img src="img/02_RTL_p035_a1b1f474a0.jpg" alt="Tri-state 驱动器电路示意" loading="lazy">
+    <figcaption><b>图 2-4</b> 独立 tri-state 输出（左）与合并总线（右）的电路示意。来源：课件 p35</figcaption>
+  </figure>
+
+  <h3 id="ch02-4">2.4 向量、常量与命名约定</h3>
+  <p>
+    <code>logic</code> 可以是标量也可以是多 bit 向量，例如 <code>logic [7:0] eight_bit_bus;</code>。数组索引采用“高位在前、低位在后”的写法，与日常书写数字习惯一致。部分选择（part-select）和位选择可直接用方括号：<code>big_bus[15:8]</code> 取高 8 位，<code>big_bus[3]</code> 取第 3 位。拼接运算符 <code>{}</code> 能把多个信号组合成更宽向量，重复拼接可用 <code>{N{signal}}</code>。
+  </p>
+  <p>
+    SystemVerilog 数字常量格式为 <code>N'basevalue</code>，如 <code>8'b0000_0001</code>、<code>12'hFA7</code>、<code>8'd42</code>。下划线仅提高可读性，不影响值。模块内局部常量用 <code>localparam</code>，可在多个端口声明间共享；跨模块参数则用 <code>parameter</code>。
+  </p>
+  <p>
+    语言并非强类型，左右两边位宽不一致时会出现静默截断或补零，这是新手最常见的错误来源之一。例如 <code>4'hFA7</code> 会被截断为低 4 位 <code>0111</code>，必须显式检查位宽。建议赋值时使用与目标等宽常量，或在关键边界加 <code>$size()</code> 断言。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">位宽相关常量示例（课件 p29）</div>
+    <pre><code>localparam CONST_A = 4'b1001;   // 4 bit value 1001
+localparam CONST_B = 8'b1001;   // 8 bit value 0000_1001
+localparam CONST_C = 8'b0;      // 8 bit value 0000_0000
+localparam CONST_D = 12'hFA7;   // 12 bit value 1111_1010_0111
+localparam CONST_E = 4'hFA7;    // 4 bit value 0111 (truncated!)
+localparam CONST_F = 4'bx0XZ;   // 4 bit value X0XZ
+localparam CONST_G = 4'b00_11;  // 4 bit value 0011
+localparam CONST_H = 8'd42;     // 8 bit value 0010_1010</code></pre>
+  </div>
+
+  <p>
+    ETH 的 IIS 实验室采用统一的信号命名后缀，使代码自解释：
+  </p>
+  <ul>
+    <li><code>_i</code>：模块输入（input）</li>
+    <li><code>_o</code>：模块输出（output）</li>
+    <li><code>_io</code>：双向端口（inout）</li>
+    <li><code>_c</code>：时钟信号</li>
+    <li><code>_n</code>：低电平有效信号</li>
+    <li><code>_ni</code>：低电平有效的输入复位</li>
+    <li><code>_t</code>：类型定义（typedef）</li>
+  </ul>
+
+  <figure>
+    <img src="img/02_RTL_p030_page.jpg" alt="ETH IIS 命名约定表" loading="lazy">
+    <figcaption><b>图 2-5</b> ETH IIS 推荐的 SystemVerilog 信号后缀。来源：课件 p30</figcaption>
+  </figure>
+
+  <h3 id="ch02-5">2.5 组合逻辑建模</h3>
+  <p>
+    组合逻辑推荐用连续赋值 <code>assign</code> 或 <code>always_comb</code> 描述。简单的布尔函数与多路器用 <code>assign</code> 最直观；当逻辑分支很多、需要为输出赋默认值时，才考虑 <code>always_comb</code>。
+  </p>
+  <p>
+    下面给出基本布尔运算与 2 选 1、4 选 1 多路器示例。注意区分<b>位运算</b>（<code>~ & | ^</code>，逐位操作，结果仍为向量）与<b>逻辑运算</b>（<code>! && || == !=</code>，返回单 bit 真假）。对向量混用两类运算符会得到错误结果：例如对 8 位向量 <code>a</code>，<code>if (a)</code> 只会看最低位，而 <code>if (a != 8'b0)</code> 才看全部位。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">基本逻辑门与多路器（课件 p31、p33）</div>
+    <pre><code>assign y0 = ~a;          // NOT
+assign y1 = a & b;       // AND
+assign y2 = a | b;       // OR
+assign y3 = a ^ b;       // XOR
+assign y4 = ~(a & b);    // NAND
+assign y5 = ~(a | b);    // NOR
+
+// 2-to-1 mux
+assign result_o = select_i ? data1_i : data0_i;
+
+// 4-to-1 mux
+assign result_o = (select_i == 2'b11) ? data3_i :
+                  (select_i == 2'b10) ? data2_i :
+                  (select_i == 2'b01) ? data1_i :
+                                        data0_i;</code></pre>
+  </div>
+
+  <h3 id="ch02-6">2.6 时序逻辑与 always 语句</h3>
+  <p>
+    SystemVerilog 把传统 <code>always @(...)</code> 细化为三种意图明确的形态：<code>always_comb</code> 组合逻辑、<code>always_latch</code> 锁存器、<code>always_ff</code> 触发器。推荐的搭配是：<b>组合逻辑用阻塞赋值 <code>=</code>，时序逻辑用非阻塞赋值 <code>&lt;=</code></b>。
+  </p>
+  <p>
+    阻塞赋值 <code>=</code> 在进程内立即生效，适合描述组合逻辑的“即时”因果关系；非阻塞赋值 <code>&lt;=</code> 在时序进程的末尾统一更新，仿真上更贴近真实触发器“在同一时钟沿一起变化”的行为。若把阻塞赋值用在 <code>always_ff</code>，或在 <code>always_comb</code> 里混用非阻塞赋值，常常导致仿真与综合结果不一致。
+  </p>
+
+  <figure>
+    <img src="img/02_RTL_p051_page.jpg" alt="always_comb、always_latch、always_ff 的用法" loading="lazy">
+    <figcaption><b>图 2-6</b> 三种 always 语句的正确用法。来源：课件 p51</figcaption>
+  </figure>
+
+  <p>
+    使用 <code>always_ff</code> 时，应把它写成一个“标准触发器模板”：只负责在时钟沿把 <code>_d</code> 赋给 <code>_q</code>，并可选加上异步复位和时钟使能。不要在 <code>always_ff</code> 里塞进复杂运算或多路选择逻辑，否则综合工具难以识别标准单元，也容易引入时序分析错误。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">标准触发器模板（课件 p53）</div>
+    <pre><code>module example (
+  input logic clk_ci,
+  input logic rst_ni,
+  // ..
+);
+  logic [3:0] state_q, state_d;
+  logic       en;
+
+  always_ff @ (posedge clk_ci, negedge rst_ni) begin
+    if (rst_ni == 1'b0) begin
+      state_q <= 4'b0110;
+    end else if (en == 1'b1) begin
+      state_q <= state_d;
+    end
+  end
+endmodule</code></pre>
+  </div>
+
+  <p>
+    为区分“下一状态”与“当前状态”，ETH 推荐用 <code>_d</code> 表示 D 触发器输入（next state），<code>_q</code> 表示输出（present state）。<code>_d</code> 在 <code>always_comb</code> 中计算，<code>_q</code> 在 <code>always_ff</code> 中更新。
+  </p>
+
+  <figure>
+    <img src="img/02_RTL_p056_page.jpg" alt="_d 与 _q 命名约定" loading="lazy">
+    <figcaption><b>图 2-7</b> 用 _d/_q 区分触发器的下一状态与当前状态。来源：课件 p56</figcaption>
+  </figure>
+
+  <h3 id="ch02-7">2.7 状态机（FSM）模板</h3>
+  <p>
+    有限状态机（FSM, Finite State Machine）通常拆成三部分：下一状态逻辑、状态保持寄存器、输出逻辑。用 <code>always_comb</code> 计算 <code>state_d</code>，再用 <code>always_ff</code> 更新 <code>state_q</code>，输出可由另一个 <code>always_comb</code> 或连续赋值产生。Moore 型输出仅依赖 <code>state_q</code>，Mealy 型输出同时依赖输入。把三部分分开写并非唯一写法，但当状态转移复杂时，这种模板最不容易出错，也最容易被综合工具识别为标准 FSM 结构。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">FSM 三段式模板（课件 p61）</div>
+    <pre><code>// Next State
+always_comb begin
+  state_d = state_q; // init: hold state by default
+  if (cont) begin
+    state_d = ~state_q;
+  end
+end
+
+// State holding element
+always_ff @ (posedge clk_ci, negedge rst_ni) begin
+  if (!rst_ni) begin
+    state_q <= 1'b0;
+  end else begin
+    state_q <= state_d;
+  end
+end
+
+// Output calculation
+always_comb begin
+  out_o = ~state_q;
+end</code></pre>
+  </div>
+
+  <figure>
+    <img src="img/02_RTL_p058.jpg" alt="FSM 三段式结构" loading="lazy">
+    <figcaption><b>图 2-8</b> FSM 的三段式结构：下一状态、状态保持、输出。来源：课件 p58</figcaption>
+  </figure>
+
+  <p>
+    对于状态较多的 FSM，可用 <code>typedef enum</code> 定义状态类型。枚举让状态名直接出现在代码中，可读性远高于 <code>S0</code>、<code>S1</code>。注意在 <code>always_comb</code> 开头先给 <code>state_d</code> 一个默认值（通常是 <code>state_q</code>），这样不会漏掉分支而意外综合出锁存器。同时 <code>case</code> 语句务必加 <code>default</code>，以处理未定义状态。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">用枚举与 case 描述 FSM（课件 p64、p68）</div>
+    <pre><code>typedef enum logic [1:0] {
+  Init,
+  Run,
+  Stop,
+  Wait
+} state_t;
+
+state_t state_q, state_d;
+
+always_comb begin
+  state_d = state_q;  // default: hold
+  case (state_q)
+    Run:        state_d = Wait;
+    Stop, Wait: if (cont == 1'b1) state_d = Run;
+    Init:       state_d = Run;
+    default:    state_d = state_q;
+  endcase
+end</code></pre>
+  </div>
+
+  <h3 id="ch02-8">2.8 常见不可综合或可综合但易错写法</h3>
+  <p>
+    综合工具只接受“能对应到硬件结构”的写法。以下几类在课件中被反复提醒：
+  </p>
+  <ul>
+    <li><b>多驱动（multi-driver）</b>：同一信号在多个 <code>always</code> 进程或 <code>assign</code> 中被赋值，会综合失败或产生 X。每个信号只能由一个进程决定值。</li>
+    <li><b>不完整敏感列表</b>：传统 <code>always @(a, b)</code> 若漏写 <code>c</code>，仿真与综合行为可能不一致。用 <code>always_comb</code> 可由工具自动补全敏感列表。</li>
+    <li><b>组合块里遗漏分支</b>：若 <code>always_comb</code> 中某些输入组合没有给输出赋值，综合会推断出锁存器。给输出赋默认值可避免。</li>
+    <li><b>在 always_ff 里写复杂逻辑</b>：把算术、比较、选择全部塞进触发器进程，会让综合工具难以匹配标准单元，并增加出错概率。</li>
+    <li><b>阻塞与非阻塞混用</b>：组合逻辑用 <code>=</code>，时序逻辑用 <code>&lt;=</code>，不要颠倒。</li>
+    <li><b>使用 <code>initial</code>、<code>delay (#)</code> 或 <code>wait</code></b>：这些在 testbench 中常见，但大多数综合工具不支持，会报不可综合错误。</li>
+    <li><b>递归/反馈组合环</b>：组合逻辑输出直接回到同一进程的输入，会导致 combinational loop，通常不可综合且仿真无限振荡。</li>
+  </ul>
+
+  <figure>
+    <img src="img/02_RTL_p048_page.jpg" alt="多进程驱动同一信号的错误示例" loading="lazy">
+    <figcaption><b>图 2-9</b> 同一信号被多个进程/assign 驱动是常见错误。来源：课件 p48</figcaption>
+  </figure>
+
+  <h3 id="ch02-9">2.9 RTL 与门级网表的关系</h3>
+  <p>
+    RTL 是“行为级”描述，说明在每个时钟沿数据如何从一组寄存器转移到下一组。综合（synthesis）把它翻译成 <b>门级网表（gate-level netlist）</b>：只包含标准单元库里的门、触发器、锁存器等预定义元件，以及它们之间的连接。
+  </p>
+  <p>
+    网表是一种结构化的 HDL：每个实例都有名、类型和端口连接，不再有 <code>always</code> 或 <code>if-else</code> 这类抽象。RTL 中的 <code>if-else</code> 被综合为多路器，<code>always_ff</code> 被映射为 D 触发器，算术运算被映射为加法器/乘法器等标准单元。因此 RTL 的可综合性说到底就是“写出来的代码能不能被综合器对应到标准单元库里的结构”。下一讲将讨论综合约束、CMOS 门与具体网表格式。
+  </p>
+
+  <h3 id="ch02-10">2.10 数据通路与控制器：分离但同模块</h3>
+  <p>
+    典型数字电路可分为控制器（FSM）和数据通路（datapath）两部分。控制器产生控制信号并决定下一周期做什么，面积通常很小；数据通路做算术/逻辑运算和多路选择，占 90% 面积并决定运行速度。设计时应在同一块模块内保持二者清晰分离，而不是硬拆成两个独立模块——因为控制信号会频繁修改，拆分会增加端口和连线维护成本。
+  </p>
+
+  <figure>
+    <img src="img/02_RTL_p075_page.jpg" alt="控制器与数据通路分离" loading="lazy">
+    <figcaption><b>图 2-10</b> 典型数字电路由控制器（FSM）与数据通路组成。来源：课件 p75</figcaption>
+  </figure>
+
+  <div class="note">
+    <b>注：</b>每个文件只放一个模块、信号命名保持 <code>lower_snake_case</code>、端口按名连接、<code>always_ff</code> 保持简洁，这些习惯在 ETH 课程中被反复强调。它们不是语法强制，却能显著降低综合与仿真不一致的风险。
+  </div>
+
+  <h3 id="ch02-11">本讲要点</h3>
+  <div class="takeaway">
+    <ol>
+      <li>SystemVerilog 可综合 RTL 的核心是“模块 + always_comb + always_ff + assign”；always_comb 用阻塞赋值，always_ff 用非阻塞赋值，且每个信号只能有一个驱动源。</li>
+      <li>FSM 按“下一状态 / 状态保持 / 输出”三段式编写，用枚举和 case 提高可读性，并通过默认值与 default 分支避免综合出意外锁存器。</li>
+      <li>RTL 描述的是寄存器之间的数据转移；综合后得到只含标准单元的门级 netlist，因此 RTL 代码必须能映射到标准硬件原语。</li>
+    </ol>
+  </div>
+</section>
+<section class="chapter" id="ch03">
+  <div class="ch-head">
+    <span class="ch-no">第 3 讲</span>
+    <h2>逻辑综合与门级网表：从 RTL 走向物理实现的第一步</h2>
+    <p class="ch-meta">对应课件：03_Netlist.pdf ｜ 关键词：logic synthesis、gate-level netlist、standard cell、setup/hold time、critical path、Croc</p>
+  </div>
+
+  <div class="lead">前两讲我们把想法变成了 HDL 描述，并验证了它"功能正确"。但 HDL 仍是与工艺无关的文本，芯片并不认识 <b>always</b> 块，它只认识晶体管搭出来的门。把 RTL 翻译成一张由标准单元（standard cell）与连线组成的门级网表（gate-level netlist），正是本讲的主题——逻辑综合（logic synthesis）。这张网表是后续所有物理设计步骤的共同输入；要判断它"好不好"，又必须先建立时序（timing）的基本概念——这也是后面 LIB、SDF 两讲的地基。</div>
+
+  <h3 id="ch03-1">3.1 本讲定位：RTL 之后，为什么必须落到门级网表</h3>
+  <p>先把综合放回整条流程。所谓<b>前端设计（front-end design）</b>，是从想法与规格（specification）出发，找到合适的架构、翻译成 HDL，再验证它的行为是否符合预期。这一阶段有一个重要性质：<b>与工艺无关（technology-independent）</b>——同一份 RTL 理论上可用于任何工艺。</p>
+  <p>综合改变了这一点：它把 RTL 描述<b>映射（map）到某个具体工艺的标准单元库</b>上，输出通常是一份 Verilog 网表。只有变成门和连线，我们才能谈面积、延迟与功耗，也才能进入布图规划（floorplan）与布局布线（placement &amp; routing）。换句话说，综合是"行为世界"与"物理世界"之间的桥。</p>
+  <figure>
+    <img src="img/03_Netlist_p034_page.jpg" alt="从架构到 Tape-out 的设计流程，标注前端设计与后端设计的分界" loading="lazy">
+    <figcaption><b>图 3-1</b> 设计流程：架构/系统、翻译成 HDL、验证属于前端，与工艺无关；从"综合到网表"起进入 VLSI2 讨论的后端流程。来源：课件 p34</figcaption>
+  </figure>
+  <div class="note"><b>注：</b>课程分工：VLSI1 覆盖前端三步，VLSI2 从"综合到网表"一路做到 Tape-out。</div>
+
+  <h3 id="ch03-2">3.2 示例 SoC「Croc」：一个小而全的片上系统</h3>
+  <p>本课程后面每一讲都围绕同一个示例设计展开，它叫 <b>Croc</b>。先看片上系统（System on a Chip，SoC）的由来：最早的芯片只包含单一部件——处理器、存储器、外设或加速器，系统要靠印制电路板（PCB）把多颗芯片连起来；摩尔定律带来更多晶体管，于是几十个部件被集成到同一颗芯片上。Croc 就按现代 SoC 的方式搭建，只是刻意做"轻"：规模小、复杂处理被简化，好在较短时间内跑完从综合到版图的练习。</p>
+  <figure>
+    <img src="img/03_Netlist_p007_9f8ba963fb.jpg" alt="Croc 的顶层结构，包含 CVE2 处理器核、JTAG 调试、OBI 互连、存储器与各类外设" loading="lazy">
+    <figcaption><b>图 3-2</b> Croc 顶层结构：CVE2 与 JTAG 挂在 OBI 互连上，存储器分 Bank 0/1，外设经 OBI Peripheral 接入。来源：课件 p7</figcaption>
+  </figure>
+  <table class="tbl">
+    <thead><tr><th>组件</th><th>作用</th></tr></thead>
+    <tbody>
+      <tr><td>处理器核（CVE2）</td><td>系统的"大脑"，负责取指、译码与执行</td></tr>
+      <tr><td>互连（OBI）</td><td>把各个部件连在一起，负责搬运数据</td></tr>
+      <tr><td>存储器（Memory）</td><td>同时保存指令（instruction）与数据（data）</td></tr>
+      <tr><td>调试与编程接口（JTAG）</td><td>访问 SoC、把程序装进去并启动它</td></tr>
+      <tr><td>外设（Peripherals）</td><td>供用户使用的外部功能</td></tr>
+      <tr><td>用户域（User Domain）</td><td>供扩展和加速器接入的区域</td></tr>
+    </tbody>
+  </table>
+  <p>处理器选用 <b>CVE2</b>：一颗 32 位 <b>RISC-V 指令集（ISA）</b>核，支持整数、乘法与压缩扩展（RV32IMC），只有 <b>2 级流水线</b>，目标是"小而完整"。其血统来自 ETH Zürich 的 Zeroriscy → Ibex → CVE2，现由 OpenHW 组织维护。选 RISC-V 是因为 ISA 只是软硬件之间的契约：只规定处理器"能做什么"，不含实现细节，规范按标准扩展（I、E、M、A、F、D、C、X）组织。</p>
+  <figure>
+    <img src="img/03_Netlist_p010_page.jpg" alt="RISC-V 指令集架构的由来与标准化扩展列表" loading="lazy">
+    <figcaption><b>图 3-3</b> RISC-V 只是一个 ISA：2010 年由 UC-Berkeley 发起，ETH Zürich 是创始成员，规范按"扩展"组织。来源：课件 p10</figcaption>
+  </figure>
+  <p>为了让 Croc 足够简单，课件做了几处关键简化，它们正好解释了这套架构：</p>
+  <ul>
+    <li><b>存储可以做小、因而做快。</b>Croc 不是大芯片，可用较小的存储器，使其访问速度与流水线大致匹配。</li>
+    <li><b>OBI 互连允许多端口、多存储体（bank）。</b>指令与数据存储器挂在同一互连上、走不同地址，地址不冲突即可同时读写。</li>
+    <li><b>JTAG 可直接读写存储器。</b>于是能把编译好的二进制装到指定地址，再直接启动执行——这正是练习里"跑起来"的方式。</li>
+  </ul>
+  <p>处理器内部的基本循环决定了对存储器的需求：<b>程序计数器（PC）</b>指出下一条指令的位置（取指 fetch），处理器对指令<b>译码（decode）</b>，然后<b>执行（execute）</b>——执行会改变机器状态（寄存器、存储器、CPU 状态），有些指令（如 <b>bne</b>）还会改变程序流。数据最终都要回到存储器，而存储器恰恰是最矛盾的资源：我们想要它<b>又大又快又便宜</b>，但三者不可兼得；Croc 的折中是小存储加多存储体，让"取指令"与"读/写数据"尽量同时进行。</p>
+  <figure>
+    <img src="img/03_Netlist_p019_page.jpg" alt="处理器基本工作循环：取指、译码、执行与程序计数器" loading="lazy">
+    <figcaption><b>图 3-4</b> 处理器的基本循环：PC 给出指令地址，取指令、译码、执行；执行既可能改数据，也可能改程序流。来源：课件 p19</figcaption>
+  </figure>
+  <figure>
+    <img src="img/03_Netlist_p030_page.jpg" alt="Croc 中指令存储器与数据存储器的并行访问，地址由 ALU 计算" loading="lazy">
+    <figcaption><b>图 3-5</b> 借助多存储体，OBI 让"读一条指令"与"读或写一次数据"同时进行；数据的地址由 ALU 算出。来源：课件 p30</figcaption>
+  </figure>
+  <p>最后是 <b>JTAG（Joint Test Action Group，IEEE 1149）</b>：一套工业标准的测试接口，定义了统一的端口与命令，各家厂商、各种器件通用。它最初用于<b>边界扫描测试（boundary scan test）</b>，把芯片隔离出来单独测试；也用于通用测试访问（灌入 BIST/ATPG 向量并读回结果），还兼作<b>编程与调试接口</b>。对 Croc 来说，它就是装入程序并把芯片跑起来的通道。</p>
+  <figure>
+    <img src="img/03_Netlist_p033_a2ba89684d.png" alt="JTAG 系统框图，含测试访问端口 TAP、边界寄存器与各类寄存器" loading="lazy">
+    <figcaption><b>图 3-6</b> JTAG 系统框图：测试访问端口（TAP）含 TCK、TMS、TDI、TDO、TRST 五个信号，由 TAP 控制器驱动边界寄存器以隔离并控制所有 I/O。来源：课件 p33</figcaption>
+  </figure>
+
+  <h3 id="ch03-3">3.3 用 CMOS 搭建任意布尔函数</h3>
+  <p>网表里的每个单元最终都是晶体管搭出来的。这一节先说明"为什么几个基本门就够了"——这是综合能在有限库单元上做映射的前提。</p>
+  <p>数字 CMOS 设计之所以是现代 IC 的基石，原因有两层。第一，<b>布尔代数</b>可以把任意功能映射成 0/1，并给出化简与变换的规则——这正是综合的核心工作。第二，我们并不需要很多种门：理论上只要<b>一个 2 输入 NAND（或 NOR）加一个触发器（flip-flop）</b>，就能搭出任意数字电路——这条"完备性"解释了为什么标准单元库只需几十个单元。</p>
+  <p>晶体管在这里被当作<b>开关</b>使用：导通时有电流流过，关断时基本没有（只有极小的漏电流）。而 CMOS 的巧思在于把 nMOS 与 pMOS 配成一对：任一时刻要么 nMOS 把输出拉低，要么 pMOS 把输出拉高，不会同时强驱动同一节点，因此静态时几乎不消耗直流功率，制造也相对简单。</p>
+  <p>给定一个布尔函数，构造方法很机械：<b>先画 nMOS 下拉网络</b>——AND 串联、OR 并联；<b>pMOS 上拉网络则是它的对偶（互补）网络</b>：nMOS 里并联的在 pMOS 里就串联，反之亦然。以课件中的例子为例：</p>
+  <div class="code-block">
+    <div class="code-title">用于构造 CMOS 门的布尔函数（原始写法）</div>
+    <pre><code>OUP = NOT ( ( (IN1 AND IN2) OR IN3) AND (IN4 OR IN5) )</code></pre>
+  </div>
+  <p>nMOS 网络负责"拉低"，因此<b>当函数为真时输出被拉到 '0'</b>。这说明 CMOS 天生实现的是"反相"形式；正因如此，NAND、NOR 才是比 AND、OR 更基础的门——后者通常要在 NAND/NOR 后接一级反相器。</p>
+  <div class="fig-row">
+    <figure>
+      <img src="img/03_Netlist_p043_4cc4c89160.jpg" alt="CMOS 门由上拉 pMOS 网络与下拉 nMOS 网络构成" loading="lazy">
+      <figcaption><b>图 3-7</b> 任何一个 CMOS 门都可拆成"p 沟道上拉网络"与"n 沟道下拉网络"两部分。来源：课件 p43</figcaption>
+    </figure>
+    <figure>
+      <img src="img/03_Netlist_p050_76c3574f45.jpg" alt="最常见的逻辑单元：Buffer、AND、OR、XOR、Inverter、NAND、NOR、XNOR 及其晶体管实现" loading="lazy">
+      <figcaption><b>图 3-8</b> 最常用的逻辑单元：Buffer、AND、OR、XOR、Inverter、NAND、NOR、XNOR。来源：课件 p50</figcaption>
+    </figure>
+  </div>
+
+  <h3 id="ch03-4">3.4 门延迟从哪来：驱动能力与负载的平衡</h3>
+  <p>门不是瞬间翻转的：它的输出要给下一级的输入电容充放电。由电流与电容的关系可知，<b>要想更快，要么加大电流，要么减小电容</b>——前者对应更大的晶体管，后者对应更小的负载。</p>
+  <p>于是出现了最典型的权衡：加大晶体管尺寸能提供更大驱动电流、让输出翻转更快，<b>但代价是面积和功耗，且下一级看到的输入电容也变大</b>——前一级的负载反而更重，所以单纯把门做大并不一定更快。在先进工艺里，连线电容（wire capacitance）已经超过门电容（gate capacitance），延迟越来越多地由"线"而非"门"决定，这也是后面必须做寄生参数提取的原因。</p>
+  <div class="fig-row">
+    <figure>
+      <img src="img/03_Netlist_p051_a4982f5cd4.jpg" alt="CMOS 门时序的简化模型：一个 NAND 驱动一个反相器" loading="lazy">
+      <figcaption><b>图 3-9</b> 门时序的简化模型：A、B 经一个 NAND、再经一个反相器得到 Z。来源：课件 p51</figcaption>
+    </figure>
+    <figure>
+      <img src="img/03_Netlist_p054_1a32e044b6.jpg" alt="给输出充电到高电平的简化模型，并标注如何更快" loading="lazy">
+      <figcaption><b>图 3-10</b> 给输出充电的简化模型：电流越大、电容越小，翻转越快。来源：课件 p54</figcaption>
+    </figure>
+  </div>
+  <p>标准单元库正是为这个权衡服务的：同一功能提供<b>多个驱动强度（drive strength）版本</b>，另有缓冲器与反相器驱动长连线；<b>综合工具</b>负责挑选最合适的单元组合，以平衡速度、面积与功耗。这正是"综合不是一对一翻译"的直接答案。</p>
+
+  <h3 id="ch03-5">3.5 逻辑综合三步：翻译、优化、映射</h3>
+  <p>现在可以完整地描述综合在做什么了：<b>逻辑综合算法用布尔代数，把 HDL 描述映射到标准单元库上，产出一张门级网表</b>。所谓"综合"，可以拆成三步理解：</p>
+  <ul>
+    <li><b>翻译（translation）：</b>把 HDL 代码转成工艺无关的通用逻辑表示，此时还没有任何具体单元。</li>
+    <li><b>优化（optimization）：</b>在布尔层面做化简与重构，朝目标（速度、面积、功耗）优化。</li>
+    <li><b>映射（mapping）：</b>把优化后的逻辑对应到目标工艺库里真实存在的标准单元。</li>
+  </ul>
+  <p>工具能优化速度、面积和功耗，<b>但它必须先知道"哪个更重要"</b>，这个信息由<b>约束（constraint）</b>提供。时序往往是头等约束，因为它会间接决定其他性质：跑得更快的电路通常更大，而更大的电路又更耗电。</p>
+  <figure>
+    <img src="img/03_Netlist_p058_8369e1a2bc.jpg" alt="综合的优化目标：面积与传播延迟之间的 Pareto 权衡图" loading="lazy">
+    <figcaption><b>图 3-11</b> 综合的优化目标：横轴为传播延迟 T，纵轴为复杂度（面积）。用户时序约束在可行解边界上切出受约束的最优解，其余量即 slack。来源：课件 p58</figcaption>
+  </figure>
+  <p>可行解落在一条边界上——追求最快就必然变大（"fastest but largest"），追求最省就必然变慢（"smallest but slowest"），二者之间存在面积-延迟乘积最小的双曲线。用户给出的<b>时序约束</b>把这条边界切开，得到受约束的最优解；约束与最优解之间的余量就是<b>时延余量（slack）</b>：为正说明还有提速空间，为负则说明约束根本达不到，必须回去改架构或改约束。</p>
+
+  <h3 id="ch03-6">3.6 时序基础一：传播/污染延迟与建立/保持时间</h3>
+  <p>这一节是本讲的核心，也是后面 LIB、SDF 两讲的地基。先精确定义两个延迟：</p>
+  <ul>
+    <li><b>传播延迟（propagation delay, t<sub>pd</sub>）：</b>输入发生变化后，输出<b>最迟</b>在什么时候稳定到新的正确值。</li>
+    <li><b>污染延迟（contamination delay, t<sub>cd</sub>）：</b>输入发生变化后，输出<b>最早</b>在什么时候可能开始变化。</li>
+  </ul>
+  <p>也就是说，在 t<sub>cd</sub> 到 t<sub>pd</sub> 这段窗口里，输出是"未知（unknown）"的——它既不是旧值，也不能保证已经是新值。再看触发器：它并不是"瞬时采样"的。数据必须在时钟沿到来<b>之前</b>稳定保持一段时间，这叫<b>建立时间（setup time）</b>；并且在时钟沿之后还要继续保持稳定一段时间，这叫<b>保持时间（hold time）</b>。若这两条不满足，触发器采到的值就不确定。</p>
+  <figure>
+    <img src="img/03_Netlist_p059_0827efde61.jpg" alt="时序路径：最长路径决定时钟周期，最短路径受保持时间约束" loading="lazy">
+    <figcaption><b>图 3-12</b> 时序的两个极端：上方最长路径（传播延迟 + 线延迟 + 建立时间）决定目标时钟周期；下方最短路径（污染延迟 + 线延迟）必须不短于保持时间。来源：课件 p59</figcaption>
+  </figure>
+  <p>把一条路径串起来（组合门 + 线延迟）看：</p>
+  <ul>
+    <li><b>最长路径（longest path）</b>决定时钟周期：数据从发送触发器出发，经过各级单元的传播延迟与连线延迟，再加上接收触发器的建立时间，<b>必须在一个时钟周期内走完</b>。这正是课件里那句"target clock period = max. acceptable path delay"的含义——<b>时钟周期的物理意义，就是最长路径允许的最大延迟</b>。这条最长的路径就是<b>关键路径（critical path）</b>。</li>
+    <li><b>最短路径（shortest path）</b>受保持时间约束：数据也不能来得"太早"。发送触发器的污染延迟加线延迟，<b>必须不短于接收触发器的保持时间</b>，否则新数据会抢在旧数据被可靠锁存之前冲进接收端，造成保持违例（hold violation）。</li>
+  </ul>
+  <p>一句话总结：<b>建立时间约束管"太慢"，保持时间约束管"太快"；一头一尾，共同决定一个时钟周期能否成立。</b></p>
+  <figure>
+    <img src="img/03_Netlist_p063_f622be790e.jpg" alt="污染延迟与传播延迟的波形示意，输出在未知窗口后稳定" loading="lazy">
+    <figcaption><b>图 3-13</b> 从波形看两个延迟：输入变化后，输出在污染延迟 t<sub>cd</sub> 之后开始变化，在传播延迟 t<sub>pd</sub> 之后才稳定到新值；中间是"unknown"窗口。来源：课件 p63</figcaption>
+  </figure>
+
+  <h3 id="ch03-7">3.7 时序基础二：时钟周期、关键路径与输入/输出约束</h3>
+  <p>有了上面的定义，很多结论就顺理成章。<b>时钟周期一旦确定，电路内部所有时序都被确定</b>：据此可算出全部建立/保持与传播/污染延迟，必要时回头优化电路。为简单起见，本课程只考虑<b>单时钟域（single clock domain）</b>，真实大电路更复杂但思想不变。</p>
+  <p>真正棘手的是电路的<b>边界</b>：你的电路要和上游、下游配合。相对参考时钟，<b>输入最晚/最早何时到达？输出每周期最早/最晚何时出现？</b>这些信息不属于内部逻辑，却直接影响电路能否正常工作。我们用<b>输入延迟（input delay）</b>与<b>输出延迟（output delay）</b>把环境的时序补全：</p>
+  <ul>
+    <li><b>输入延迟</b>为 1ns，表示输入会在时钟沿之后 1ns 才到达——它把上游电路的延迟"算进来"。</li>
+    <li><b>输出延迟</b>为 2ns，表示输出必须在下一个时钟沿<b>之前</b> 2ns 出现——它为下游电路预留了时间。</li>
+  </ul>
+  <figure>
+    <img src="img/03_Netlist_p062_20b4523d0f.jpg" alt="从电路角度看输入输出时序：上游电路、待构造电路与下游电路的时序关系" loading="lazy">
+    <figcaption><b>图 3-14</b> 边界时序：上游、待构造与下游电路。输入延迟 t<sub>idel</sub>、输出延迟 t<sub>odel</sub>、时钟周期 T<sub>clk</sub> 与时钟分布延迟 t<sub>di</sub> 共同描述接口时序。来源：课件 p62</figcaption>
+  </figure>
+  <div class="warn"><b>坑：</b>只给时钟周期、不给输入/输出延迟，是初学者最常见的错误。这样综合出来的电路"内部很快"，但接口时序对不上外部环境，等于白做。请记住：<b>综合时给出完整的边界条件，和给出时钟周期同样重要。</b></div>
+
+  <h3 id="ch03-8">3.8 门级网表的形态与阅读方法</h3>
+  <p>最后回到本讲的产物——网表本身。回顾一下 HDL 的三种用法，它们其实是"同一语言、不同抽象层"：</p>
+  <ul>
+    <li><b>行为级 HDL（behavioral）：</b>描述硬件"做什么"，常见于向综合器解释架构。</li>
+    <li><b>结构级 HDL（structural）：</b>描述模块与它们之间的连接，是框图的"一一翻译"。</li>
+    <li><b>门级网表（gate-level netlist）：</b>结构级 HDL 的一个子集，最底层的模块就是标准单元。</li>
+  </ul>
+  <p>网表只用最基本的语法，是很"朴素"的 Verilog，接口与连线都是简单逻辑类型。其特征可用于快速判断是不是网表：几乎由工具自动生成；通常是一个很大的文件；供工具处理，不预期手工编辑；只用 Verilog 语法，不需 SystemVerilog 扩展；<b>没有 always / always_ff / always_comb / always_latch</b>；<b>不用 logic、int，一般只有 wire</b>；可以层次化（多个 module）或扁平（单个 module）；有时还会额外生成一份<b>电源网表（power netlist）</b>，含 VDD、GND 与衬底连接，用于 LVS 与多电源域仿真。</p>
+  <div class="code-block">
+    <div class="code-title">网表长什么样：Croc 练习中网表的片段（来源：课件 p67）</div>
+    <pre><code>module croc_chip (
+clk_i,
+// […]
+wire net5157;
+wire i_croc_soc_i_croc__0389_;
+wire i_croc_soc_i_croc__0390_;
+// […]
+sg13g2_a21oi_1 i_croc_soc_i_croc__3715_ (.Y(i_croc_soc_i_croc__0117_),
+.A1(i_croc_soc_i_croc__0107_),
+.A2(i_croc_soc_i_croc__0112_),
+.B1(i_croc_soc_i_croc__0116_));
+sg13g2_buf_4 fanout5182 (.X(net5182),
+.A(net5185));
+// [ … ]
+endmodule</code></pre>
+  </div>
+  <p>可以看到，每个实例（instance）都是"单元名 + 实例名 + 端口连接"的形式：<b>sg13g2_a21oi_1</b> 是与-或-反（AOI）单元，<b>sg13g2_buf_4</b> 是驱动强度为 4 的缓冲器——同一功能的不同驱动版本由单元名区分，正好呼应 3.4 节的权衡。这份练习里的 Croc 网表是<b>单个 module</b>，含 <b>40'091 个标准单元、43'191 条 wire 定义、共 182'348 行</b>；这个量级说明网表是给人"看局部"的，不是从头读到尾的。</p>
+  <div class="code-block">
+    <div class="code-title">浏览网表的实用命令（来源：课件 p68）</div>
+    <pre><code>less -S netlist.v
+SHIFT+G     (go to end)
+?module     (search backwards for module)
+grep wire netlist.v | wc -l
+awk '/sg13g2/{print $1}' netlist.v | sort -u</code></pre>
+  </div>
+  <div class="note"><b>注：</b>课件第一条建议是"不要用编辑器打开你不打算编辑的文件"。用 <b>less</b> 浏览即可：SHIFT+G 跳到末尾，?module 反向查找模块定义；配合 <b>grep</b>、<b>awk</b>、<b>sort</b>，就能迅速统计 wire 数量、列出所有用到的单元类型。</div>
+
+  <h3 id="ch03-9">本讲要点</h3>
+  <div class="takeaway"><ol>
+    <li><b>综合是"行为"到"物理"的桥。</b>它在布尔代数层面把与工艺无关的 RTL 描述，经翻译、优化、映射三步，落成一张由标准单元与连线组成的门级网表；这张网表是后续全部物理设计步骤的共同输入。</li>
+    <li><b>时序的两个极端决定一切。</b>最长路径的延迟（传播延迟 + 线延迟 + 建立时间）决定时钟周期能压到多短，这条路径就是关键路径；最短路径的延迟（污染延迟 + 线延迟）必须不短于保持时间，否则会冲掉刚采到的数据。前者管"太慢"，后者管"太快"。</li>
+    <li><b>约束要完整，边界不能漏。</b>时钟周期决定了电路内部的所有时序，但它只解决一半问题；输入/输出延迟描述了电路与外部环境的接口时序，在工业设计中往往是最关键的约束。只给周期、不给边界条件，综合结果可能完全不能用。</li>
+  </ol></div>
+</section>
+<section class="chapter" id="ch04">
+  <div class="ch-head">
+    <span class="ch-no">第 4 讲</span>
+    <h2>IC 制造工艺：从硅片到芯片</h2>
+    <p class="ch-meta">对应课件：04_ICT.pdf ｜ 关键词：doping、lithography、photoresist、mask、CMOS、metal stack、ICT file</p>
+  </div>
+
+  <div class="lead">
+    前几讲我们一直在"纸上"设计芯片：先写 RTL，再综合成门级网表。但综合器给出的面积、延迟、可用层数、可用的标准单元，归根结底都由制造工艺决定。这一讲我们把设计流程暂停一下，用一条"相当传统"的工艺线走一遍：从一块硅片出发，经过掺杂、光刻、刻蚀、沉积、平坦化和多层金属，最后得到一颗能工作的芯片。目的不是把大家培养成工艺工程师，而是搞清楚<em>设计的那些约束究竟从哪来</em>——理解这一步，第 5 讲的 LEF、第 6 讲的 DEF、第 7 讲的 LIB、第 8 讲的 SDF 才会顺理成章。
+  </div>
+
+  <h3 id="ch04-1">4.1 为什么要先看制造：约束的源头在这里</h3>
+  <p>
+    数字设计里很多"规矩"乍看很随意：为什么标准单元高度只能是固定的几个行高？为什么金属层要分层、走向还要交替？为什么某些层对间距的要求特别苛刻？答案都在制造工艺里。课件 p4 列出本讲目标：认识造芯片的三种材料（导体、绝缘体、半导体）、理解 MOS 工艺与晶体管为何特殊、掌握制造的基本步骤（光刻、注入、沉积、刻蚀、清洗、抛光），并体会"找一套互相兼容的材料"有多难。
+  </p>
+  <div class="note"><b>注：</b>课件 p5 附有一段现场视频（<code>https://www.youtube.com/watch?v=aBDJQ9NYTEU</code>）：Matt 在 IHP 产线上讲解整个流程，想把抽象步骤对应到真实洁净室设备时值得一看；不看也不影响后续理解。</div>
+
+  <h3 id="ch04-2">4.2 导体、绝缘体、半导体：三种材料的取舍</h3>
+  <p>
+    一颗芯片本质上是往一块衬底上反复"叠"三种角色不同的材料。课件 p6 讨论了其中两类，我们补上第三类。
+  </p>
+  <ul>
+    <li><b>导体（conductor）</b>：传输电流——既包括供电（power），也包括信号（signal）。理想情况希望它毫无损耗，用电导率来衡量。但"电阻小"只是第一步，它还必须与前后工艺兼容。</li>
+    <li><b>绝缘体（insulator）</b>：把不同的导体隔开——因为我们要在有限面积里走很多电源线和信号线，必须保证它们之间没有电流。关键参数是<b>介电常数</b>（dielectric constant / permittivity，ε），而这里存在矛盾：想<em>故意做电容</em>时希望 ε 越大越好，想<em>避免寄生电容</em>时又希望它越小越好。同一份材料属性，在不同场合是好是坏完全相反。</li>
+    <li><b>半导体（semiconductor）</b>：本征状态下导电性介于两者之间，本身并不稀奇，真正有价值的是它"可工程化"——下一节就讲这一点。</li>
+  </ul>
+  <p>
+    这两类材料都有一句相同的约束："需要与工艺兼容"。这是整讲反复出现的主题：材料之间要粘得住、热膨胀系数要接近、不能与前后的处理步骤打架。
+  </p>
+
+  <h3 id="ch04-3">4.3 掺杂：真正让半导体有用的东西</h3>
+  <p>
+    硅的晶格是一个重复排列的规则结构（课件 p7）。如果它始终完美，那只是一块不活泼的晶体。有趣的事从"替换原子"开始（p8）：掺入少量别的原子，就能改变它的电学性格。
+  </p>
+  <ul>
+    <li>掺入 <b>III 族</b>元素（B、Ga、In），得到 <b>P 型</b>半导体，相当于结构里"缺电子"。</li>
+    <li>掺入 <b>V 族</b>元素（P、As），得到 <b>N 型</b>半导体，相当于结构里"多电子"。</li>
+  </ul>
+  <p>
+    更重要的是掺杂<b>浓度可以控制</b>：从很轻的 p- 到很重的 p++、n+ 都做得出来。课件 p10 给出掺杂浓度约 10<sup>15</sup> 到 10<sup>20</sup>——听起来很大，但它只是阿伏伽德罗常数的一小部分：往纯净硅里"点"进一丁点杂质，就足以改变整块材料的导电类型。
+  </p>
+  <p>
+    有了可控的 P 区和 N 区，就能让它们<b>相邻</b>放置形成 PN 结，进而做出二极管、晶体管、晶闸管等器件。课件 p9 用一句话总结了这一节的本质：<b>有趣的其实不是半导体，而是掺杂。</b>为什么重要？因为"用电压控制导电"这件事——也就是晶体管的工作原理——完全依赖于掺杂形成的 PN 结。
+  </p>
+  <figure>
+    <img src="img/04_ICT_p007_5a33033dc8.jpg" alt="纯净硅的规则晶格结构" loading="lazy">
+    <figcaption><b>图 4-1</b> 硅的规则晶格：一个"完美"但本身并不有用的结构。来源：课件 p7</figcaption>
+  </figure>
+  <div class="fig-row">
+    <figure>
+      <img src="img/04_ICT_p008_0eaa806139.jpg" alt="N 型区带多余电子，整体带负电" loading="lazy">
+      <figcaption><b>图 4-2</b> 用 V 族原子替换后形成 N 型区（多电子、带负电）。来源：课件 p8</figcaption>
+    </figure>
+    <figure>
+      <img src="img/04_ICT_p009_5dd063e8bd.jpg" alt="P 型区缺电子，整体带正电" loading="lazy">
+      <figcaption><b>图 4-3</b> 用 III 族原子替换后形成 P 型区（缺电子、带正电）。来源：课件 p9</figcaption>
+    </figure>
+  </div>
+
+  <h3 id="ch04-4">4.4 晶体管：一个受电压控制的开关，以及它为什么要越做越小</h3>
+  <p>
+    课件 p11 用一个很直观的类比把晶体管讲清楚了：它本质上是一个<b>受电压控制的开关</b>。当栅极电压 V<sub>G</sub> = 0 V（逻辑 0）时，源和漏之间不导通，开关"断开"；把栅电压抬高到一定值（逻辑 1）时，源漏之间被接通。
+  </p>
+  <p>
+    把它落成实际结构就是 p12 的画面：在一块 <b>p 型掺杂的硅片</b>（半导体衬底，substrate）上，做出两个 <b>n 型掺杂区</b>，分别叫源（source）和漏（drain）；两者之间上方是<b>栅（gate）</b>，栅与硅之间隔着一层<b>介质（dielectric / oxide）</b>。这里有一个常被忽略的历史细节：<b>在长达 30 多年的时间里，栅并不是金属，而是多晶硅（polysilicon）。</b>所以别看到"metal gate"就以为理所当然。
+  </p>
+  <figure>
+    <img src="img/04_ICT_p011_2304a33c6b.jpg" alt="晶体管作为受电压控制的开关、剖面结构与电路符号" loading="lazy">
+    <figcaption><b>图 4-4</b> 从左到右：开关类比、晶体管剖面、电路符号。来源：课件 p11</figcaption>
+  </figure>
+  <figure>
+    <img src="img/page_04_ICT_p012.jpg" alt="MOS 晶体管剖面：p 型衬底上两个 n 区，栅下为介质" loading="lazy">
+    <figcaption><b>图 4-5</b> 一个 MOS 晶体管的基本结构；栅下是介质，源漏是 n 型区。来源：课件 p12</figcaption>
+  </figure>
+  <p>
+    接下来很自然的问题是：能不能把这个结构做得更小？当然想——同样面积塞下的晶体管越多越好。但"缩小"（shrink）并不是把图纸等比复制那么简单。课件 p13–p14 指出，摩尔定律（Moore's Law）要求不断缩小这个结构，而缩小的同时会冒出三个麻烦：
+  </p>
+  <ul>
+    <li><b>图形越来越难画</b>（patterning smaller structures）：光刻本身逼近分辨率的极限。</li>
+    <li><b>氧化层变薄导致电场更强</b>（shrinking oxide, higher E field）：介质越薄，同样电压下的场强越高，可靠性压力越大。</li>
+    <li><b>尺寸进入原子量级，涨落变严重</b>（atomistic sizes, variation）：当结构只剩几十个原子宽时，"多一点少一点"不再是统计误差，而是实打实的器件差异。</li>
+  </ul>
+  <figure>
+    <img src="img/04_ICT_p014_page.jpg" alt="缩小结构带来的三重压力：图形更难、电场更强、原子尺度涨落" loading="lazy">
+    <figcaption><b>图 4-6</b> 缩小结构带来的三类问题：图形、电场、原子尺度的涨落。来源：课件 p14</figcaption>
+  </figure>
+  <p>
+    还有一件事必须解决：就算晶体管做得再好，我们也要连到它。课件 p15 讲得很形象——你要"访问这些结构"：在密集图形之间挖出小孔（digging small holes），再填上导电材料（filling small holes）。这意味着芯片不能只有一层器件，还必须在其上叠出互连层；4.7 节的多层金属结构，根子就埋在这里。
+  </p>
+  <figure>
+    <img src="img/04_ICT_p015_page.jpg" alt="为了访问晶体管而刻蚀并填充小孔" loading="lazy">
+    <figcaption><b>图 4-7</b> 器件做好之后，还要刻蚀小孔、填孔，才能把这些结构连出去。来源：课件 p15</figcaption>
+  </figure>
+  <div class="note"><b>注：</b>课件并没有给出具体"工艺节点"编号与对应尺寸表。但从 p14 可以看到，缩小同时带来"图形难刻、电场增强、原子尺度涨落"三重压力，这正是后来工艺节点数字越来越不能等同于某个真实物理尺寸、而更像一个代际标签的原因。</div>
+
+  <h3 id="ch04-5">4.5 光刻与"涂—曝—显—做—洗"循环</h3>
+  <p>
+    要在晶圆表面按图形地"加材料"或"减材料"，就要靠<b>光刻（lithography）</b>。课件 p17 说明整套光学系统的工作原理：期望的图形先做在<b>掩模（mask）</b>上，掩模特征尺寸比最终图形<b>放大 5 到 10 倍</b>，刻在一块金属表面；再用光学系统把它缩小聚焦到晶圆表面。由于一次曝光只能覆盖很小一块区域，晶圆会被"步进"（stepped）着移动，让下一块区域接着曝光，以覆盖整片晶圆。课件还标注了一条硬限制：<b>光学方法目前只能做到 193 nm</b>。
+  </p>
+  <figure>
+    <img src="img/04_ICT_p017_24c0c66a87.jpg" alt="光刻系统：激光源、光束扩展、掩模、缩小投影镜头与步进曝光" loading="lazy">
+    <figcaption><b>图 4-8</b> 光刻成像链路：掩模图形经缩小投影到涂有光刻胶的晶圆上，再步进重复。来源：课件 p17</figcaption>
+  </figure>
+  <p>
+    课件 p18–p23 把一次图形转移拆成五个动作，并强调这是一个<b>循环</b>：
+  </p>
+  <ol>
+    <li><b>涂光刻胶（coat photoresist）</b>：在晶圆表面均匀涂一层感光有机材料，并需要固化处理（p18）。</li>
+    <li><b>透过掩模曝光（illuminate through mask）</b>：光把掩模的图形投到表面，被照到的光刻胶性质发生改变（p19）。</li>
+    <li><b>显影（develop）</b>：用溶剂把固化（正胶）或未固化（负胶）的部分去掉，留下图形（p20）。</li>
+    <li><b>执行制造步骤</b>：未被光刻胶保护的区域被处理，方式主要有三类——<b>刻蚀（etching）、沉积（deposition）、注入（implantation）</b>；光刻胶则保护其余表面（p21）。</li>
+    <li><b>去胶并清洗</b>：把有机的光刻胶溶解、冲洗干净（p22）。</li>
+  </ol>
+  <p>
+    做完这五步，只是完成了一层。课件 p23 给出量级上的提醒：整个过程要重复<b>上百个步骤</b>，用掉<b>几十张掩模</b>；而且每一张新掩模都必须<b>对准到同一位置</b>，并且要求表面足够平整才谈得上继续做图形。
+  </p>
+  <div class="fig-row">
+    <figure>
+      <img src="img/04_ICT_p019_page.jpg" alt="曝光：光透过掩模照射光刻胶" loading="lazy">
+      <figcaption><b>图 4-9</b> 曝光：被照到的光刻胶性质改变。来源：课件 p19</figcaption>
+    </figure>
+    <figure>
+      <img src="img/04_ICT_p021_page.jpg" alt="施加制造步骤：刻蚀、沉积或注入，光刻胶保护其余表面" loading="lazy">
+      <figcaption><b>图 4-10</b> 施加制造步骤：在未受保护的区域进行刻蚀、沉积或注入。来源：课件 p21</figcaption>
+    </figure>
+  </div>
+  <figure>
+    <img src="img/04_ICT_p023_page.jpg" alt="下一张掩模需对准同一位置，且表面必须足够平整；过程上百步、几十张掩模" loading="lazy">
+    <figcaption><b>图 4-11</b> 下一张掩模必须对准同一位置，且表面要足够平整；全过程上百步、几十张掩模。来源：课件 p23</figcaption>
+  </figure>
+  <div class="note"><b>注：</b>图 4-11 那句"表面必须足够平整才做得出图形"，正是化学机械抛光（CMP，chemical-mechanical polishing）存在的理由：每叠一层、每填一次孔，表面都会起伏，必须靠平坦化磨掉高低差，否则下一层光刻的焦深与对准都会失败。</div>
+  <div class="warn"><b>坑：</b>"上百步、几十张掩模"不是修辞。任何一步失败都可能毁掉整片晶圆，而晶圆上所有芯片是同时做出来的——这就是制造既慢又贵、并且必须在设计阶段就严格守规则的根本原因。设计端多留出的余量，很多时候就是在为这些工艺波动买单。</div>
+
+  <h3 id="ch04-6">4.6 掩模：逻辑掩模与物理掩模，以及为什么可以省成本</h3>
+  <p>
+    课件 p24 对掩模做了总结。它把一次图形操作抽象成四类：<b>光照（illumination）、注入（implantation）、沉积（deposition）、去除（removal）</b>；掩模（photomask）决定哪块区域被这四类操作作用。图里给出两个视角：<b>剖面视图（cut view）</b>看沿"切线（cut line）"切开后的竖直层叠关系，<b>俯视图（top view）</b>看从上方看到的平面图形。以后读版图时，这两个视角要能来回切换。
+  </p>
+  <figure>
+    <img src="img/04_ICT_p024_9d67d59c8d.jpg" alt="掩模总览：光照、注入、沉积、去除四类操作与剖面视图、俯视图" loading="lazy">
+    <figcaption><b>图 4-12</b> 掩模作用总览：四类图形操作，以及剖面视图与俯视图的对应关系。来源：课件 p24</figcaption>
+  </figure>
+  <p>
+    但这里有一个重要的区分（p26）：我们画图时画的是<b>逻辑掩模（logical mask）</b>——按"区域"来画，比如栅区（gate）、有源区（active）、n 阱（n-well）等等；而真正拿去制造的是<b>物理掩模（physical mask）</b>。两者之间的差别可以省下成本：
+  </p>
+  <ul>
+    <li>制造过程中，<b>有些掩模可以从其他掩模推导出来</b>，不必单独制作。</li>
+    <li><b>同一张物理掩模可以用于不同的步骤</b>。</li>
+  </ul>
+  <p>
+    为什么值得专门讲？因为掩模本身要花钱制造，减少数量、让一张掩模多干几份活就能直接降成本。课件的总结很干脆：这样做<b>省成本（saves costs）</b>。
+  </p>
+  <figure>
+    <img src="img/04_ICT_p026_81820fd2a0.jpg" alt="逻辑掩模与物理掩模的三种图层描述方式对比" loading="lazy">
+    <figcaption><b>图 4-13</b> 同一结构的不同掩模划分：逻辑掩模按 gate/active/n-well 等区域画，物理掩模由制造推导。来源：课件 p26</figcaption>
+  </figure>
+  <p>
+    那么这套掩模到底是为了做出什么？课件 p25 给出的答案是：<b>nMOS 加上 pMOS 等于 CMOS，这是整个工艺最重要的创新（the big innovation）</b>。同一张图里，(a)(d) 是反相器的两种电路画法（上拉 PMOS、下拉 NMOS），(b) 是它的版图俯视与剖切关系，(c) 是沿切线展开的完整剖面：可以看到 p<sup>+</sup>/n<sup>+</sup> 扩散区、n 阱与 p 衬底，以及接触孔（contact）如何把器件接到金属上。CMOS 之所以关键，是因为它让反相器在静态时几乎不耗电——这也是数字电路几乎全部建立在 CMOS 之上的原因。
+  </p>
+  <figure>
+    <img src="img/04_ICT_p025_951f12c593.jpg" alt="CMOS 反相器：电路符号、版图俯视与完整剖面（含 p+/n+、n 阱、接触孔）" loading="lazy">
+    <figcaption><b>图 4-14</b> 一个 CMOS 反相器的电路、版图与剖面：nMOS 与 pMOS 必须分别做在不同掺杂类型的区域里。来源：课件 p25</figcaption>
+  </figure>
+
+  <h3 id="ch04-7">4.7 逐层搭建：从阱到高层金属</h3>
+  <p>
+    把 4.5 节的循环按顺序执行，芯片就这样一层一层"长"出来。课件 p27–p34 用"黑板上的分步演示"给出这条路线，顺序大致是：<b>形成阱（wells）→ 定义有源区（active areas）→ 做晶体管（transistors）→ 开接触孔（contacts）→ 第一层金属（Metal1）→ 更高层金属（higher metals）→ 最终状态</b>。其中 p27（也即 p34 的"最终状态"）给出最终完整剖面，并附图例列出所有层的名字。
+  </p>
+  <figure>
+    <img src="img/04_ICT_p027_7d55f11358.jpg" alt="最终的芯片剖面总览，附各层名称图例：扩散、阱、衬底、栅金属、接触、多层金属、通孔、介质、钝化层" loading="lazy">
+    <figcaption><b>图 4-15</b> 逐层搭好之后的最终剖面。图例列出的层包括 n/p 扩散、n 阱、p 衬底、栅金属、接触塞、metal1–metal2–metal3–顶层金属、通孔（via cut）、层间介质、最终钝化层等。来源：课件 p27 / p34</figcaption>
+  </figure>
+  <p>
+    对照图例可以把结构读出来：器件层（各种扩散区、阱、衬底）之上是<b>栅金属</b>和<b>接触塞（contact plug）</b>，再往上是多层金属（metal1、metal2、metal3、顶层金属），层与层之间用<b>通孔（via cut）</b>连接，金属层之间填满<b>层间介质（interlevel dielectric）</b>做绝缘，最上面盖一层<b>最终钝化层（final passivation）</b>保护芯片。
+  </p>
+  <p>
+    为什么要这么多层金属？回到 4.4 节的 p15：我们不仅要做出晶体管，还要把它们连起来，而连线不能和器件抢同一块面积。于是工艺把互连分层：<b>底层金属做单元内部的短连线，越往上的金属层越粗、越长，用来走全局的电源和时钟</b>。每加一层，就要重复一次"打孔—填孔—铺金属—磨平"。
+  </p>
+  <div class="warn"><b>坑：</b>层数越多，要重复的光刻与平坦化就越多，出错和涨落的机会也越多。这解释了一条设计经验：能少用一层金属就少用一层，能靠单元内部连通的就不要拉到高层。布线层数不是越多越好，它直接换来更高的制造代价。</div>
+
+  <h3 id="ch04-8">4.8 ICT 文件：金属叠层决定了寄生参数</h3>
+  <p>
+    最后回到本讲的标题。ICT 在这里指的是一种文件格式——<b>互连工艺文件（ICT，Interconnect technology file）</b>。课件 p36 说明它的作用：ICT 文件<b>描述金属叠层（metal stack）本身</b>——列出用了哪些材料、各自的<b>电阻率（resistivity）</b>与<b>介电常数（permittivity）</b>，并给出各层<b>高度（height）</b>，从而把叠层重新"搭"出来。据此可生成提取用的表格，计算：
+  </p>
+  <ul>
+    <li><b>导线以及通孔/接触的电阻</b>；</li>
+    <li><b>导线之间的电容</b>。</li>
+  </ul>
+  <p>
+    为什么这对本课程重要？第 8 讲要做寄生提取（parasitics extraction），依赖的正是这些由叠层定义出来的 RC 表。换句话说，本讲的金属叠层是后面时序分析（SDF）的物理基础，不是可有可无的背景知识。
+  </p>
+  <p>
+    不过课件也指出，ICT 文件<b>如今并不常见了</b>，原因有两个：现代制造工艺非常复杂，会用到多个更薄的小层；而一份详细的描述很可能<b>泄露工艺机密</b>。所以代工厂通常不再提供完整的叠层描述，而是直接交付<b>已经提取好的 RC 表</b>。
+  </p>
+  <p>
+    课件 p37 给出了一段 ICT 文件的片段，可以直观看到它长什么样。它用 <code>conductor</code> 和 <code>dielectric</code> 两种块来描述各层：多晶硅作为导体，给出了高度、厚度、电阻率，并标注它属于栅层、是形成栅的材料，以及温度系数；氧化层作为介质，给出了介电常数。
+  </p>
+  <div class="code-block">
+    <div class="code-title">ICT 文件中的一个导体层与一个介质层（节选）</div>
+    <pre><code>// […]   
+   conductor "Polysilicon" {
+        height                  0.600
+        thickness               0.15
+        resistivity             7
+        layer_type              gate
+        gate_forming_layer      true
+        temp_tc1                0.0029
+   }
+// […]   
+   dielectric ”ox1" {
+        conformal               FALSE
+        height                  0.750
+        thickness               0.50
+        dielectric_constant     4.1
+   }
+}</code></pre>
+  </div>
+  <div class="note"><b>注：</b>课件对这段示例补充了三点：<code>conformal</code> 指该层是否"跟随下层轮廓"（follows contours of lower layer）；实际工艺中介质通常需要多层；而这种写法如今已相当少见。课件也注明这只是一个适配过的简化示例。</div>
+
+  <h3 id="ch04-9">本讲要点</h3>
+  <div class="takeaway"><ol>
+    <li>三类材料各有取舍：导体要好导电又要兼容工艺；绝缘体的介电常数"越高越好"还是"越低越好"，取决于我们要的是电容还是避开寄生电容；半导体的价值则来自<b>可控掺杂</b>——不是半导体本身，而是掺杂让它有用。</li>
+    <li>晶体管是受电压控制的开关。摩尔定律驱动它不断缩小，但缩小同时带来"图形更难刻、氧化层更薄而电场更强、尺寸进入原子量级而涨落加剧"三重压力；器件做好后还必须刻孔、填孔才能连出去。</li>
+    <li>制造靠"涂胶—曝光—显影—刻蚀/沉积/注入—去胶"反复循环，全程上百步、几十张掩模；逻辑掩模可推出物理掩模、一张物理掩模可多用，从而省成本。最终叠成的多层金属由 ICT 文件描述，它定义了导线电阻与电容，是后续寄生提取与时序分析的物理基础。</li>
+  </ol></div>
+</section>
+<section class="chapter" id="ch05">
+  <div class="ch-head">
+    <span class="ch-no">第 5 讲</span>
+    <h2>LEF：标准单元与布线层</h2>
+    <p class="ch-meta">对应课件：05_LEF.pdf ｜ 关键词：standard cell、routing layer、LEF、macro cell</p>
+  </div>
+
+  <div class="lead">
+    本讲进入后端（back-end）设计的抽象层。数字 IC 后端并不重新设计晶体管，而是把预先设计好的标准单元（standard cell）和宏单元（macro cell）通过金属互连层连成一个可制造的整体。我们会说明为什么需要这种抽象、金属层如何组织、标准单元为何必须等高成排、SRAM 等宏单元为何特殊，以及 LEF（Library Exchange Format）文件怎样把这一切信息编码给布线工具。
+  </div>
+
+  <h3 id="ch05-1">5.1 后端设计的抽象层次：晶体管之上只看互连</h3>
+  <p>在完整的 IC 设计流程里，前端（front-end）关心晶体管本身——它的尺寸、阈值电压、开关特性；后端（back-end）则关心晶体管之间的<b>互连（interconnect）</b>：金属线（metal line）、通孔（via/contact）以及与外界相连的 I/O。把前后端拆开，是因为现代数字电路的规模已经大到不可能在画版图时还去逐个调整晶体管。工艺厂和单元库团队会先完成晶体管级设计，后端工程师拿到的只是这些预定义构建块的外形、引脚和可用布线层。</p>
+
+  <figure>
+    <img src="img/05_LEF_p005_c349bca370.jpg" alt="前端与后端的关注点划分" loading="lazy">
+    <figcaption><b>图 5-1</b> 前端关注晶体管，后端关注金属互连与对外接口。来源：课件 p5</figcaption>
+  </figure>
+
+  <p>这种抽象带来一个关键问题：后端工具不需要知道单元内部每一根多晶硅走线，但必须精确知道“能在哪里连进去、哪里不能走线”。这一需求催生了<b>抽象视图（abstract view）</b>，也就是用 LEF 文件描述单元的外形、引脚位置、障碍物（obstruction）等足够信息。</p>
+
+  <figure>
+    <img src="img/05_LEF_p006_5f727e9de4.jpg" alt="IC 中的互连结构" loading="lazy">
+    <figcaption><b>图 5-2</b> 晶体管之上的多层金属互连把逻辑单元连接成功能电路。来源：课件 p6</figcaption>
+  </figure>
+
+  <h3 id="ch05-2">5.2 金属互连层：从晶体管到三维布线</h3>
+  <p>所有逻辑功能最终都由晶体管实现，而晶体管的漏极（drain）、栅极（gate）和源极（source）必须用导线连起来。早期的工艺只用栅极多晶硅做短距离互连，并用 2–3 层金属连接漏/源；但多晶硅电阻较大，不能跑远距离信号。随着集成度提高，金属层数迅速增加。</p>
+
+  <figure>
+    <img src="img/05_LEF_p007_5c9677a675.jpg" alt="Intel 4 工艺的金属堆叠截面" loading="lazy">
+    <figcaption><b>图 5-3</b> Intel 4 工艺中从晶体管到 M0–M4 的金属堆叠截面。来源：课件 p7</figcaption>
+  </figure>
+
+  <p>每增加一层金属，工艺复杂度都会上升：表面越来越不平，下一次光刻的对准越来越难，层间通孔也越来越难做。真正的转折点是<b>化学机械平坦化（Chemical-Mechanical Planarization，CMP）</b>。平坦化让金属层表面重新变平，使后续光刻和刻蚀可以持续进行，金属层数因此从早期的 2–3 层跃升到 5–6 层，再到 8–13 层甚至更多。</p>
+
+  <figure>
+    <img src="img/05_LEF_p012_79fedf7568.jpg" alt="多层金属互连的 SEM 照片" loading="lazy">
+    <figcaption><b>图 5-4</b> 先进工艺中多层金属互连的显微结构。来源：课件 p12</figcaption>
+  </figure>
+
+  <p>现代金属层的使用有明确分工：靠近晶体管的下层用于单元内部和宏单元内部走线；中间层用于块间布线；上层更厚，用于长距离信号、电源和时钟。上层金属的<b>节距（pitch）</b>通常设计为下层节距的整数倍，这样上层的信号可以方便地“落下来”与下层对齐。</p>
+
+  <h3 id="ch05-3">5.3 曼哈顿布线与轨道节距</h3>
+  <p>为了简化自动布线，数字 IC 通常采用<b>曼哈顿布线（Manhattan routing）</b>：每一层金属有一个优先方向，要么是水平，要么是垂直。要从 A 点走到 B 点，先在某一层水平走，打一个通孔到相邻层，再垂直走。这种限制把三维布线问题拆解成可管理的二维问题，也更容易保证设计规则检查（DRC）通过。</p>
+
+  <figure>
+    <img src="img/05_LEF_p014_55bf6152a8.jpg" alt="曼哈顿布线示例" loading="lazy">
+    <figcaption><b>图 5-5</b> 水平走线、垂直走线、同层 jog 与层间通孔。来源：课件 p14</figcaption>
+  </figure>
+
+  <p>衡量布线密度的基本单位是<b>轨道节距（track pitch）</b>，即相邻两条金属走线中心之间的距离。它必须同时容纳线宽、线间距以及放置通孔所需的空间，因此通常比工艺最小节距略宽松。布线工具以轨道网格为单位放置走线，所以标准单元的宽度和高度也常常设计成轨道节距的整数倍，这样才能无缝拼接成整齐的单元行。</p>
+
+  <figure>
+    <img src="img/05_LEF_p017_b47f95d806.jpg" alt="互连的三维结构" loading="lazy">
+    <figcaption><b>图 5-6</b> 真实芯片中的互连是三维结构。来源：课件 p17</figcaption>
+  </figure>
+
+  <h3 id="ch05-4">5.4 标准单元的物理结构：等高、电源轨与引脚</h3>
+  <p>数字后端用<b>标准单元库（standard cell library）</b>来实现网表中的各种门。CMOS 门在物理上天然分成互补的两部分：上半部分是 pMOS 管，放在 n 阱（NWELL）里，负责把输出拉向 VDD；下半部分是 nMOS 管，负责把输出拉向 GND。输入信号通常同时接到两边的栅极，输出则从漏极取出。</p>
+
+  <figure>
+    <img src="img/05_LEF_p019_c9c8dcf0b6.jpg" alt="芯片布局中的 I/O 环、宏单元与标准单元" loading="lazy">
+    <figcaption><b>图 5-7</b> 一块完整芯片的布局：外围是 I/O 环，中间有宏单元和标准单元阵列。来源：课件 p19</figcaption>
+  </figure>
+
+  <p>为了便于布局布线，所有标准单元被组织成等高的行（row）。为什么必须等高？因为只有这样，相邻单元才能共享同一对电源轨（power rail），才能在行与行之间用统一的布线通道走线。单元的宽度则根据内部晶体管数量变化，但仍然是垂直轨道节距的整数倍。</p>
+
+  <figure>
+    <img src="img/05_LEF_p020_4f15069693.jpg" alt="标准单元行" loading="lazy">
+    <figcaption><b>图 5-8</b> 放大后的标准单元行，每个小矩形是一个标准单元。来源：课件 p20</figcaption>
+  </figure>
+
+  <p>一个标准单元的典型结构包括：顶部和底部的电源轨（VDD 在上，GND 在下）、位于 n 阱中的 pMOS 区、位于衬底上的 nMOS 区、以及需要从 Metal1 引出的输入/输出引脚。单元高度通常等于若干条水平轨道的总高度，因此也被称为“12-track cell”“10-track cell”等。</p>
+
+  <figure>
+    <img src="img/05_LEF_p026_db8ca293ca.jpg" alt="标准单元内部结构" loading="lazy">
+    <figcaption><b>图 5-9</b> 标准单元的内部结构：NWELL、pMOS 区、nMOS 区、电源轨与引脚。来源：课件 p26</figcaption>
+  </figure>
+
+  <p>相邻两行标准单元通常采用“翻转”放置：一行的 VDD 在上、GND 在下，下一行则倒过来。这样两行之间可以共享一根电源轨或地轨，减小整体高度并简化供电网络。对后端工具来说，它不需要知道单元内部晶体管的具体形状，只需要知道引脚在哪里、在哪一层、以及哪些区域被内部走线占用而不能插入外部走线。</p>
+
+  <div class="fig-row">
+    <figure>
+      <img src="img/05_LEF_p028_c002351ad5.jpg" alt="标准单元行的引脚连接位置" loading="lazy">
+      <figcaption><b>图 5-10</b> 后端只需要知道单元的可连接位置。来源：课件 p28</figcaption>
+    </figure>
+    <figure>
+      <img src="img/05_LEF_p029_9716314018.jpg" alt="相邻标准单元行翻转放置" loading="lazy">
+      <figcaption><b>图 5-11</b> 相邻行翻转后共享电源/地轨。来源：课件 p29</figcaption>
+    </figure>
+  </div>
+
+  <h3 id="ch05-5">5.5 宏单元与 SRAM：无法塞进标准单元行的块</h3>
+  <p>并不是所有功能都适合用标准单元实现。存储器就是一例：用触发器（flip-flop）做存储虽然速度快、可并行访问，但一位需要 20 多个晶体管；<b>静态随机存取存储器（Static RAM，SRAM）</b>把一位降到约 6 个晶体管；<b>动态随机存取存储器（Dynamic RAM，DRAM）</b>只需要一个晶体管加一个电容，但需要特殊工艺且读取会破坏数据。因此片上存储通常用 SRAM 宏单元（SRAM macro）实现。</p>
+
+  <figure>
+    <img src="img/05_LEF_p030_161bd62855.jpg" alt="存储器宏单元" loading="lazy">
+    <figcaption><b>图 5-12</b> 存储器宏单元：无法嵌入标准单元行的预设计大模块。来源：课件 p30</figcaption>
+  </figure>
+
+  <p>SRAM 的核心是一个由 6T 单元组成的大阵列。阵列面积占整个宏单元的大部分，因此人们想尽一切办法压缩位单元（bitcell）面积。但位单元变小后，它要驱动的位线（bitline）电容很大，会限制速度，所以需要预充电（pre-charge）、灵敏放大器（sense amplifier）等电路配合。</p>
+
+  <figure>
+    <img src="img/05_LEF_p034_63405c9272.jpg" alt="SRAM 宏单元结构" loading="lazy">
+    <figcaption><b>图 5-13</b> SRAM 宏单元的阵列、译码器与读写外围电路。来源：课件 p34</figcaption>
+  </figure>
+
+  <p>实际项目中，SRAM 通常由<b>宏单元生成器（macro generator）</b>根据字数、位宽、多路复用因子、字节使能等参数自动生成版图、时序和 LEF 等视图。由于 SRAM 的版图并不遵循标准单元行高，放置时必须在宏单元周围留出<b>隔离环（halo）</b>，并且标准单元行在靠近宏单元的一端要用小段的电源/地轨“收口”。</p>
+
+  <figure>
+    <img src="img/05_LEF_p035_c028360fee.jpg" alt="IHP 工艺中的 SRAM 版图" loading="lazy">
+    <figcaption><b>图 5-14</b> IHP 工艺中 SRAM 的版图，可见位单元阵列与外围电路。来源：课件 p35</figcaption>
+  </figure>
+
+  <h3 id="ch05-6">5.6 LEF 文件：把物理信息交给后端工具</h3>
+  <p>LEF（Library Exchange Format）是后端工具读取物理信息的接口。它分为两类：</p>
+  <ul>
+    <li><b>Technology LEF</b>：定义工艺层、通孔、设计规则等，通常每个工艺节点只有一份。</li>
+    <li><b>Standard Cell / Macro LEF</b>：定义单元和宏单元的外形、引脚、障碍物等，可以有多个库文件。</li>
+  </ul>
+
+  <p>下面是一段 Technology LEF 的节选，来自课件 p39。注意所有语法都保持英文原样，中文解释放在代码块之后。</p>
+
+  <div class="code-block">
+    <div class="code-title">Technology LEF 片段（p39）</div>
+    <pre><code>VERSION 5.7 ;
+DIVIDERCHAR "/" ;
+BUSBITCHARS "[]" ;
+UNITS
+  DATABASE MICRONS 1000 ;
+END UNITS
+MANUFACTURINGGRID 0.005 ;
+LAYER Via1
+  TYPE  CUT ;
+  RESISTANCE      20 ;
+  SPACING         0.22 ;
+  ENCLOSURE BELOW 0.010 0.05 ;
+  ENCLOSURE ABOVE 0.005 0.05 ;
+# […]
+END Via1
+
+LAYER Metal1
+  TYPE          ROUTING ;
+  DIRECTION     VERTICAL ;
+  PITCH         0.48 ;
+  OFFSET        0.0 ;
+  WIDTH         0.16 ;
+  MAXWIDTH      30 ;
+  AREA          0.09 ;
+  HEIGHT        0.930 ;
+  THICKNESS     0.40 ;
+  RESISTANCE    RPERSQ     0.135 ;
+  CAPACITANCE   CPERSQDIST 3.49E-05 ;
+# […]
+END Metal1</code></pre>
+  </div>
+
+  <p>逐句解释如下：</p>
+  <ul>
+    <li><code>VERSION 5.7</code>：LEF 版本号，工具据此解析语法。</li>
+    <li><code>DIVIDERCHAR "/"</code>：层次分隔符，用于类似 <code>A/B</code> 的层级名。</li>
+    <li><code>BUSBITCHARS "[]"</code>：总线位宽采用方括号，例如 <code>A[0]</code>。</li>
+    <li><code>DATABASE MICRONS 1000</code>：数据库单位，1 微米被划分为 1000 个内部单位，因此坐标数值 1000 表示 1 μm。</li>
+    <li><code>MANUFACTURINGGRID 0.005</code>：制造网格，所有几何尺寸必须是 0.005 μm 的整数倍。</li>
+    <li><code>LAYER Via1</code> 到 <code>END Via1</code>：定义 Via1 这一<b>切割层（CUT）</b>，包括电阻、间距，以及它必须被上下两层金属覆盖的最小距离（ENCLOSURE BELOW/ABOVE）。</li>
+    <li><code>LAYER Metal1</code> 到 <code>END Metal1</code>：定义 Metal1 为<b>布线层（ROUTING）</b>，方向为垂直（VERTICAL），节距 0.48 μm，线宽 0.16 μm，最大线宽 30 μm，最小面积 0.09 μm²，厚度 0.40 μm，以及方块电阻和每平方单位电容。</li>
+  </ul>
+
+  <p>再看标准单元 LEF 的节选，来自课件 p40。它描述了一个名为 <code>sg13g2_a21o_1</code> 的单元。</p>
+
+  <div class="code-block">
+    <div class="code-title">Standard Cell LEF 片段（p40）</div>
+    <pre><code>VERSION 5.7 ;
+DIVIDERCHAR "/" ;
+BUSBITCHARS "[]" ;
+SITE  CoreSite
+    CLASS   CORE ;
+    SYMMETRY Y ;
+    SIZE 0.48 BY 3.78 ;
+END  CoreSite
+MACRO sg13g2_a21o_1
+  CLASS CORE ;
+  ORIGIN 0 0 ;
+  SIZE 3.36 BY 3.78 ;
+  SYMMETRY X Y ;
+  SITE CoreSite ;
+
+PIN A2
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+     LAYER Metal1 ;
+      RECT 2.81 0.405 3.215 0.965 ;
+    END
+ END A2
+ # […]
+ PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    SHAPE ABUTMENT ;
+    PORT
+     LAYER Metal1 ;
+      RECT 0 3.56 3.36 4 ;
+    
+# […]
+OBS
+    LAYER Metal1 ;
+      RECT 2.915 2.21 3.175 3.125 ;
+      RECT 1.855 2.21 2.115 3.125 ;
+      RECT 1.855 2.21 3.175 2.405 ;
+      RECT 1.335 2.17 1.595 3.125 ;
+      RECT 1.335 1.54 1.575 3.125 ;
+      RECT 1.415 1.22 1.575 3.125 ;
+      RECT 0.625 1.54 1.575 1.87 ;
+      RECT 1.415 1.22 2.27 1.385 ;
+      RECT 2.02 0.825 2.27 1.385 ;
+  END
+END sg13g2_a21o_1</code></pre>
+  </div>
+
+  <p>逐句解释如下：</p>
+  <ul>
+    <li><code>SITE CoreSite</code>：定义一个名为 CoreSite 的<b>位置类型（site）</b>，表示标准单元应放置的“槽位”。<code>CLASS CORE</code> 说明它属于核心逻辑区域；<code>SYMMETRY Y</code> 表示单元可以沿 Y 轴翻转；<code>SIZE 0.48 BY 3.78</code> 给出 site 的宽 0.48 μm、高 3.78 μm。</li>
+    <li><code>MACRO sg13g2_a21o_1</code>：开始定义一个宏/单元，对应网表中的 <code>sg13g2_a21o_1</code>。</li>
+    <li><code>CLASS CORE</code>：这是一个核心逻辑单元。</li>
+    <li><code>ORIGIN 0 0</code>：单元本地坐标原点。</li>
+    <li><code>SIZE 3.36 BY 3.78</code>：单元宽度 3.36 μm、高度 3.78 μm。注意到高度正好等于 CoreSite 的高度，宽度则是 site 宽度的 7 倍（3.36 / 0.48 = 7），因此该单元占 7 个 site 列。</li>
+    <li><code>SYMMETRY X Y</code>：单元可以沿 X 轴或 Y 轴翻转，布局工具据此做行翻转。</li>
+    <li><code>SITE CoreSite</code>：该单元属于 CoreSite 类型，只能放在对应行上。</li>
+    <li><code>PIN A2</code>：定义引脚 A2；<code>DIRECTION INPUT</code> 表示输入；<code>USE SIGNAL</code> 表示信号引脚；<code>PORT</code> 中的 <code>LAYER Metal1</code> 和 <code>RECT</code> 给出该引脚在 Metal1 层上的可连接矩形区域。</li>
+    <li><code>PIN VDD</code>：电源引脚；<code>DIRECTION INOUT</code> 表示可进可出；<code>USE POWER</code> 表示电源网络；<code>SHAPE ABUTMENT</code> 表示该引脚设计为与相邻单元拼接，从而共享电源轨。</li>
+    <li><code>OBS</code>：obstruction，障碍物。列出的矩形区域表示 Metal1 在该单元内部已经被占用，外部布线工具不能在这些地方再放走线。</li>
+  </ul>
+
+  <div class="note"><b>注：</b><code>RECT x1 y1 x2 y2</code> 中的坐标顺序是左下角到右上角，单位为 LEF 的 <code>DATABASE MICRONS</code> 所定义的内部单位。读 LEF 时务必留意单位和制造网格。</div>
+
+  <h3 id="ch05-7">5.7 从 LEF 中快速提取信息</h3>
+  <p>LEF 文件可能包含成千上万个单元，手动浏览效率很低。课件推荐用命令行工具快速抽取信息：</p>
+  <ul>
+    <li><code>grep "^MACRO" file.lef</code>：列出所有以 <code>MACRO</code> 开头的行，也就是文件中定义的所有单元。其中 <code>^</code> 把匹配锚定到行首。</li>
+    <li><code>awk '/^MACRO/{print $2}' file.lef</code>：匹配以 <code>MACRO</code> 开头的行，并打印第二个字段，即单元名。</li>
+    <li><code>grep "^MACRO" file.lef | cut -d " " -f 2</code>：用管道把 grep 的输出传给 cut，以空格为分隔符取第二列，效果同上。</li>
+  </ul>
+  <p>这些基本技巧在脚本化检查库文件、统计单元数量或查找特定引脚时非常有用。</p>
+
+  <h3 id="ch05-8">本讲要点</h3>
+  <div class="takeaway">
+    <ol>
+      <li>后端设计以“互连抽象”为核心：不处理晶体管，只看标准单元/宏单元的引脚、障碍物和金属层规则。</li>
+      <li>标准单元必须等高且对齐成行，才能共享电源轨并形成统一布线网格；宏单元（如 SRAM）因版图不规则，需要 halo 和行收口处理。</li>
+      <li>LEF 把 Technology LEF（层、通孔、设计规则）与单元 LEF（SITE、MACRO、PIN、PORT、OBS）分开描述，是后端工具理解物理世界的入口。</li>
+    </ol>
+  </div>
+</section>
+<section class="chapter" id="ch06">
+  <div class="ch-head">
+    <span class="ch-no">第 6 讲</span>
+    <h2>DEF 与布图规划</h2>
+    <p class="ch-meta">对应课件：06_DEF.pdf ｜ 关键词：floorplan、DEF、I/O ring、pad、ESD、packaging、core utilization</p>
+  </div>
+
+  <div class="lead">
+    在前一讲掌握了标准单元（standard cell）与布线层（routing layer）的 LEF 描述之后，我们现在要把网表变成一个可制造的芯片。布图规划（floorplanning）是后端流程的第一步：它决定芯片的尺寸与形状，为核心逻辑、宏单元（macro）和 I/O 单元划分地盘，并同步规划电源、I/O 与封装。本讲介绍的 DEF（Design Exchange Format）则是把这些几何与连接信息写成文本交换格式的标准方法。
+  </div>
+
+  <h3 id="ch06-1">6.1 从网表到芯片：布图规划要回答什么</h3>
+  <p>
+    综合得到的网表只告诉我们“需要哪些门、它们如何连接”，并不回答这些门在硅片上放在哪里、芯片应该多大多宽。布图规划就是要补齐这一层几何决策。课件把这一阶段的目标概括为五点：确定芯片尺寸与形状；为标准单元准备核心区域（core area）；为宏单元找到合适的放置位置；布置 I/O 单元（I/O cells）以连接外部世界；最终把所有内容装进一个封装（package）里（课件 p3）。
+  </p>
+  <p>
+    为什么这一步如此关键？因为硅片的单位成本与面积成正比，晶圆上能切出的裸片（die）数量随面积增大而迅速减少。布图规划的直接经济目标就是：在满足性能、可布线性、电源完整性和封装约束的前提下，找到最小的可行硅面积；同时又不把工程迭代成本推高到得不偿失的地步（课件 p7）。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p006_bb1d389887.png" alt="芯片整体布局示意，标注 Core Area、Macros 与 IO Cells" loading="lazy">
+    <figcaption><b>图 6-1</b> 芯片整体布局示意：核心区域、宏单元与 I/O 单元共同决定裸片尺寸。来源：课件 p6</figcaption>
+  </figure>
+
+  <h3 id="ch06-2">6.2 芯片面积与核心利用率</h3>
+  <p>
+    网表给出的只是所有标准单元的“净面积”（net cell area），实际芯片面积必须比它大。原因很直接：单元不能无缝密铺，还需要走线通道、电源网络、优化余量，以及宏单元和 I/O 单元周围的禁布区（keep-out regions）。此外，时序约束会把某些逻辑拉近，造成局部拥挤；时钟树综合（clock tree synthesis）和时序修复也会插入缓冲器，进一步占用面积（课件 p7）。
+  </p>
+  <p>
+    核心利用率（core utilization）是衡量这些额外空间占用程度的指标，定义为：
+  </p>
+  <p><b>core utilization = net cell area / reserved core area</b></p>
+  <p>
+    其中 reserved core area 是为标准单元预留的核心区域面积（课件 p18）。利用率太低意味着硅片浪费；利用率太高则可能导致布线拥塞、时序收敛困难。合理的初始利用率依赖工艺节点与设计类型，需要通过后端流程反复迭代来验证。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p015.jpg" alt="标准单元、电源布线、信号布线分层示意" loading="lazy">
+    <figcaption><b>图 6-2</b> 标准单元、电源布线与信号布线需要分层占用面积，因此不能把所有单元紧挨着放置。来源：课件 p15</figcaption>
+  </figure>
+
+  <p>
+    复杂设计通常采用层次化（hierarchical）方法：把电路拆成若干子模块，各自独立布局布线，再作为宏单元集成到顶层。这种“分而治之”的策略能减少单次优化的规模，但模块之间的接口时序约束必须事先明确。课件以 Poseidon 设计为例展示了这种 bottom-up 流程：先给三个子模块分配面积余量，再分别实现，最后在顶层把它们当作宏单元拼合（课件 p20–p21）。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p020_f0550673a5.jpg" alt="Poseidon 层次化设计布局" loading="lazy">
+    <figcaption><b>图 6-3</b> Poseidon 设计的层次化布图：三个独立模块在顶层作为宏单元拼合。来源：课件 p20</figcaption>
+  </figure>
+
+  <h3 id="ch06-3">6.3 I/O 环与焊盘设计</h3>
+  <p>
+    现代芯片的 I/O 使用专门的 I/O 晶体管，原因有三：第一，核心逻辑与 I/O 往往工作在不同电压（5.0 V、3.3 V、2.5 V、1.8 V、1.2 V 等）；第二，先进工艺节点（如 14 nm）的核心晶体管无法直接承受外部 PCB 的负载，因此 I/O 驱动器需要更大的尺寸和驱动能力；第三，I/O 单元要把芯片内部与外部噪声、静电放电（ESD）隔离开来（课件 p22）。
+  </p>
+  <p>
+    一个典型的 I/O 单元包含四部分：物理连接到封装（焊盘/凸点）、ESD 保护、输出/输入驱动器，以及电平转换与控制逻辑（课件 p24）。I/O 库通常分为数字 I/O、模拟 I/O 和电源单元三类；数字 I/O 又可按接口标准细分为标准、特殊、SSTL、HSTL、LVDS 等（课件 p25）。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p026_0f6d8dc222.png" alt="数字 I/O 缓冲器电路结构" loading="lazy">
+    <figcaption><b>图 6-4</b> 数字 I/O 缓冲器结构：包含驱动链、上/下拉、三态使能与 ESD 保护等。来源：课件 p26</figcaption>
+  </figure>
+
+  <p>
+    I/O 设计会反过来约束 floorplan。焊盘（pad）并不小，而且需要电源环（power ring）等附加结构；I/O 数量与类型直接决定芯片是“焊盘受限”（pad limited）还是“核心受限”（core limited），进而影响面积与长宽比（课件 p28）。
+  </p>
+  <p>
+    此外，高速 I/O 还要处理同步开关输出（Simultaneously Switching Outputs，SSO）问题：当 64 位总线同时从高电平翻转到低电平时，大量电流在封装电感上产生 di/dt 压降，这一压降与频率无关，只取决于同时翻转的 I/O 数量。SSO 指标帮助我们估算需要多少对 I/O 电源/地（课件 p27）。慢速输入信号容易在跳变沿受噪声影响，可用施密特触发器（Schmitt trigger）提高噪声容限；快速输出则需要限制转换速率（slew rate）以降低开关噪声，或采用差分信号（如 LVDS）来换取更好的噪声裕度与更低功耗（课件 p29）。
+  </p>
+
+  <h3 id="ch06-4">6.4 电源规划：环、条带与网格</h3>
+  <p>
+    电源网络的规划在布图阶段就要确定，包括使用哪些金属层、每条电源线多宽、如何连接宏单元与 I/O 环（课件 p10）。核心电源与 I/O 电源通常分离，因为 I/O 驱动大负载时会在电源上引入显著噪声，而 I/O 电压也往往高于核心电压（课件 p34）。
+  </p>
+  <p>
+    常见的片上电源结构包括：
+  </p>
+  <ul>
+    <li><b>电源环（power ring）</b>：沿芯片四周边缘或 I/O 环内侧走线的闭合电源/地环，为 I/O 和核心提供主干回路。</li>
+    <li><b>电源条带（power stripes）</b>：从电源环或焊盘向芯片内部延伸的较宽金属条，把电源分布到核心区域。</li>
+    <li><b>电源网格（power mesh）</b>：由水平和垂直电源条带交织成的网格，通过过孔（via）连接，降低整体阻抗并提供多条电流返回路径。</li>
+  </ul>
+  <p>
+    标准单元行内的电源由较细的内部电源轨（通常位于单元最上层金属）供给，而宏单元和 I/O 单元则需要专门考虑它们的电源接口位置与宽度（课件 p11–p12）。电源规划是否合理，直接影响 IR 压降、电迁移和芯片能否达到目标性能。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p011_05dfa1a78e.jpg" alt="标准单元区域的电源连接" loading="lazy">
+    <figcaption><b>图 6-5</b> 标准单元区域的电源布线与连接方式。来源：课件 p11</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/06_DEF_p012_cfdf98a60f.jpg" alt="宏单元的电源连接" loading="lazy">
+    <figcaption><b>图 6-6</b> 宏单元的电源接口与周围连接。来源：课件 p12</figcaption>
+  </figure>
+
+  <h3 id="ch06-5">6.5 ESD 保护结构</h3>
+  <p>
+    静电放电（Electro-Static Discharge，ESD）是芯片在制造、测试、运输和装配过程中面临的常见威胁。人在合成地毯上行走可产生 100 V 到 30 kV 的静电，一旦通过封装引脚放电，峰值电流可达数安培，足以击穿内部薄栅氧化层（课件 p30）。
+  </p>
+  <p>
+    防护措施分为两条线：一是工艺与环境控制，包括湿度控制、防静电地板/服装/腕带、耗散性包装等；二是在芯片内部设计 ESD 保护网络。课件给出的典型结构包含二极管钳位（diode clamps）与限流电阻：当焊盘电压超过 VDD+0.7 V 或低于 VDD−0.7 V 时，二极管导通，把过压/欠压引导到电源/地；串联电阻限制流入内部电路的电流，保护次级保护器件与栅极（课件 p32）。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p032_page.jpg" alt="ESD 保护结构示例" loading="lazy">
+    <figcaption><b>图 6-7</b> ESD 保护结构示例：初级保护、限流电阻与次级保护共同提供低阻抗泄放通道。来源：课件 p32</figcaption>
+  </figure>
+
+  <p>
+    ESD 保护网络的关键思想是：为 ESD 电流提供一条低阻抗、定义明确的泄放路径（课件 p33）。电源单元不仅是“一根连线”，它们往往与 I/O 环配合，构成 ESD 保护网络的一部分，因此电源焊盘、VDD/VSS 环和 I/O 单元必须一并规划（课件 p34）。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p034_page.jpg" alt="电源单元与 ESD 保护" loading="lazy">
+    <figcaption><b>图 6-8</b> 电源单元与 I/O 环共同为 ESD 电流提供泄放路径。来源：课件 p34</figcaption>
+  </figure>
+
+  <h3 id="ch06-6">6.6 封装形式与先进集成</h3>
+  <p>
+    裸片必须装入封装才能被使用。封装的作用不仅是机械保护和便于装配：它还承担散热、电气连接、甚至提升集成密度的任务（课件 p37）。选择封装时要综合考虑引脚数量、物理尺寸、焊接方式（通孔 / SMD / 球栅阵列）、热阻/热容，以及成本（课件 p39）。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p041_f50203fead.png" alt="引线键合连接芯片与封装" loading="lazy">
+    <figcaption><b>图 6-9</b> 引线键合（wirebonding）把芯片焊盘与封装引脚用细金线连接。来源：课件 p41</figcaption>
+  </figure>
+
+  <p>
+    传统的引线键合（wirebonding）把芯片贴在封装腔体中，用细金属线连接焊盘与引脚（课件 p40）。键合线有机械与电气限制：线太细容易断且电阻大，焊盘尺寸和键合角度也受工艺约束，因此周边能放的 I/O 数量有限。为了突破这一限制，出现了球栅阵列（Ball Grid Array，BGA）：芯片通过键合连到封装基板，再由基板把信号引到整面阵列焊球上，引脚密度大幅提高（课件 p55）。
+  </p>
+  <p>
+    更进一步的方案是倒装焊（flip-chip）：芯片正面朝下，通过焊球/铜柱直接连接到基板，典型凸点间距约 150 µm（C4），再用底部填充胶增强机械稳定性。倒装焊允许 I/O 分布在整片芯片表面，而不仅限于四周，同时散热路径也更短（课件 p58）。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p055_4866a7240b.jpg" alt="球栅阵列 BGA 封装" loading="lazy">
+    <figcaption><b>图 6-10</b> 球栅阵列（BGA）封装通过基板把周边键合转为面阵列焊球。来源：课件 p55</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/06_DEF_p058_d4f8f95e69.jpg" alt="倒装焊截面结构" loading="lazy">
+    <figcaption><b>图 6-11</b> 倒装焊（flip-chip）截面：芯片通过凸点直接连到基板。来源：课件 p58</figcaption>
+  </figure>
+
+  <p>
+    封装技术还在向更高集成度演进：2.5D 集成把多颗裸片贴在硅中介层（interposer）上，通过中介层实现片间互连；3D 集成则通过硅通孔（Through-Silicon Via，TSV）把多颗芯片垂直堆叠（课件 p59–p60）。这些先进封装让“封装”不再只是保护壳，而成为扩展系统规模与带宽的关键手段。
+  </p>
+
+  <figure>
+    <img src="img/06_DEF_p060_89dc167035.jpg" alt="TSV 与硅中介层结构" loading="lazy">
+    <figcaption><b>图 6-12</b> 硅通孔（TSV）与硅中介层（interposer）实现多芯片三维集成。来源：课件 p60</figcaption>
+  </figure>
+
+  <h3 id="ch06-7">6.7 DEF：布图信息的文本表达</h3>
+  <p>
+    前述所有几何与连接信息最终需要一种可交换的格式，DEF（Design Exchange Format）就是为此而生的工业标准。课件指出，DEF 包含芯片尺寸、标准单元行、已放置单元位置、I/O 环、宏单元位置以及所有网络的布线（课件 p67）。在设计早期，DEF 可能只包含 floorplan；随着后端推进， placement、routing 等信息逐步补全。
+  </p>
+  <p>
+    下面是一段来自课件 p68 的 DEF 文件头部示例，我们逐句解释。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">DEF 文件头部与标准单元行定义（节选）</div>
+    <pre><code>VERSION 5.8 ;
+DIVIDERCHAR "/" ;
+BUSBITCHARS "[]" ;
+DESIGN croc_chip ;
+UNITS DISTANCE MICRONS 1000 ;
+DIEAREA ( 0 0 ) ( 2017000 2017000 ) ;
+ROW ROW_0 CoreSite 215040 215460 N DO 3306 BY 1 STEP 480 0 ;
+ROW ROW_1 CoreSite 215040 219240 FS DO 3306 BY 1 STEP 480 0 ;
+ROW ROW_2 CoreSite 215040 223020 N DO 3306 BY 1 STEP 480 0 ;
+ROW ROW_3 CoreSite 215040 226800 FS DO 3306 BY 1 STEP 480 0 ;
+# [ … ]</code></pre>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>语句</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td><code>VERSION 5.8 ;</code></td><td>指明文件遵循 DEF 5.8 版本规范。</td></tr>
+      <tr><td><code>DIVIDERCHAR "/" ;</code></td><td>层次化实例名中的层级分隔符为“/”，例如 <code>i_croc_soc/i_croc/_05086_</code>。</td></tr>
+      <tr><td><code>BUSBITCHARS "[]" ;</code></td><td>总线位的索引符号为方括号，如 <code>bus[3]</code>。</td></tr>
+      <tr><td><code>DESIGN croc_chip ;</code></td><td>当前设计的顶层名称为 croc_chip。</td></tr>
+      <tr><td><code>UNITS DISTANCE MICRONS 1000 ;</code></td><td>距离单位：1 个数据库单位等于 0.001 µm（即 1 nm）。</td></tr>
+      <tr><td><code>DIEAREA ( 0 0 ) ( 2017000 2017000 ) ;</code></td><td>芯片外接矩形对角顶点为 (0,0) 与 (2017000,2017000)，按上面单位约为 2017 µm × 2017 µm。</td></tr>
+      <tr><td><code>ROW ROW_0 CoreSite 215040 215460 N DO 3306 BY 1 STEP 480 0 ;</code></td><td>定义名为 ROW_0 的标准单元行：使用 site CoreSite，左下角坐标 (215040,215460)，方向 N（North），沿 x 方向重复 3306 个 site，步进 480；y 方向只 1 行。</td></tr>
+      <tr><td><code>N / FS</code></td><td>方向标记：N 表示正向（North），FS 表示沿 South 方向翻转（Flipped-South），相邻行常用相反方向以共享电源轨。</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    接下来是 COMPONENTS 与 NETS 段，分别描述已放置单元和网络布线（课件 p69）。
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">DEF 中的 COMPONENTS 与 NETS 示例（节选）</div>
+    <pre><code>[ … ]
+- i_croc_soc/i_croc/_05086_ sg13g2_inv_1 + PLACED ( 902880 948780 ) N ;
+- i_croc_soc/i_croc/_05087_ sg13g2_nor4_2 + PLACED ( 848160 956340 ) N ;
+- i_croc_soc/i_croc/_05088_ sg13g2_nor4_1 + PLACED ( 853920 956340 ) N ;
+- i_croc_soc/i_croc/_05089_ sg13g2_nand2_2 + PLACED ( 855360 952560 ) FS ;
+[ … ]
+- net983 ( fanout983 X ) ( i_croc_soc/i_croc/i_core_wrap/_19735_ A2 ) (
+i_croc_soc/i_croc/i_core_wrap/_19821_ A1 ) ( fanout977 A ) ( fanout978 A ) (
+fanout979 A ) ( fanout980 A )
+( fanout981 A ) ( fanout982 A ) + USE SIGNAL
++ ROUTED Metal2 ( 792000 984900 ) ( * 985740 )
+NEW Metal2 ( 792000 985740 ) ( 813120 * )
+NEW Metal3 ( 813120 985740 ) ( * 1007580 )
+NEW Metal2 ( 792480 980700 ) ( 793440 * )
+NEW Metal3 ( 793440 980700 ) ( * 985740 )
+[ … ]</code></pre>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>语句</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td><code>- i_croc_soc/i_croc/_05086_ sg13g2_inv_1 + PLACED ( 902880 948780 ) N ;</code></td><td>名为 _05086_ 的实例对应 LEF 中定义的单元 sg13g2_inv_1；状态为 PLACED，左下角坐标 (902880,948780)，方向 N。</td></tr>
+      <tr><td><code>- net983 ( fanout983 X ) … + USE SIGNAL</code></td><td>定义网络 net983，列出所有连接的引脚（pin）名称；+ USE SIGNAL 表示这是普通信号网络（非电源/地/时钟）。</td></tr>
+      <tr><td><code>+ ROUTED Metal2 ( 792000 984900 ) ( * 985740 )</code></td><td>该网络的第一段布线位于 Metal2 层，从 (792000,984900) 到 (792000,985740)；“*”表示该坐标与前一个坐标相同。</td></tr>
+      <tr><td><code>NEW Metal2 ( 792000 985740 ) ( 813120 * )</code></td><td>NEW 开始一段新的布线路径；在 Metal2 层从 (792000,985740) 走到 (813120,985740)。</td></tr>
+      <tr><td><code>NEW Metal3 ( 813120 985740 ) ( * 1007580 )</code></td><td>换到 Metal3 层，通过过孔隐式连接；从 (813120,985740) 走到 (813120,1007580)。</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    除了这些，DEF 还常用 PINS 段描述 I/O 焊盘的位置、层和方向；BLOCKAGES 段声明禁止放置或布线的区域，例如宏单元周围的 keep-out；以及 SPECIALNETS 段描述电源/地网络的宽金属布线。这些段使 DEF 成为连接 floorplan、placement 与 routing 各阶段的中枢文件。
+  </p>
+
+  <div class="note"><b>注：</b>DEF 只记录“是什么”，单元和金属层的几何规则仍由 LEF 定义。因此 DEF 与 LEF 必须配对使用，二者共同构成后端工具之间的交换边界。</div>
+
+  <h3 id="ch06-8">本讲要点</h3>
+  <div class="takeaway">
+    <ol>
+      <li>布图规划决定芯片面积与形状：核心利用率、宏单元位置、I/O 环与封装约束共同把“网表面积”放大为“芯片面积”。</li>
+      <li>I/O 环与电源规划是 floorplan 阶段必须同步解决的问题：核心与 I/O 电源分离、ESD 保护、键合/倒装焊等封装形式会反过来约束焊盘数量和芯片尺寸。</li>
+      <li>DEF 用文本化的 DIEAREA、ROW、COMPONENTS、NETS 等段把几何与连接信息标准化，使 floorplan、placement、routing 各步骤之间能够无损交换。</li>
+    </ol>
+  </div>
+</section>
+<section class="chapter" id="ch07">
+  <div class="ch-head">
+    <span class="ch-no">第 7 讲</span>
+    <h2>LIB：时序、时钟树与工艺角</h2>
+    <p class="ch-meta">对应课件：07_LIB.pdf（Timing, clock trees and process corners）｜ 关键词：setup/hold、STA、clock tree、skew、jitter、insertion delay、PVT corner、Liberty</p>
+  </div>
+
+  <div class="lead">
+    标准单元摆上了芯片，但"电路能跑多快"始终没回答。本讲补上这一环：同步电路只有两条时序条件（SETUP 与 HOLD），要用静态时序分析（STA）而非功能仿真去检查；时钟在物理上极难分布，代价是插入延迟、偏斜与抖动；最后落到描述"变化"的工艺角，与描述"延迟"的 Liberty 时序库（LIB）。
+  </div>
+
+  <h3 id="ch07-1">7.1 SETUP 与 HOLD：同步设计仅有的两条时序条件</h3>
+
+  <p>课件从调度问题入手：电路里只有一个物理加法器，要顺序处理一路送来的 10 个数（100, 100, 250, 200, 256, 185, 185, 200, 0, 0）。难处在区分它们——从 200 跳到 256 时，怎么确定中间没漏掉一个数？<b>数据本身不携带"我属于哪个周期"的信息</b>，切分时间的机制必须由外部提供。</p>
+
+  <p>一条路是<b>异步（asynchronous）</b>：块间用握手（handshake）信号，算完交给下一级、就绪后通知上一级，每次跳变都有意义；但课件提醒 <i>"We are not discussing how these signals are generated (not that easy)"</i>——协议不难，难的是在每级都正确、快速、低功耗地产生它。另一条路是<b>全局时钟（global clock）</b>：同一个同步信号送到所有部分，由状态保持元件（触发器 FF、锁存器 latch）推进状态，课件称它是 "by far the most convenient approach, widely used"。时钟规定数据流、周期决定计算时间，我们只需保证它到达每个地方并满足两条约束：<b>SETUP（有足够时间算出下一状态）</b>与<b>HOLD（在下一状态被覆盖前有足够时间）</b>。</p>
+
+  <figure>
+    <img src="img/07_LIB_p008_0827efde61.jpg" alt="最长路径的 SETUP 检查与最短路径的 HOLD 检查" loading="lazy">
+    <figcaption><b>图 7-1</b> 最长路径决定 SETUP：prop. delay 加 wire delay 加末级触发器的 setup time，必须落在 target clock period 之内；最短路径决定 HOLD：contam. delay 加 wire delay 必须大于末级触发器的 hold time。来源：课件 p8（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <div class="code-block">
+    <div class="code-title">课件 p9 给出的两条时序条件（原文照录）</div>
+    <pre><code>Setup:
+Tclk &gt;= tpd_ff1 + tpd,c + tsu,ff2
+
+Hold:
+thold &lt;= tcd,ff1 + tcd,c</code></pre>
+  </div>
+
+  <p>两类延迟必须分清：<b>传播延迟（propagation delay, tpd）</b>决定路径最长能多慢，<b>污染延迟（contamination delay, tcd）</b>决定路径最短能多快。SETUP 用最慢的延迟卡周期，HOLD 用最快的延迟卡安全——所以同一条路径要算两遍，也所以<b>工艺角会从两个相反方向咬我们</b>：芯片变快对 SETUP 有利、对 HOLD 有害。另外 HOLD 与时间预算无关、只关乎新旧数据是否撞车，<b>所以降频救不了 HOLD 违例</b>。</p>
+
+  <h3 id="ch07-2">7.2 STA：为什么不能用功能仿真查时序</h3>
+
+  <p>既然只有两条条件，跑波形不就行？课件说不行。<b>功能仿真需要输入向量</b>：Verilator 这类仿真器用于功能验证，只能回答"这些输入下对不对"，而时序违例恰恰出现在你没想到的组合上——课件原话是它 "can not test every corner case without proper vectors that you need to supply"。要证明时序正确需要覆盖<b>所有路径</b>；何况还有循环依赖：仿真里的延迟值从哪来？</p>
+
+  <p><b>静态时序分析（STA）不需要向量</b>：它把设计展开成有向图，穷举所有时序路径，由约束给出边界条件，并接受一些特殊说明（例如哪些信号本来就不关键）。它的延迟数据来自两处：<b>时序库（LIB）</b>给出单元在给定负载与输入转换时间下的延迟，<b>寄生提取</b>给出连线的电阻电容。缺一不可——LIB 描述"门"，寄生描述"线"。综合时还没有真实布线，只能用线负载模型（wireload model）近似；版图完成后提取真实寄生再重新反标（back-annotate）延迟，这是第 8 讲的主题。</p>
+
+  <h3 id="ch07-3">7.3 时钟分布的挑战与时钟树</h3>
+
+  <p>同步方案看起来完美，唯一的问题是课件那句轻描淡写的话："clock needs to arrive simultaneously"，而"同时"在物理上很贵。困难很具体：时钟要覆盖<b>很大一片面积</b>，走线长、寄生大；要驱动<b>极大的负载</b>，Croc 这样简单的设计里就有<b>超过 7000 个触发器</b>；还要求边沿<b>陡峭</b>，因为转换时间（transition，即 rise/fall time）一长，信号更易受噪声干扰、延迟更难预测，还会让上下管同时导通产生短路电流。所以时钟必须靠缓冲器搭出<b>多级时钟树（clock tree）</b>。</p>
+
+  <figure>
+    <img src="img/07_LIB_p013_e6f861aecf.jpg" alt="时钟树结构：trunk 与 leaf 两段，以及 Min/Max Delay 和 Max Skew 的定义" loading="lazy">
+    <figcaption><b>图 7-2</b> 从 Clk_CI 到叶节点分 <b>Trunk</b>（主干）与 <b>Leaf</b>（末梢）两段；底部三量定义 <b>Min Delay</b>、<b>Max Delay</b>（最快与最慢叶节点的插入延迟）与 <b>Max Skew</b>（两者之差）。来源：课件 p13</figcaption>
+  </figure>
+
+  <p>图 7-2 把三个概念钉在同一结构上：<b>插入延迟（insertion delay）</b>是从时钟源到叶节点的绝对时间，<b>偏斜（skew）</b>是不同叶节点之间这个时间的差。信号每经一级缓冲就变陡一点、也变晚一点；通过平衡缓冲器并把它们摆在"正确"的位置（课件举了 H-tree 布置），可以压住 skew。但账单也很清楚（p14）：树本身有<b>最小插入延迟</b>无法回避，缓冲器占<b>额外面积</b>，更重要的是<b>烧功耗</b>——课件特意留了一句给第 10 讲："Clock is the most active net with the highest capacitance"。所以目标只能写得很克制：<b>找一个好的折中，让 skew 和代价保持平衡</b>。</p>
+
+  <h3 id="ch07-4">7.4 时钟树的演进与插入延迟的副作用</h3>
+
+  <p>课件用三页把时钟分布的主要形态排成 a) 到 f)，并对若干种打上禁止或警告标志：从 padframe 引出的时钟若在核内自由绕线、一路不加缓冲，是不可接受的；H-tree 用对称的 H 形几何把时钟送到各子区，路径长度天然匹配，但也被标以警告。越接近现代的做法是把驱动分散到树的各级，或干脆用网格（grid / mesh）由规则分布的驱动器馈送，把各处到达时间的差"短接"掉，代价是网格上的电容与功耗。</p>
+
+  <figure>
+    <img src="img/07_LIB_p017_2729abd52a.jpg" alt="e) 带缓冲的分级时钟树与 f) 网格加驱动器的时钟分布方案" loading="lazy">
+    <figcaption><b>图 7-3</b> e) 分级缓冲树，驱动分散到各级，并用局部短接对齐小失配；f) 时钟网格由规则分布的驱动器馈送。课件 p15–p16 另给出不加缓冲的绕线、H-tree、带分支骨架、无缓冲纯网格。来源：课件 p17（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <p>演化主线很清楚：每次变化都是在同一个折中三角上换位置——skew 越小、边沿越陡，面积、功耗与插入延迟的代价越大。课件 p23 还提醒：<b>是约束在驱动时钟树生成</b>。转换时间目标、skew 目标、扇出限制直接决定工具长出多大的树，不必要或过紧的约束会长出过大的树、烧掉过多功耗；生成后必须<b>复查结果</b>——很多时钟树问题就是因为 "people do not check the results of the tree generation"。</p>
+
+  <p>插入延迟既然存在，能不能消掉？课件 p26 给出两条经典答案：<b>锁相环（PLL）</b>与<b>延迟锁定环（DLL）</b>，都是把片上时钟的相位与外部时钟比较，再用结果去调节片上时钟。</p>
+
+  <figure>
+    <img src="img/07_LIB_p026_01fec034c9.jpg" alt="a) PLL 结构：相位鉴别器、环路滤波器、压控振荡器；b) DLL 结构：相位鉴别器、环路滤波器、可控延迟线" loading="lazy">
+    <figcaption><b>图 7-4</b> a) PLL：相位鉴别器 + 环路滤波器 + 压控振荡器（可选分频器）；b) DLL：把振荡器换成<b>可控延迟线</b>，只调延迟、不产生频率。两者反馈点都取在<b>时钟缓冲树末端</b>——要消除的正是"外部时钟沿"与"触发器看到的时钟沿"之差。来源：课件 p26（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/07_LIB_p024_536ad4c1f1.jpg" alt="无时钟插入延迟时的 I/O 时序预算：t_idel、t_in2reg、t_reg2reg、t_reg2out、t_odel" loading="lazy">
+    <figcaption><b>图 7-5</b> 被 Environment（芯片外部）包围的 Our Circuit。一个周期被切成 <b>t_idel</b>（外部到芯片输入端可用的时间）、<b>t_in2reg</b>、<b>t_reg2reg</b>、<b>t_reg2out</b>、<b>t_odel</b>（输出端仍需留给外部的时间）——这一串就是<b>时序约束的物理含义</b>。来源：课件 p24</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/07_LIB_p025_82e51c592a.jpg" alt="加入时钟缓冲树后，外部时钟与内部时钟错开，输入端可用时间变多、输出端可用时间变少" loading="lazy">
+    <figcaption><b>图 7-6</b> 时钟须先经缓冲树才到达触发器，External Clock 与 Internal Clock 之间出现 <b>Clock insertion delay（t_di）</b>：输入端 "More time for input"（t_idel 被拉长），输出端 "Less time for output"（t_odel 被吃掉同样多），而 t_reg2reg 一站<b>没有变</b>。来源：课件 p25</figcaption>
+  </figure>
+
+  <p>图 7-6 是本讲最该记住的一张图。插入延迟对寄存器到寄存器路径几乎无影响（两端同时被推迟，差被消掉），但对<b>跨芯片边界的路径是单向的</b>：输入方向白赚一段，输出方向白亏一段。这就是课件标题说的 "Unintended consequences, moving the I/O timing"——你只是想让时钟树好一点，接口时序却被推走了；若接口要满足外部标准（例如 DDR 的参数），这个偏移必须显式算进约束。</p>
+
+  <div class="note"><b>注：</b>课件止于这一步——它定义了边界时间预算、展示插入延迟如何移动这些预算，但<b>没有给出约束命令的语法</b>。约束文件（SDC）中对应的常用命令是 <code>create_clock</code>、<code>set_input_delay</code>、<code>set_output_delay</code>，作用就是把图 7-5 那几段翻译成工具能读的边界条件；其具体用法不在本讲课件范围内，这里不展开，要记住的是它们的物理含义（t_idel 与 t_odel）。</div>
+
+  <h3 id="ch07-5">7.5 skew、jitter 与 latency：三个量、三种来源</h3>
+
+  <figure>
+    <img src="img/07_LIB_p027_260837845a.jpg" alt="左：含 scan chain 的层次化时钟树；右：分布延迟、skew 与 jitter 的定义" loading="lazy">
+    <figcaption><b>图 7-7</b> a) 层次化时钟树：时钟经 distribution network 分到 subcircuit a/b/c，各子电路内部还有小树，图中同时画出扫描链（Sci_TI、Sco_TO、first/last）。b) 三个量：<b>分布延迟</b>用 min/avg/max(t_dl) 描述；<b>skew</b> 是同一时刻不同触发器之间到达时间的散布（max|t_sk|）；<b>jitter</b> 是同一触发器不同周期之间的散布（t_jt）。来源：课件 p27（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <p>关键是两组对比。<b>延迟 vs 偏斜</b>：延迟是绝对量（从源到叶走了多久），偏斜是它在<b>空间上的差</b>——课件里的 insertion delay、distribution delay 与通常说的 latency 指一件事。<b>偏斜 vs 抖动</b>：偏斜是同一拍内不同寄存器之间的差，通过平衡时钟树可压；抖动是同一寄存器不同周期之间的差，源于噪声（电源噪声、衬底噪声等）。</p>
+
+  <p>由此可得三个结论。第一，<b>skew 可以被利用</b>（课件 p11：它 "can help us"，给 SETUP 多一点时间、给 HOLD 少一点压力），一些工具还支持<b>有用偏斜（useful skew）</b>；但课件补一句 "No magic solution, you need to be able to 'steal' what you use without issues"——借来的时间最终要还。第二，<b>jitter 不能被时钟树平衡掉</b>，因此给 skew 设定了<b>不可逾越的下限</b>，也永远不能变成 useful skew。第三，所以必须留裕量（"we need to add a margin in our timing for it"）；在时序约束里这个裕量通常以"时钟不确定性"的形式给出，它的两个来源正是 skew 与 jitter。</p>
+
+  <p>课件 p28 还有一句很硬的建议：<b>状态保持元件一旦放好就不要动</b>，因为时钟树是按触发器位置长出来的，动一个就可能打破整棵树平衡。</p>
+
+  <h3 id="ch07-6">7.6 时钟策略：单边、双边与两相锁存器</h3>
+
+  <p>VLSI 1 里其实已经默认选定了一种用法：<b>同步单边沿触发触发器</b>——状态存在上升沿（或下降沿）触发的触发器里，是设计数字时序电路最简单的方式。课件 p31 把优缺点摆得很平：简单、时序好理解、广泛使用，而且<b>时钟占空比不重要</b>；但短路径容易出现 HOLD 违例，触发器比锁存器<b>更大</b>，也不容易从一个周期借时间给另一个周期。课件还给了句口诀：用上升沿还是下降沿无所谓，<b>但不要把两者混在一起</b>。</p>
+
+  <figure>
+    <img src="img/07_LIB_p029_82ffa20c51.jpg" alt="单边沿触发时的可用组合逻辑时间窗口 Tcp 等于时钟周期 Tclk" loading="lazy">
+    <figcaption><b>图 7-8</b> 单边沿触发时"留给组合逻辑 C 的时间"（Tcp）：每个周期只在一个边沿开启一个窗口，长度等于 Tclk。来源：课件 p29（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/07_LIB_p032_17eb6a76b9.jpg" alt="双边沿触发时每个边沿都开启一个长度为 Tclk 的组合逻辑窗口" loading="lazy">
+    <figcaption><b>图 7-9</b> 双边沿触发（DDR 的典型做法）：上升沿与下降沿<b>各自</b>开启一个长度为 Tclk 的窗口，一个周期内有两个数据转移事件，技术上由两个触发器交替实现。课件 p32 的评价是：速率是两倍，但"做事情的时间只有一半"，同时时钟活动量下降、有可能省功耗。来源：课件 p32（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <p>另一个方向是回到<b>锁存器（latch）</b>。锁存器电平敏感，时序参数与触发器不同——没有"沿"这个绝对时刻，而是有相对透明窗口<b>闭合</b>的建立时间与 CLK 到 Q 的延迟。课件 p30 把两类元件的参数并排放置，因为<b>这两套参数写的是不同的东西，混用会导致时序约束写错</b>。</p>
+
+  <figure>
+    <img src="img/07_LIB_p030_62a21e29c0.jpg" alt="触发器与锁存器的时序参数对比：tsu、tho、tpd、tcd 等" loading="lazy">
+    <figcaption><b>图 7-10</b> 触发器（上）：t_su,ff、t_ho,ff、t_pd,ff、t_cd,ff。锁存器（下）：t_su,la、t_ho,la、t_pd,lc（CLK 到 Q）、t_cd,lc，以及 t_pd,ld（D 到 Q，即透明期间输入直通输出的延迟）。来源：课件 p30（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/07_LIB_p033_a2a2219f80.jpg" alt="两相时钟 T1/T2/T3/T4 的相位划分与 C12、C21 的互斥窗口" loading="lazy">
+    <figcaption><b>图 7-11</b> 电平敏感两相时钟：两组锁存器分别在两相不重叠的时钟下工作，任一时刻只有一组透明。一个周期被切成 T1、T2（都不透明，pass hold）、T3、T4（又是 pass hold）；时间轴上的 <b>mutual exclusion</b> 阴影表示两组锁存器互斥、不能同时传数据，而 <b>T2 与 T4 正是两相方案的安全裕量</b>。子图给出环路拓扑：L1、L2 由 Clk1_C、Clk2_C 控制，中间插入组合逻辑 C12 与 C21。来源：课件 p33（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/07_LIB_p034_62eaf5e2e5.jpg" alt="时间借用的合法区域与非法区域：t12 与 t21 构成的约束平面" loading="lazy">
+    <figcaption><b>图 7-12</b> 时间借用（time borrowing）的边界：横轴 t21、纵轴 t12 是两条组合路径的延迟，约束线把平面分成 <b>legal</b>（灰色）与 <b>illegal</b>，斜边是 "full utilization" 极限；沿箭头方向借时间，越过斜边即不可实现。来源：课件 p34（图取自 Kaeslin）</figcaption>
+  </figure>
+
+  <p>有了 T2/T4，两相方案能<b>有机地从一个周期借时间给下一个周期</b>，代价是必须产生严格不交叠的时钟，时序分析更麻烦、测试更复杂。把这条路走到极端的两个退化版本，课件都用否定的语气收尾：<b>单线电平敏感两相时钟</b>（p35）去掉非交叠相位、只用一根时钟线，更简单，但 T2、T4 的好处全部消失；再极端一点，<b>单相电平敏感</b>（p36）只剩一个锁存器和一根时钟，课件说 "all safety nets are gone"，结论是 "Not recommended at all!"。</p>
+
+  <table class="tbl">
+    <thead><tr><th>方案</th><th>优点</th><th>代价</th></tr></thead>
+    <tbody>
+      <tr><td><b>单边沿触发器</b>（最常见）</td><td>简单、占空比无关</td><td>短路径易 HOLD 违例；元件更大；难以跨周期借时间</td></tr>
+      <tr><td><b>双边沿触发器</b>（多用于 I/O）</td><td>速率翻倍；可能省功耗</td><td>每拍做事时间减半</td></tr>
+      <tr><td><b>电平敏感两相锁存器</b></td><td>能自然借时间；锁存器更小；靠 T2、T4 抗 skew/jitter</td><td>需严格非交叠时钟；时序更难；测试更复杂</td></tr>
+      <tr><td><b>单相电平敏感</b></td><td>实现可能更小</td><td>没有安全网，极难做对，课件建议"远离"</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="ch07-7">7.7 工艺角：把"变化"变成可签核的边界</h3>
+
+  <p>到此我们假设延迟是确定值，但制造出来并非如此。课件 p38 指出时序（和功耗）直接受三个参数影响：<b>工艺（Process）</b>，由制造质量决定（第 4 讲）；<b>电压（Voltage）</b>，很难在全芯片处处供应高质量电源（第 10 讲 IR drop）；<b>温度（Temperature）</b>，泄漏、电流、电阻等一批电学参数都随温度变化。三者合称 <b>PVT 角（PVT corner）</b>。课件特意指出它们<b>技术上是独立的</b>，但工程上 "frequently bunched together"，示例 <code>SS-1.08V-125C</code> 的含义是：slow nMOS、slow pMOS、比 1.2 V 标称低 10%、125 摄氏度。</p>
+
+  <p>为什么需要一个范围而不是一个点？制造分布意味着<b>极少数芯片才恰好落在中值附近</b>。比设计更快的芯片是坏芯片吗？看情况：更快对 SETUP 是好事，对 HOLD 是坏事。于是只能反过来定义一个<b>可接受区间</b>——太快的不能用，太慢的也不能用，中间这一段我们愿意卖，这样能卖掉更多已制造出的芯片（p41、p43）。有了区间，<b>工艺角就是区间的边界</b>（p44）：只要保证边界上的芯片都能满足时序，落在中间的必然也满足。所以签核的门槛设在角上而不是中值上。</p>
+
+  <p>电压这一维常被误解。课件 p45 强调<b>并不是我们假设电压很不稳</b>，而是供电存在非理想因素（纹波、过冲与下冲），加上芯片内部电阻路径造成的 <b>IR drop</b> 使到达标准单元的电压低于标称。因此"只要能把 IR drop 控制在 10% 的余量内，我们就覆盖到了"——这句话正好解释了 <code>SS-1.08V-125C</code> 里那 10% 的来历。温度则是 "a wild card"：一部分来自工作环境，一部分来自电路自热与散热效率，不同用途（汽车、军工）允许的范围本就不同。</p>
+
+  <table class="tbl">
+    <thead><tr><th>课件 p46：IHP 库标定的两套角（不可混用）</th><th></th></tr></thead>
+    <tbody>
+      <tr><td><code>fast_1p32V_m40C</code></td><td><code>fast_1p65V_m40C</code></td></tr>
+      <tr><td><code>typ_1p20V_25C</code></td><td><code>typ_1p50V_25C</code></td></tr>
+      <tr><td><code>slow_1p08V_125C</code></td><td><code>slow_1p35V_125C</code></td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="img/07_LIB_p047_page.jpg" alt="同一电路在 Worst Case、Typical、Best Case 三个角下的电压、温度、关键路径与相对值对比表" loading="lazy">
+    <figcaption><b>图 7-13</b> 同一电路、同一份网表，只换工艺角：Worst Case（1.08 V / 125 ℃）3.49 ns，Typical（1.20 V / 27 ℃）2.24 ns，Best Case（1.32 V / −40 ℃）1.59 ns。课件底部原话："The circuit is the same, timing has been done using different corners." 来源：课件 p47</figcaption>
+  </figure>
+
+  <div class="note"><b>注：</b>图 7-13 最后一行的 "Relative" 容易看错：它<b>不是延迟之比，而是速度之比</b>（约等于 1/延迟）。以 Typical 为 100%，Worst Case 为 2.24/3.49 ≈ <b>64.2%</b>，Best Case 为 2.24/1.59 ≈ <b>140.9%</b>。同一设计在角之间的频率差可达约 2.2 倍，这就是"多角签核"不是可选项的原因。另：课件 p46 角名写 25 ℃、p47 表格写 27 ℃，两页并不一致，此处按原样保留。</div>
+
+  <p>现代工艺把这件事变得更复杂（p48）。主要<b>趋势</b>仍在：芯片在低温、高压下更快；但高阶效应很多——<b>在某些较低电压下，温度更高反而更快</b>，因此已不能断言哪个角一定对 SETUP 或 HOLD 最关键。现代工艺的角有几十个甚至接近一百个，签核（sign-off）通常跑遍所有角，代价是大量分析与优化时间；课件提到用<b>体偏置（body biasing）</b>减轻负担：施加静态体偏压把芯片"调"到更窄的区间，也有方案做自适应体偏置，在运行中透明完成。</p>
+
+  <h3 id="ch07-8">7.8 Liberty（LIB）时序库解剖</h3>
+
+  <p>前面所有关于延迟的讨论最终都要落在数据上：STA 凭什么知道一个反相器的延迟是 0.02 ns 还是 0.8 ns？答案是 <b>LIB 文件</b>。课件 p50 说明它的地位：综合工具从 LIB 里拿<b>功能、面积、速度</b>三种信息；STA 依赖其中的延迟表工作，而 STA 又支撑前后端所有优化——<b>LIB 是整个流程里时序数据的唯一契约</b>。它含两类内容：<b>库级信息</b>（基本单位、约束默认值如最大扇出与最大转换时间、用来近似寄生效应的<b>线负载模型</b>）与<b>单元级信息</b>（每个单元所有输入到输出转换的延迟表与功耗表）。</p>
+
+  <div class="code-block">
+    <div class="code-title">LIB 文件解剖：单位与默认值（课件 p51 原文）</div>
+    <pre><code>library (sg13g2_stdcell_typ_1p20V_25C) {
+delay_model
+: table_lookup;
+capacitive_load_unit
+(1,pf);
+current_unit
+: "1uA";
+leakage_power_unit
+: "1pW";
+time_unit
+: "1ns";
+voltage_unit
+: "1V";
+default_max_capacitance : 0.3;
+default_max_fanout
+: 8;
+default_max_transition
+: 2.5074;
+nom_process
+: 1;
+nom_temperature
+: 25;
+nom_voltage
+: 1.2;</code></pre>
+  </div>
+
+  <ul>
+    <li><code>library (sg13g2_stdcell_typ_1p20V_25C)</code>——库名就把条件写全了：IHP <code>sg13g2</code> 工艺、标准单元库、<b>typ 角</b>、1.20 V、25 ℃。工具靠名字索引角，名实必须相符。</li>
+    <li><code>delay_model : table_lookup;</code>——声明延迟用<b>查表</b>计算。它是可选项，说明该格式允许不同的延迟模型。</li>
+    <li>五个单位声明——<b>后面表格里的裸数字全按这些单位解释</b>，错一个字节整库延迟就错几个数量级。</li>
+    <li>三个 <code>default_max_*</code>——库级默认约束，单元未单独指定时生效。它们不是"事实"而是<b>设计意图</b>，超过就报违例。</li>
+    <li><code>nom_*</code> 三项——标定条件：后面的延迟表是在"25 ℃、1.2 V、工艺为 1（归一化值）"下测出来的。</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-title">延迟表的模板与索引（课件 p52 原文）</div>
+    <pre><code>lu_table_template (TIMING_DELAY_7x7ds1) {
+  variable_1 : input_net_transition;
+  variable_2 : total_output_net_capacitance;
+  index_1 ("0.0186, 0.0966, 0.174, 0.3294, 0.6408, 1.263, 2.5074");
+  index_2 ("0.001, 0.0234, 0.039, 0.0648, 0.108, 0.18, 0.3");
+}</code></pre>
+  </div>
+
+  <figure>
+    <img src="img/07_LIB_p052_page.jpg" alt="lu_table_template 语法与其对应的 7x7 查找表网格，横轴为输出总电容，纵轴为输入转换时间" loading="lazy">
+    <figcaption><b>图 7-14</b> 上面的 <code>lu_table_template</code> 与对应的 <b>7×7 查找表</b>：横向是 Total Output Net Capacitance（<code>index_2</code> 的断点），纵向是 Input Net Transition（<code>index_1</code> 的断点）。模板只定义表的形状，数值由后面引用它的 <code>values</code> 填充。来源：课件 p52（该页标题误写成 "Anatomy of a DEF file"，内容其实是 LIB）</figcaption>
+  </figure>
+
+  <p>为什么延迟要用<b>两个变量</b>索引？一个门的延迟一阶上由两件事决定：<b>输入信号本身有多陡</b>（输入转换慢，管子长时间处于半开状态，输出就更晚翻转），以及<b>它要驱动的负载有多大</b>（电容越大充电越慢）。这两个量恰好就是 <code>input_net_transition</code> 与 <code>total_output_net_capacitance</code>。既然延迟是它们的函数，就把这个二维函数<b>采样成网格</b>，每行每列由一个断点（breakpoint）定位，运行时做二维插值；<code>7x7</code> 表示每个方向 7 个断点、共 49 个值，是精度与体积的折中。</p>
+
+  <p>那为什么用表而不用公式？课件 p55 给了答案：这类表 "usually generated automatically using multiple SPICE runs"。真实晶体管延迟受大量二阶效应影响（尤其短沟道器件），没有简单解析式能算准；SPICE 算得准，但对几千万门的设计每次都跑根本跑不完。查表加插值就是两者的折中：<b>精度由 SPICE 保证，速度由插值保证</b>。课件只展示了 <code>table_lookup</code> 这一条路线，并提到 LIB 里"还有许多其他计算延迟的方式"而未展开——更精细的模型本讲未涉及，讲义不代为补充。</p>
+
+  <div class="code-block">
+    <div class="code-title">单元定义与漏电功耗（课件 p53 原文）</div>
+    <pre><code>cell (sg13g2_inv_1) {
+  area : 5.4432;
+  cell_footprint : "IN";
+  cell_leakage_power : 62.9723;
+  leakage_power () {
+    value : 82.4073;
+    when : "A&amp;!Y";
+  }
+  leakage_power () {
+    value : 43.5373;
+    when : "!A&amp;Y";
+  }</code></pre>
+  </div>
+
+  <ul>
+    <li><code>cell (sg13g2_inv_1)</code>——单元名，一个单元一条记录，工具按名字在网表里索引。</li>
+    <li><code>area : 5.4432;</code>——面积，供综合做面积优化。片段里<b>没有 area 单位声明</b>，故它只能当相对量用于单元间比较，不能直接当 µm² 用。</li>
+    <li><code>cell_footprint : "IN";</code>——把"版图脚印相同"的单元归为一类（这里是反相器族），工具做等效替换时才知道哪些单元可直接互换而不破坏布局。</li>
+    <li><code>cell_leakage_power</code>——整个单元的平均漏电功耗，是功耗优化的依据之一。</li>
+    <li><code>leakage_power () { value : ...; when : "A&amp;!Y"; }</code>——<b>条件漏电</b>：漏电依赖晶体管状态，<code>when</code> 给出该数值成立的条件。<b>这就是同一个单元要写多条 leakage_power 的原因</b>——不同状态的漏电可以差很多，取平均会失真；<code>when</code> 里的 <code>&amp;!</code> 是 Verilog 风格的与、非，由工具解析字符串。</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-title">输出引脚与延迟表（课件 p54 原文）</div>
+    <pre><code>pin (Y) {
+  direction : "output";
+  function : "!(A)";
+  min_capacitance : 0.001;
+  timing () {
+    related_pin : "A";
+    cell_rise (TIMING_DELAY_7x7ds1) {
+      index_1 ("0.0186, 0.0966, 0.174, 0.3294, 0.6408, 1.263, 2.5074");
+      index_2 ("0.001, 0.0234, 0.039, 0.0648, 0.108, 0.18, 0.3");
+      values ( \
+"0.02082, 0.0841762, 0.127392, 0.198773, 0.318202, 0.517192, 0.848807", \
+"0.0406465, 0.122122, 0.165229, 0.236765, 0.356492, 0.555268, 0.886778", \
+"0.0940591, 0.392424, 0.514929, 0.671701, 0.874693, 1.12559, 1.46255", \
+/* [ … ] */
+      );
+    }
+  }
+}</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-title">输入引脚（课件 p55 原文）</div>
+    <pre><code>pin (A) {
+  direction : "input";
+  max_transition : 2.5074;
+  capacitance : 0.00289398;
+  /* [ … ] */
+}
+}</code></pre>
+  </div>
+
+  <ul>
+    <li><code>pin (Y) { direction : "output"; function : "!(A)"; ... }</code>——Y 是输出引脚，功能是 A 取反。<b>功能与速度在同一个对象里</b>，这正是综合工具只读 LIB 就能同时做逻辑映射与时序优化的原因。</li>
+    <li><code>min_capacitance : 0.001;</code>——驱动该输出时允许的最小负载电容。<b>负载过小反而不好</b>（摆率过快、模型外推），所以它是下限。</li>
+    <li><code>timing () { related_pin : "A"; cell_rise (...) { ... } }</code>——这是<b>时序弧（timing arc）的定义</b>：<code>related_pin</code> 指明延迟从哪个输入算起，即<b>A 到 Y 存在一条时序弧</b>；<code>cell_rise</code> 是"输出上升"的延迟表，它<b>引用</b>前面定义的模板（故模板必须先定义）。同一个 <code>timing()</code> 里通常还有 <code>cell_fall</code> 及 <code>rise_transition</code> / <code>fall_transition</code>，课件只用 <code>cell_rise</code> 作代表；反相器只有一个输入所以只有一条弧，与门、或门这类多输入单元每个输入到输出各有一条。</li>
+    <li><code>values ( \ ... \ /* [ … ] */ );</code>——真正的 49 个数值按行优先排列：第一行 7 个数对应 <code>index_2</code> 的 7 个负载电容、固定 <code>index_1</code> 的第一个转换时间点 0.0186 ns；课件用自己的 <code>/* [ … ] */</code> 省略了其余各行。</li>
+    <li><code>pin (A) { direction : "input"; max_transition : 2.5074; capacitance : 0.00289398; }</code>——输入引脚只需交代<b>它的电容</b>（上游要驱动它，所以要算负载）与<b>它的最大转换时间约束</b>；末尾孤立的 <code>}</code> 是前面 <code>cell (...)</code> 的闭合括号。</li>
+  </ul>
+
+  <div class="note"><b>注：</b>对照本节开头的库头部会发现一个漂亮的内部一致性：<code>default_max_transition : 2.5074</code> 正好等于 <code>index_1</code> 的最后一个断点，<code>default_max_capacitance : 0.3</code> 正好等于 <code>index_2</code> 的最后一个断点，输入引脚 A 上的 <code>max_transition</code> 也是同一个数。这说明<b>索引表的采样范围就是按设计约束的上限选的</b>——超出范围工具只能外推，而外推不可靠。所以当某节点转换时间远大于 2.5074 ns 时，问题不是"表算得不准"，而是<b>这个节点本来就已经违约了</b>。</div>
+
+  <div class="warn"><b>坑：</b>课件给出的 <code>timing()</code> 只写了 <code>related_pin</code>，<b>没有出现对时序弧做分类的属性</b>（例如描述弧单调性的 <code>timing_sense</code>，或描述时钟/数据关系的 <code>timing_type</code>）。课件没有展示这些语法，讲义也不代为补写——它们属于完整 Liberty 规范，请以工具厂商文档为准。同理，本讲片段只覆盖组合单元；触发器、锁存器所需的时钟相关时序（建立、保持、CLK 到 Q 等）课件没有给出示例，此处如实指出而不虚构。</div>
+
+  <h3 id="ch07-9">本讲要点</h3>
+  <div class="takeaway"><ol>
+    <li>同步设计只有两条时序条件：<b>SETUP</b>（Tclk ≥ tpd_ff1 + tpd,c + tsu,ff2，看最慢路径）与 <b>HOLD</b>（thold ≤ tcd,ff1 + tcd,c，看最快路径）。tpd 与 tcd 是两回事，所以工艺角从两个相反方向咬我们，降频也救不了 HOLD。</li>
+    <li>时序必须用 <b>STA</b> 检查：仿真需要你提供向量，而违例恰恰出现在没想到的组合上；STA 无需向量，靠约束给边界条件，并依赖 LIB（门）与寄生提取（线，第 8 讲）。</li>
+    <li>时钟难分布的原因很具体：面积大、线长、寄生大、负载极多（Croc 就超过 7000 个触发器）、需要陡峭边沿。解法是<b>多级缓冲时钟树</b>，代价是面积、功耗与插入延迟；而且<b>是约束在驱动时钟树生成</b>。</li>
+    <li>插入延迟会<b>单向移动 I/O 时序</b>：跨边界的路径里输入方向白赚一段、输出方向白亏一段，而寄存器到寄存器路径几乎不受影响。PLL/DLL 以时钟树末端为反馈点，可扣除"树之前的延迟"。</li>
+    <li>三个量要分清：<b>latency</b> 是绝对时间（min/avg/max t_dl），<b>skew</b> 是同一拍不同寄存器之间的空间散布（max|t_sk|），<b>jitter</b> 是同一寄存器不同周期之间的时间散布（t_jt）。skew 可被利用（useful skew），jitter 源于噪声、不能被时钟树平衡掉，给 skew 设了下限；两者都要在时序里留裕量。</li>
+    <li>时钟策略：单边沿触发器最简单通用但短路径易 HOLD 违例；双边沿（DDR）速率翻倍、每拍可用时间减半；两相锁存器靠 T2、T4 获得对 skew/jitter 的天然容忍并能跨周期借时间，代价是非交叠时钟与更难的时序、测试。</li>
+    <li>工艺角（PVT）把制造、电压、温度的变化变成可签核的边界：角上满足则中间必然满足；供电的 10% 余量来自"把 IR drop 控制住"的工程约定。同一电路 worst/typ/best 角的相对速度为 64.2% / 100% / 140.9%；现代工艺角有几十甚至近百个，且已不能断言哪个角最关键。</li>
+    <li>LIB 是全流程的时序数据契约：<code>delay_model : table_lookup</code> 声明查表法，<code>lu_table_template</code> 定义表的形状，单元用 <code>cell_rise (模板)</code> 引用模板并填 <code>values</code>；<code>pin (Y) { timing () { related_pin : "A"; ... } }</code> 就是一条<b>时序弧</b>的定义。表由多次 SPICE 仿真自动生成——SPICE 保精度，插值保速度。</li>
+  </ol></div>
+</section>
+<section class="chapter" id="ch08">
+  <div class="ch-head">
+    <span class="ch-no">第 8 讲</span>
+    <h2>寄生效应、信号完整性与 SDF 反标</h2>
+    <p class="ch-meta">对应课件：08_SDF.pdf ｜ 关键词：parasitic、electromigration、IR drop、ground bounce、crosstalk、aging、SDF back-annotation</p>
+  </div>
+
+  <div class="lead">到此为止，我们谈时序时都默认导线是一根"理想导体"：信号瞬间到达，电压稳定不变。真实芯片里没有这回事。金属线有电阻和电容，电源网络有电感和压降，相邻的线会互相干扰，晶体管还会随时间变慢。本讲要讲清这些寄生效应从哪来、如何破坏时序与可靠性，最后说明 <b>SDF</b>（Standard Delay Format，标准延迟格式）如何把布局布线后提取出的真实延迟<b>反标</b>（back-annotation）回仿真，让后仿（post-layout simulation）看到每一根线的真实延时。它处在流程的"分析"环节——LIB 给出单元的时序，SDF 给出连线的时序，两者合起来才是完整的时序模型。</div>
+
+  <h3 id="ch08-1">8.1 寄生参数：芯片上"没要"的四种元件</h3>
+
+  <p>我们设计电路时只把晶体管当成元件，但芯片一旦做出来，金属线、通孔、氧化层、衬底会一起贡献出一个分布式的 RLCG 网络。课件用四个字母把这四类寄生参数和它们的后果一一对应起来：</p>
+
+  <table class="tbl">
+    <thead><tr><th>寄生参数</th><th>出现在哪里</th><th>造成什么后果</th></tr></thead>
+    <tbody>
+      <tr><td>电阻 R（Resistance）</td><td>电源连接、恒定直流电流</td><td>决定速度的时间常数；线上产生压降</td></tr>
+      <tr><td>电感 L（Inductance）</td><td>电源连接、供电电流发生变化时</td><td>地弹（ground bounce）／电压跌落（voltage droop）</td></tr>
+      <tr><td>电容 C（Capacitance）</td><td>导线与导线、导线与衬底之间</td><td>速度的时间常数；动态功耗变化与电源纹波</td></tr>
+      <tr><td>电导 G（Conductance）</td><td>不理想的绝缘体、上拉/下拉结构</td><td>漏电（leakage）</td></tr>
+    </tbody>
+  </table>
+
+  <p>为什么这四样全都冒出来？回到 CMOS 最基本的样子：一个<b>电压控制的电流源</b>去驱动一个<b>电容性负载</b>，而这个电流源要通过一根<b>不完美的导体</b>连到多个负载上。导体不完美，于是 R 让线上有压降，C 在原有负载上再加一份电容，L 造成交叉耦合，G 来自不理想的绝缘。对应的四个工程后果是：RC 延迟（影响时序）、交叉耦合（一条线上的信号影响邻线）、<b>电迁移</b>（electromigration，电流过大会从物理上毁掉金属连接）、以及 IR 压降（电流流过非理想导体，把供给电压拉低）。</p>
+
+  <div class="note"><b>注：</b>课件有一句很好的提醒——"记住，最简单的东西往往最复杂"。寄生效应不涉及任何新奇的器件物理，只是导线不理想而已，但它几乎决定了先进工艺下时序收敛的难度。</div>
+
+  <h3 id="ch08-2">8.2 互连的电阻与电容：截面和距离决定一切</h3>
+
+  <p>先从最朴素的充电过程看起。把输出从低电平充到高电平，本质是电流源往负载电容里灌电荷。所以"怎么才能更快"的答案只有两条：<b>更大的电流</b>，或者<b>更小的电容</b>。前者受晶体管宽长比 W/L 的限制，后者则要我们去理解导线电容的构成。</p>
+
+  <p>导线电阻很直观：<i>V</i> = <i>I</i>·<i>R</i>，线越长电阻越大；好消息是截面越大电阻越小。但"截面大"这件事在版图上是有代价的——它同时改变了电容。从剖面看，这与四件事有关：金属层的厚度、侧壁面积、线与线之间的距离、以及氧化层的厚度。课件用两句话把取舍讲得很清楚：<b>小 R 就意味着大 C</b>；<b>薄氧化层就意味着更高的 C</b>。氧化层厚度还直接关系到通孔（via）的可靠性，是先进工艺里的一个突出问题。</p>
+
+  <div class="fig-row">
+    <figure>
+      <img src="img/08_SDF_p012_6fcae8c062.jpg" alt="导线截面及其等效 R、C、L 模型" loading="lazy">
+      <figcaption><b>图 8-1a</b> 导体的物理截面与对应的集总 R、C、L 等效模型。来源：课件 p12</figcaption>
+    </figure>
+    <figure>
+      <img src="img/08_SDF_p014_d7d7c8a395.jpg" alt="寄生电容的四类分量" loading="lazy">
+      <figcaption><b>图 8-1b</b> 互连的寄生电容是复杂结构：平行板电容（C_plate）、边缘电容（C_fringe）、边缘到侧向、侧向电容（C_lateral）。来源：课件 p14</figcaption>
+    </figure>
+  </div>
+
+  <p>为什么要强调"寄生电容是复杂结构"？因为很多人下意识地把它当成一个平行板电容去算，而实际版图里占主导的往往是<b>边缘电容</b>和<b>侧向电容</b>——两根本不相交的相邻导线之间照样有耦合，而且线距越近耦合越大。课件明确点出了这个关键：<b>关键在于距离，越近问题越大</b>。这也解释了为什么布线工具会把"不要贴着最小间距走长线"当作一条准则。</p>
+
+  <p>电阻和电容合在一起就是 RC 延迟。真实的连线不是一根电阻加一个电容，而是一个<b>分布式 RC 阶梯</b>：每一小段都有自己的 r 和 c。课件给出的结论是总延迟约等于 <i>τ</i> ≈ r·c·l²/2，即延迟与线长的<b>平方</b>成正比——注意这个平方关系，它正是长连线难以优化的根本原因（把线长减半，延迟降到四分之一）。</p>
+
+  <figure>
+    <img src="img/08_SDF_p016_152290e793.jpg" alt="分布式 RC 阶梯与延迟公式" loading="lazy">
+    <figcaption><b>图 8-2</b> 用分布式 RC 网络建模互连：从一段到无穷段的逼近，以及 τ ≈ rc·l²/2 的来源。来源：课件 p16</figcaption>
+  </figure>
+
+  <p>那么什么时候电阻才是主要矛盾？课件给出一张连线长度分布图：横轴是"线长 / 芯片对角线长度"，纵轴是连接出现的概率，曲线呈明显的<b>双峰</b>形状——靠近原点的峰是大量很短的局部连线，右侧的宽峰是少量的全局连线。两者的缩放规律完全不同：<b>S<sub>Local</sub> = S<sub>Technology</sub>，S<sub>Global</sub> = S<sub>Die</sub></b>。也就是说，局部互连跟随工艺节点一起缩小，而全局互连的尺寸只跟随芯片面积（对角线）变化。芯片面积并不随工艺节点线性缩小，因此全局连线的相对代价一代比一代高，R 也就越来越重要。</p>
+
+  <figure>
+    <img src="img/08_SDF_p017_fb58ecc503.jpg" alt="连线长度分布与局部、全局互连的缩放差异" loading="lazy">
+    <figcaption><b>图 8-3</b> 连线长度分布的双峰特征，以及局部互连按工艺缩放、全局互连按芯片尺寸缩放的差别。来源：课件 p17</figcaption>
+  </figure>
+
+  <div class="warn"><b>坑：</b>不能把 R 和 C 分开来谈。加宽导线降低了 R，但同时也增大了侧壁面积，从而抬高 C；减薄介质层可以缩小线宽，却让耦合电容上升。所有的"优化"都是在 R、C、面积、可制造性之间做权衡，不存在单方向的改善。</div>
+
+  <h3 id="ch08-3">8.3 电迁移：大电流把金属"吹走"</h3>
+
+  <p>电迁移是"看起来很简单的现象造成很大麻烦"的典型。问题出在金属线上持续流动的<b>直流电流</b>。为什么偏偏是电源/地线上的电流？因为那里叠加了成千上万个快速翻转的晶体管电流，而留给电源网络的面积又是有限的——它还要和信号线抢布线资源。铝（Al）、铜（Cu）、金（Au）导线和通孔都有自己的电流上限；一旦大量电流持续流过，金属原子便会在"电子风"的推动下缓慢迁移。</p>
+
+  <p>迁移的后果是两种互补的缺陷。在电子流的上游（离子被推走的地方）形成<b>空洞</b>（void），在电子流的下游（离子堆积的地方）形成<b>挤出</b>（extrusion）。空洞会让导线变细甚至断开，挤出则可能顶穿绝缘层碰到旁边的线，制造短路。因此上游处于张应力、下游处于压应力。</p>
+
+  <div class="fig-row">
+    <figure>
+      <img src="img/08_SDF_p022_443b2b1cac.jpg" alt="空洞与挤出的形成机制" loading="lazy">
+      <figcaption><b>图 8-4a</b> 空洞（void）与挤出（extrusion）的形成机制：Cu 被推向下游，上游受张应力、下游受压应力。来源：课件 p22</figcaption>
+    </figure>
+    <figure>
+      <img src="img/08_SDF_p023_81a04b6772.jpg" alt="电迁移导致空洞与挤出的显微照片" loading="lazy">
+      <figcaption><b>图 8-4b</b> 电迁移造成的实际缺陷：左侧是空洞，右侧是挤出。来源：课件 p23</figcaption>
+    </figure>
+  </div>
+
+  <p>电迁移最麻烦的地方在于它的时间尺度：它发生得非常慢，在整个寿命里慢慢退化，然后在某一刻突然失效。这属于可靠性问题，而不是我们可以靠时序分析预先发现的逻辑错误。</p>
+
+  <p>课件用一个数值算例说明电流密度的量级。假设一颗 10 万门等效规模（100 000 gate equivalents）的芯片：28 nm CMOS 工艺、1.0 V 核心电压、333 MHz 时钟（单相单边沿触发）、平均节点活动率 α = 1/4（即每个周期翻转 8 次）、内部节点电容 5 fF、电源与地线宽 5 µm、顶层金属导体厚度 880 nm。由此估算核心的平均动态供电电流，再除以导线截面积得到电流密度。</p>
+
+  <div class="code-block">
+    <div class="code-title">电迁移算例中的两行计算（课件原文）</div>
+    <pre><code>I_dd ≈ f_clk U_dd (1 + σ) Σ (α_k / 2) C_k
+     = 333 MHz · 1.0 V · (1 + 0.05) · 200 000 · (1/4) / 2 · 5 fF  ≈ 44 mA
+
+J_dd = I_dd / (w · h) = 44 mA / (5 µm · 880 nm) = 10 mA/µm² = 10 000 A/mm²
+
+Safe limits: Al alloys ↦ 5 to 10 mA/µm², Cu ↦ 25 to 50 mA/µm².
+
+For comparison:
+Overhead lines (1500 A in Al conductor Ø = 50 mm) ↦ 0.75 A/mm²
+Household line (10 A in Cu conductor □ = 1.5 mm²) ↦ 6.7 A/mm²</code></pre>
+  </div>
+
+  <figure>
+    <img src="img/08_SDF_p025_bc02de4667.jpg" alt="平均供电电流与电流密度的推导及安全限值" loading="lazy">
+    <figcaption><b>图 8-5</b> 从平均动态电流推导电流密度，并与铝、铜的安全限值和宏观导线做对比。来源：课件 p25</figcaption>
+  </figure>
+
+  <p>这组数字非常值得记住：芯片内部的电流密度高达 <b>10 000 A/mm²</b>，而架空高压线只有 0.75 A/mm²、家用电线 6.7 A/mm²。也就是说，片上导线的电流密度比家用电线高出三个数量级。铝的安全上限是 5–10 mA/µm²，铜是 25–50 mA/µm²——铜之所以能取代铝，很大程度上就是因为它能承受更高的电流密度。工程上还有一个简单好记的经验法则：<b>平均每 1 µm 线宽对应 1 mA 电流</b>（当然严格来说取决于导线截面，但便于现场估算）。</p>
+
+  <h3 id="ch08-4">8.4 IR 压降、地弹与电源网络</h3>
+
+  <p>IR 压降要分成静态和动态两部分来理解。静态部分是这样的：电路的平均功耗对应一个平均电流，而这个电流要穿过<b>非零电阻</b>的电源网络。电流在电阻上产生压降，于是门电路实际看到的供电电压低于名义值。门电路的电压低了，驱动能力下降，也就变慢。这个效应在今天尤其严重——工艺越先进供电电压越低（现代工艺常常在 1 V 上下），同样功率下电流反而越大，压降的绝对影响也更明显。</p>
+
+  <p>动态部分由电源路径上的<b>电感</b>造成：电感抗拒电流的变化。当大量门同时翻转时，电路瞬间需要一个大电流，而电源路径上的电感来不及响应，就会造成地电位被抬起（地弹）或电源电位被拉低（电源塌陷）。课件用一张图说明耦合机制：polluter 单元翻转时，电流通过共用回流路径上的电感 L<sub>g</sub> 回到地，于是 victim 单元的本地地电位 U<sub>l</sub> 被抬离 0 V，victim 的开关判决点随之偏移，可能提前或延后翻转。</p>
+
+  <p>课件把静、动两部分写在一个一阶模型里：<b>u<sub>g</sub>(t) = R<sub>g</sub>·i<sub>g</sub>(t) + L<sub>g</sub>·di<sub>g</sub>/dt</b>，其中 u<sub>g</sub> 是地弹电压、i<sub>g</sub> 是地电流、R<sub>g</sub> 是到地路径的电阻、L<sub>g</sub> 是到地路径的电感。R 项对应静态压降，L 项对应动态地弹。</p>
+
+  <figure>
+    <img src="img/08_SDF_p036_d6cd3597ce.jpg" alt="地弹的耦合机制与失真的开关电平" loading="lazy">
+    <figcaption><b>图 8-6</b> 地弹的基本耦合机制（a）以及由此造成的开关电平失真（b、c）。来源：课件 p36</figcaption>
+  </figure>
+
+  <p>为什么说电阻在先进节点上越来越成问题？课件给出一张跨工艺的对照表，比较的是同样几何条件：一条走在顶层金属上的电源/地线，宽 50 µm；一条走在底层金属（M1）上的最小宽度信号线；两者都长 10 mm、相距 1 µm。</p>
+
+  <table class="tbl">
+    <thead><tr><th>参数</th><th>工艺 A（250 nm Al）</th><th>工艺 B（130 nm Cu）</th><th>工艺 C（45 nm Cu）</th><th>工艺 D（28 nm Cu）</th></tr></thead>
+    <tbody>
+      <tr><td>线宽 [nm]（电源 / 信号）</td><td>50 000 / 320</td><td>50 000 / 160</td><td>50 000 / 70</td><td>50 000 / 50</td></tr>
+      <tr><td>串联电阻 [Ω]（电源 / 信号）</td><td>7.2 / 1 700</td><td>5.4 / 4 400</td><td>4.4 / 40 000</td><td>5.6 / 94 000</td></tr>
+      <tr><td>对衬底电容 [pF]（电源 / 信号）</td><td>2.4 / 0.46</td><td>2.7 / 0.52</td><td>4.4 / 0.9</td><td>3.8 / 1.0</td></tr>
+      <tr><td>串联电感 [nH]（电源 / 信号）</td><td>3.8 / 8.2</td><td>3.8 / 8.8</td><td>3.8 / 9.5</td><td>3.8 / 9.8</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="img/08_SDF_p032_33f3bb7d9e.jpg" alt="不同工艺节点下片上连线的寄生参数对照表" loading="lazy">
+    <figcaption><b>图 8-7</b> 相同几何条件下四代工艺的片上连线寄生对照：供电线电阻几乎不变，信号线电阻从 1.7 kΩ 涨到 94 kΩ。来源：课件 p32</figcaption>
+  </figure>
+
+  <p>请特别注意这张表里的两个不对称：<b>供电线</b>又宽又厚，从 250 nm 到 28 nm 电阻只从 7.2 Ω 微变到 5.6 Ω；而<b>信号线</b>被工艺一路缩窄（320 nm → 50 nm），电阻从 1 700 Ω 暴涨到 94 000 Ω，涨了五十多倍。这不是"器件缩小、一切变好"的故事，而是"器件缩小、连线变糟"的故事。也正因如此，电源网络的可靠性分析和信号线的时序分析必须分开处理。</p>
+
+  <p>IR 压降怎么分析？用 EDA 工具把整个电源网络离散成电阻网络，注入每个门的电流，求解每一点的电压，最后画成色图。课件展示的例子是一个 90 nm CMOS 的数字滤波器芯片，面积 1.7 mm × 1.7 mm，660 MHz，1.2 V；图中<b>绿色表示供电电压达到名义值的 99% 以上，红色表示跌到 95% 以下</b>（这只是 V<sub>DD</sub> 一侧的影响，如果 V<sub>SS</sub> 也对称受扰，总影响要加倍）。</p>
+
+  <figure>
+    <img src="img/08_SDF_p033_4b072b6c08.jpg" alt="IR 压降分析得到的芯片电压分布图" loading="lazy">
+    <figcaption><b>图 8-8</b> 数字滤波器芯片（90 nm，1.7 mm × 1.7 mm，660 MHz，1.2 V）的 IR 压降分析结果，绿 ≥99%、红 ≤95%。来源：课件 p33</figcaption>
+  </figure>
+
+  <p>缓解 IR 压降最直接的办法是<b>增加电源/地引脚的数量</b>。课件用一张引脚预算表说明这已经成为几十年来芯片设计的主线之一：Motorola MC 68000 总共 64 个引脚，其中电源/地只有 4 个（约 6%）；而 Intel Core i7-4960X 总共 2011 个引脚，电源/地有 868 个（约 43%）。将近一半的封装引脚都被用于供电，这正是电流需求的直接体现。</p>
+
+  <figure>
+    <img src="img/08_SDF_p034_85e4a67f44.jpg" alt="历代高性能 CPU 的引脚预算中电源地引脚占比" loading="lazy">
+    <figcaption><b>图 8-9</b> 高性能 CPU 引脚预算的演变：电源/地引脚占比从个位数升到 43%。来源：课件 p34</figcaption>
+  </figure>
+
+  <div class="note"><b>注：</b>课件特别区分了两件事——<b>IR 压降主要影响时序，而不是可靠性</b>（电源网络被"烧断"才是可靠性问题，那是电迁移的管辖范围）。所以电源分析里既要看电流密度是否超过限值，也要看电压是否跌落过多。</div>
+
+  <p>综合起来，预防电迁移和 IR 压降的手段是同一套：用粗导线做电源分配（记住 1 mA/µm 的经验法则）；做电源网格（power grid）和电源环（power ring），把尽可能多的金属用于均匀分配电流；用 EDA 工具同时分析电流密度和 IR 压降，确保没有<b>热点</b>（hot spot）；发现热点就增加导线和电流通路来分摊。注意功耗计算本身依赖活动率（activity），活动率必须设置得当，否则整个分析都会偏。</p>
+
+  <p>至于动态的地弹与电源塌陷，解决思路是把电源路径按频段分层。课件画出了从远端电源到芯片内部的完整层级：最外层是线缆寄生，由远端电源供电；中间是板级布线寄生，在此处放<b>大容量旁路电容</b>（bulk bypass capacitor），负责 1 kHz 以下的慢变化；最内层是封装与片上互连寄生，在<b>每个封装旁边</b>放射频陶瓷电容，覆盖 1 MHz 到 300 MHz 的快速开关瞬态。旁路电容的作用就是在开关瞬间就地供能，这样电流不必从远处电源"长途跋涉"过来；同时要保持电流回路上的电感尽量低，因为电感会抗拒电流变化，在最需要电流的时候反而"饿死"电路。</p>
+
+  <figure>
+    <img src="img/08_SDF_p037_19186bb0c6.jpg" alt="从线缆到片上的电源分配层级与去耦电容布置" loading="lazy">
+    <figcaption><b>图 8-10</b> 电源分配的三个层级与对应的去耦电容：层级越靠内，负责的频率越高。来源：课件 p37</figcaption>
+  </figure>
+
+  <h3 id="ch08-5">8.5 串扰与信号完整性</h3>
+
+  <p>噪声进入信号有四种耦合机制，课件把它们放在一张总览图里：<b>传导耦合</b>（conductive coupling，多个门共用一段有电阻的回流路径，一个门的电流在共用阻抗上产生电压，从而影响另一个门的地参考）、<b>电磁耦合</b>（electromagnetic coupling，互感）、<b>串扰</b>（crosstalk，主要是互电容耦合）、以及<b>地弹</b>（ground bounce）。它们的共同点是：干扰源和受害者共享了某一段本不该共享的路径或空间。</p>
+
+  <figure>
+    <img src="img/08_SDF_p026_cdbb68c46f.jpg" alt="四种噪声耦合机制的总览" loading="lazy">
+    <figcaption><b>图 8-11</b> 四种噪声耦合机制：传导耦合、电磁耦合、串扰、地弹。来源：课件 p26</figcaption>
+  </figure>
+
+  <p>既然噪声无法根除，就必须给数字电路留出<b>噪声容限</b>（noise margin）。课件给出的定义是：<b>U<sub>nML</sub> = U<sub>iL</sub> − U<sub>oL</sub></b>（低电平容限，输出低电平到输入判为低的最远距离），<b>U<sub>nMH</sub> = U<sub>oH</sub> − U<sub>iH</sub></b>（高电平容限），而整体的噪声容限取两者中较小的那个：<b>U<sub>nM</sub> = min(U<sub>nML</sub>, U<sub>nMH</sub>)</b>。这个定义是整个信号完整性分析的出发点：只要耦合到受害线上的电压尖峰不超过门电路的开关门限 U<sub>trip</sub>，逻辑就不会出错。</p>
+
+  <p>那么串扰对时序有什么影响？课件把受害信号在传输过程中的波形画了出来。当干扰线（polluting signal）先上升、受害线（victim signal）随后上升时，互电容把电荷推入受害线，使它<b>提前</b>越过 U<sub>trip</sub>，这叫作<b>加速</b>（acceleration）；反过来，当干扰线快速下降而受害线正在上升时，受害线被<b>推迟</b>越过门限，这叫作<b>延迟</b>（retardation）。</p>
+
+  <figure>
+    <img src="img/08_SDF_p028_07487d6b5a.jpg" alt="串扰造成受害信号的加速与延迟" loading="lazy">
+    <figcaption><b>图 8-12</b> 串扰对传输中信号的影响：干扰线跳变使受害信号加速（a）或延迟（b）越过开关门限。来源：课件 p28</figcaption>
+  </figure>
+
+  <p>这一点在工程上非常关键：串扰引起的偏差不是随机的噪声，而是<b>可预测的时序偏移</b>。因此它必须被纳入时序分析——对建立时间（setup）检查要按最坏情况找"加速"方向，对保持时间（hold）检查则要找"延迟"方向，否则芯片会在某个特定数据模式下失效，而常规仿真根本测不到。</p>
+
+  <p>课件给出了减少串扰的几条可操作手段，值得逐条记下：</p>
+
+  <ul>
+    <li>减少<b>同时</b>发生的翻转：对一组总线驱动器做错峰启动（staggering activation）是常用技巧。</li>
+    <li>避免长距离平行且紧邻的走线：耦合与距离相关，不要贴着最小间距一路走到底。</li>
+    <li>让相邻金属层的走线方向交替（横向/纵向），减少同向长距离并行。</li>
+    <li>为信号提供独立的返回线；所有信号都要从源流回地，必须保证地通路干净。</li>
+    <li>考虑加<b>屏蔽</b>（shielding）：屏蔽把电磁活动约束在内部，阻止其向其他线传播。</li>
+  </ul>
+
+  <h3 id="ch08-6">8.6 闩锁与器件老化：可靠性的两条线</h3>
+
+  <p>CMOS 工艺里隐藏着一个寄生的双极结构：n 阱/n 衬底与 p⁺/n⁺ 扩散区会形成横向 npn 与纵向 pnp 两个双极晶体管，它们首尾相接，构成一个类似可控硅（SCR）的正反馈回路。一旦被外部干扰触发导通，这个回路会自己锁住，在电源与地之间维持一条大电流通路，芯片随即失效——这就是<b>闩锁</b>（latch-up）。课件里的剖面图也画出了抑制它的关键结构：<b>体接</b>（body tie）与 butted contacts，它们把寄生晶体管的基极牢牢短接到电源或地，使其无法被激活。I/O 单元的版图上还会围绕器件加装<b>多数载流子保护环</b>与<b>少数载流子保护环</b>（majority / minority carrier guard），用来截断寄生回路的触发路径。</p>
+
+  <figure>
+    <img src="img/08_SDF_p038_9a83c71457.jpg" alt="CMOS 中的寄生 npn 与 pnp 双极晶体管" loading="lazy">
+    <figcaption><b>图 8-13</b> 闩锁的物理根源：横向 npn 与纵向 pnp 构成的寄生回路，以及体接与 butted contacts 的作用。来源：课件 p38</figcaption>
+  </figure>
+
+  <p>防护闩锁的核心是<b>保证衬底处处都被正确偏置</b>。标准单元通常自带一对衬底接触；现代工艺还会插入额外的偏置单元——不过课件提醒我们，做这些单元的初衷其实是为了用<b>体偏置</b>（body biasing）调节晶体管的阈值电压，防闩锁只是顺带的好处。此外有两种工艺层面的免疫手段：SOI 工艺把衬底用埋氧层隔开，寄生双极晶体管没有通路，因此不怕闩锁；而现代低压电路（V<sub>DD</sub> &lt; 1.2 V）也不那么容易闩锁，因为要让寄生双极晶体管开启，必须有足够的电压余量（headroom）。但要小心：<b>再先进的工艺里仍然有 I/O 晶体管</b>——它们工作在更高的电压域，仍然是闩锁的薄弱点。</p>
+
+  <p>可靠性的第二条线是<b>老化</b>（aging）。它从最基础的 MOS 结构开始：栅氧化层并不是完美绝缘体，里面存在游离的掺杂原子（stray dopant atom）、脆弱的 Si–Si 键（weak Si/Si bond）和氢原子（hydrogen atom）。这些缺陷让氧化层中产生"陷阱态"（defect states），电子可以在陷阱之间跳跃，形成一条泄漏通路。由此衍生出三种主要的老化机制：</p>
+
+  <table class="tbl">
+    <thead><tr><th>机制</th><th>成因</th><th>后果</th></tr></thead>
+    <tbody>
+      <tr><td>氧化层击穿（Oxide Breakdown）</td><td>栅上施加电压会在氧化层内产生电活性缺陷并捕获电荷</td><td>捕获电荷累积到一定程度形成短路，晶体管灾难性失效</td></tr>
+      <tr><td>热载流子注入（Hot Carrier Injection, HCI）</td><td>源漏之间流动的高能电荷进入栅氧化层</td><td>阈值电压升高，晶体管工作速度随时间变慢</td></tr>
+      <tr><td>偏置温度不稳定性（Bias Temperature Instability, BTI）</td><td>即使源漏间没有电流，栅上电压也会让电荷迁移进绝缘栅氧化层</td><td>阈值漂移、性能退化，且部分可逆</td></tr>
+    </tbody>
+  </table>
+
+  <p>这三种机制放在时间轴上就得到经典的<b>浴盆曲线</b>（bathtub curve）：最左侧是<b>早期失效</b>（infant mortality）的高峰，通常在出厂后约 1 年内暴露；中间是漫长的<b>随机失效</b>（random）平台期；最右侧又从 5–15 年之间抬头，进入<b>磨损失效</b>（wearout）阶段。工程上用<b>老化筛选</b>（burn-in test）在出厂前把早期失效的产品提前"烤"出来——这正是要花钱减少早期失效率的原因。</p>
+
+  <figure>
+    <img src="img/08_SDF_p047_6a8dd36d09.jpg" alt="集成电路失效率的浴盆曲线" loading="lazy">
+    <figcaption><b>图 8-14</b> 集成电路的浴盆曲线：早期失效、随机失效、磨损失效三个阶段，以及 burn-in 筛选的介入位置。来源：课件 p47</figcaption>
+  </figure>
+
+  <p>课件最后给出一个务实的判断：<b>集成电路的老化不可避免</b>。晶体管越小越脆弱——更高的电场、更近的距离、更高的能量，这就是小型化的代价。它与前面那些寄生效应最大的不同在于：老化通常表现为<b>性能逐渐退化</b>，而不是突然的失效，而且特性会随时间变化。应对方式有两条：一是提前预留余量（guardbanding），在时序预算里长期留出位置；二是遇到问题再适配（但客户可能会不满，也可能根本察觉不到）。一个令人愉快的巧合是：<b>降低功耗的措施通常对老化也是有益的</b>——关掉不用的部分（降低 C）、降低供电电压（V<sub>DD</sub>）、降低活动率（A）、降低频率（f），这四项同时也在减轻电场应力和热应力。</p>
+
+  <h3 id="ch08-7">8.7 SDF：把提取出的真实延迟反标回仿真</h3>
+
+  <p>现在回到本讲的收尾问题：<b>为什么综合阶段的时序估计不够用？</b>课件在第 18 页把获得寄生参数的三条路径列了出来：其一是<b>忽略</b>——这只在工艺名字里不带 "nano" 的年代可行；其二是<b>估算</b>——用统计方法，也就是 LIB 文件里的<b>线负载模型</b>（wireload model），它只是一张"按扇出查负载"的表，精度不高；其三是<b>计算</b>——用三维场求解器（3D field solver）或更简单的近似方法，从真实的版图几何中提取每根线的 R 和 C。但第三条路有个前提：<b>必须先完成布局和布线，才能知道导线到底长什么样</b>，而且这个过程很耗时。</p>
+
+  <p>这就是流程上的矛盾：综合发生在布局布线<b>之前</b>，那时我们根本不知道走线几何，只能用线负载模型凑一个估计；而真正决定成败的延迟，要等到布局布线之后才能算。解决方案是分成两阶段：综合阶段用统计估计保证时序大致合理，布局布线之后做<b>寄生提取</b>（parasitic extraction），再把提取出的延迟通过一个标准文本格式写出来——这就是 SDF。</p>
+
+  <p>SDF 文件里装的是"所有东西"的提取延迟：它为<b>每一条互连</b>单独列出延迟（延迟中包含了线长和寄生效应的信息），也为<b>每一个单元实例</b>单独列出延迟，还包括状态保持元件（触发器、锁存器）的时序检查条件。延迟用<b>三元组</b>表示，并且区分上升沿和下降沿：</p>
+
+  <div class="code-block">
+    <div class="code-title">SDF 中的延迟三元组表示法（课件原文）</div>
+    <pre><code>(      rise          ) (       fall         )
+(  min :  typ :  max ) (  min :  typ :  max )
+(0.1493:0.2114:0.2114) (0.1517:0.2159:0.2159)</code></pre>
+  </div>
+
+  <p>这里的 min/typ/max 三元组对应三种时序场景（通常由工艺角、电压、温度的组合决定）。这些延迟可以被<b>反标</b>（back-annotate）到仿真器中，这样后仿（post-layout simulation）中每一个门和每一段线都带着正确的延迟值，仿真的时序才有意义。</p>
+
+  <p>SDF 的顶层结构是一个 DELAYFILE 块，开头声明版本和各种"单位与默认值"：</p>
+
+  <div class="code-block">
+    <div class="code-title">一个 SDF 文件的文件头（课件原文，节选）</div>
+    <pre><code>(DELAYFILE
+  (SDFVERSION "3.0")
+  (DESIGN "croc_chip")
+  (VOLTAGE 1.320000:1.200000:1.200000)
+  (PROCESS "1.000000:1.000000:1.000000")
+  (TEMPERATURE -40.000000:25.000000:25.000000)
+  (TIMESCALE 1.0 ns)
+  (CELL
+    (CELLTYPE  "croc_chip")
+    (INSTANCE)
+      (DELAY
+        (ABSOLUTE</code></pre>
+  </div>
+
+  <p>逐句看这段头部：<b>DELAYFILE</b> 是文件的根节点，里面所有内容都属于这个延迟文件。<b>SDFVERSION</b> 声明格式版本（"3.0"）。<b>DESIGN</b> 说明这份延迟数据属于哪个设计（这里是 croc_chip）。紧接着三个声明给出了三元组所对应的物理条件：<b>VOLTAGE</b> 是电压（最小值 1.32 V，典型与最大值 1.20 V），<b>PROCESS</b> 是工艺缩放因子（三个值都是 1.0，表示不做额外缩放），<b>TEMPERATURE</b> 是温度（−40 ℃、25 ℃、25 ℃）。这三个声明是理解后面所有数字的钥匙——同一个延迟三元组，三个数分别对应上面这三组条件。再往下是 <b>TIMESCALE</b>，声明文件内所有时间值的单位是 1.0 ns（这一点极易出错，如果读文件的一方假定了别的单位，结果会差几个数量级）。最后进入 <b>CELL</b> 块：<b>CELLTYPE</b> 给出单元类型名，<b>INSTANCE</b> 指定具体实例（这里为空，表示顶层），<b>DELAY</b> / <b>ABSOLUTE</b> 表示后面给出的是<b>绝对</b>延迟值而不是增量。</p>
+
+  <p>互连延迟用 INTERCONNECT 描述。下面三条记录都属于同一个驱动端 <b>i_croc_soc/i_user/_2257_/X</b>，它带着三个负载，于是有三条独立的延迟记录：</p>
+
+  <div class="code-block">
+    <div class="code-title">SDF 中的互连延迟（课件原文）</div>
+    <pre><code>(INTERCONNECT 
+   i_croc_soc/i_user/_2257_/X 
+   i_croc_soc/i_croc/_07060_/A  
+      (0.0056:0.0055:0.0055) (0.0056:0.0055:0.0055)
+)
+(INTERCONNECT 
+   i_croc_soc/i_user/_2257_/X 
+   i_croc_soc/i_croc/_07393_/A  
+   (0.0051:0.0050:0.0050) (0.0051:0.0050:0.0050)
+)
+(INTERCONNECT 
+    i_croc_soc/i_user/_2257_/X 
+    i_croc_soc/i_croc/_10502_/A  
+    (0.0024:0.0024:0.0024) (0.0024:0.0024:0.0024)
+)</code></pre>
+  </div>
+
+  <p>每一条 INTERCONNECT 后面跟的是两段路径（源端实例的引脚、目的端实例的引脚），再接两个三元组，分别对应上升沿和下降沿的延迟，单位由上面的 TIMESCALE 决定（这里是 ns，所以 0.0056 ns ≈ 5.6 ps）。注意三个负载的延迟各不相同——这正是"提取"的意义所在：同一个驱动端到不同负载的走线长度不同，延迟自然不同，而综合阶段的线负载模型无法表达这种差异，它只能给出一个粗略的、按扇出估算的负载值。另外可以看出 min/typ/max 三个数非常接近，因为互连延迟受工艺角的影响相对小。</p>
+
+  <p>单元内部从输入引脚到输出引脚的延迟用 CELL 块里的 IOPATH 描述。下面是一个四输入与门实例的完整延迟表：</p>
+
+  <div class="code-block">
+    <div class="code-title">SDF 中的单元路径延迟（课件原文）</div>
+    <pre><code>(CELL
+    (CELLTYPE  "sg13g2_and4_2")
+    (INSTANCE  i_croc_soc/i_croc/_05101_)
+      (DELAY
+        (ABSOLUTE
+        (IOPATH A X  (0.1801:0.2664:0.2664) (0.1121:0.1698:0.1698))
+        (IOPATH B X  (0.1718:0.2515:0.2515) (0.0998:0.1498:0.1498))
+        (IOPATH C X  (0.1821:0.2692:0.2692) (0.1100:0.1653:0.1653))
+        (IOPATH D X  (0.1905:0.2885:0.2885) (0.1072:0.1659:0.1659))
+        )
+      )
+  )</code></pre>
+  </div>
+
+  <p>CELLTYPE 是标准单元名（sg13g2_and4_2，一个 4 输入与门），INSTANCE 是它在网表里的层次路径。每条 <b>IOPATH</b> 声明一条"从某输入引脚到某输出引脚"的路径延迟，格式是 <b>IOPATH 输入引脚 输出引脚 (上升三元组) (下降三元组)</b>。四条路径 A→X、B→X、C→X、D→X 的延迟互不相同，这也是提取与查表的结果：不同的输入引脚到输出的内部路径长度不同。注意这里的 min 与 typ/max 差别很大（例如 A→X 上升是 0.1801 对 0.2664），因为单元延迟对工艺角、电压、温度高度敏感——这也提醒我们，三元组里的三个数字承载的是真实的设计信息，不是格式装饰。</p>
+
+  <p>最后，状态保持元件的<b>时序检查</b>条件单独用 TIMINGCHECK 描述。下面这个例子是一个带复位的 D 触发器：</p>
+
+  <div class="code-block">
+    <div class="code-title">SDF 中的时序检查（课件原文）</div>
+    <pre><code>(CELL
+    (CELLTYPE  "sg13g2_dfrbp_1")
+    (INSTANCE  i_croc_soc/i_croc/all_periph_obi_rsp_101__reg)
+      (TIMINGCHECK
+        (RECREM (posedge RESET_B) (posedge CLK) 
+                (0.0557:0.1359:0.1359) (0.0000:0.0000:0.0000))
+        (SETUPHOLD (posedge D) (posedge CLK) 
+                   (0.0506:0.1335:0.1335) (0.0000:0.0000:0.0000))
+        (SETUPHOLD (negedge D) (posedge CLK) 
+                   (0.0311:0.1307:0.1307) (0.0041:0.0000:0.0000))
+        (WIDTH (posedge CLK) (0.0530:0.3204:0.3204))
+        (WIDTH (negedge CLK) (0.0664:0.3336:0.3336))
+        (WIDTH (negedge RESET_B) (0.0557:0.1601:0.1601))
+      )
+  )</code></pre>
+  </div>
+
+  <p>这里的每一条检查都对应一个仿真器必须验证的约束：<b>RECREM</b> 是异步复位信号相对于时钟的恢复/移除时间检查（复位释放必须在时钟有效沿之前足够久，否则触发器状态不确定）；<b>SETUPHOLD</b> 同时给出建立与保持约束——第一组三元组是建立时间，第二组是保持时间，并且对数据上升沿（posedge D）和下降沿（negedge D）分别给出不同的值；<b>WIDTH</b> 是<b>最小脉冲宽度</b>检查，对时钟的正相和负相、以及复位信号分别给出下限，因为脉冲太窄触发器可能采不到或者进入亚稳态。这些约束在综合阶段的 LIB 里也有，但 SDF 给出的是<b>与实际版图相对应的值</b>，两者可能会不同。</p>
+
+  <div class="warn"><b>坑：</b>反标最容易出错的地方不是语法，而是"对得上号"。SDF 里的层次路径必须与网表中的实例名、引脚名严格一致；TIMESCALE 必须与仿真器的时标设定相容；三元组必须与仿真所用的工艺角对应。一旦对不上，仿真器通常不会报错，而是静静地忽略掉这些反标值——于是你以为自己跑的是后仿，实际上跑的还是零延迟的理想情况。</div>
+
+  <p>把这一讲的所有内容收在一起看，课件给出了一个清醒的结论：<b>寄生效应无法避免</b>。我们能做的只有四件事——估计它们的影响、把影响限制在性能可接受的范围内、在可能时减小它们、以及在适当的时候<b>选择忽略</b>它们。何时该算、何时可以不算，是一门工程判断：并非所有效应都像晶体管那样按比例缩小，现代工艺中电容是大问题，28 nm 及以下通孔电阻也是大问题，而且各效应的<b>工艺变化敏感度</b>也各不相同。知道什么时候必须把它们纳进来、什么时候可以忽略，本身就是设计能力的一部分。</p>
+
+  <h3 id="ch08-8">本讲要点</h3>
+  <div class="takeaway"><ol>
+    <li>芯片上存在 R、L、C、G 四类我们不想要的寄生参数：R 与 C 决定速度，L 造成地弹与电源塌陷，G 造成漏电。</li>
+    <li>互连寄生电容由平行板、边缘、侧向三种分量构成，主导项往往是边缘与侧向耦合，而<b>距离越近耦合越强</b>。分布式 RC 的延迟正比于线长的平方（τ ≈ rc·l²/2）。</li>
+    <li>局部互连按工艺尺寸缩放，全局互连按芯片尺寸缩放，两条规律不同步，因此先进节点下全局连线的电阻代价越来越高。</li>
+    <li>电迁移是直流电流推动金属离子迁移，上游形成空洞、下游形成挤出，表现为长期缓慢退化后突然失效。算例中 28 nm 芯片内部电流密度达 10 000 A/mm²，比家用电线高三个数量级。</li>
+    <li>IR 压降分静态（R 上压降，拉低门看到的电压、使其变慢）与动态（L 抗拒电流变化，造成地弹/电源塌陷）。缓解手段是粗导线、电源网格、就近旁路电容，以及大量电源/地引脚（i7 已有 43% 的引脚用于供电）。</li>
+    <li>串扰会造成受害信号越过开关门限的<b>加速</b>或<b>延迟</b>，这是可预测的时序偏移，必须纳入 setup/hold 的最坏情况分析。</li>
+    <li>老化（氧化层击穿、HCI、BTI）使晶体管随时间变慢；浴盆曲线区分早期失效（约 1 年内，用 burn-in 筛选）、随机失效与磨损阶段（5–15 年）。降低功耗的措施通常也减缓老化。</li>
+    <li>SDF 把布局布线后提取出的互连延迟与单元延迟写成文本，用 (min:typ:max) 三元组分别描述上升/下降沿，通过 DELAYFILE / CELL / IOPATH / INTERCONNECT / TIMINGCHECK 等语法组织，再反标到仿真中以获得真实的后仿时序。反标之所以必要，正是因为综合阶段的线负载模型只是按扇出查表的粗略估计，无法反映真实走线几何。</li>
+  </ol></div>
+</section>
+<section class="chapter" id="ch09">
+  <div class="ch-head">
+    <span class="ch-no">第 9 讲</span>
+    <h2>GDS：布局、布线、芯片收尾与 GDSII 文件</h2>
+    <p class="ch-meta">对应课件：09_GDS.pdf ｜ 关键词：placement、routing、global / detailed routing、chip finishing、filler、antenna、DRC、LVS、GDS2 / GDSII</p>
+  </div>
+
+  <div class="lead">
+    前几讲把约束准备齐了：单元库、布图规划、时序与寄生。本讲走完流程的最后一段——布局（placement）决定每个单元落在行里的什么位置，布线（routing）决定单元之间怎么连；芯片收尾（chip finishing）插入填充单元与天线单元，并做 DRC、LVS 签核；最后由工具导出 GDS2/GDSII 文件，交给晶圆厂。课件本身很短，只列出了目标、来源与 GDS 格式的要点，本讲把这些要点讲透。
+  </div>
+
+  <h3 id="ch09-1">9.1 本讲在流程中的位置与目标</h3>
+  <p>
+    课件开场回顾了此前的积累（课件 p3）：标准单元（standard cell）是高度固定、可以并排摆放的矩形块；布图规划（floorplanning）确定芯片面积，并为 I/O、宏单元（macro cell）和标准单元预留位置；此外还有 I/O 焊盘、ESD 保护与封装，以及时序、时钟分布、工艺角（process corner）和寄生参数。这些工作回答的是“芯片要多大、必须满足什么约束”。本讲要回答剩下的两个问题：<b>每个单元具体放在哪里、它们之间怎么连起来</b>，以及最终交付的文件是什么样子。
+  </p>
+  <p>
+    课件把本讲目标列为四项（课件 p4）：单元布局，以及布局所用的算法与方法；布线，即如何把所有单元连起来，分为全局布线与详细布线；芯片收尾，即提交设计前的最后步骤，包括填充单元（filler）与天线单元（antenna cell），以及 DRC、LVS；最后是 GDS 文件。课件还声明这部分幻灯片取自 BIU（Bar-Ilan University）的 Digital VLSI Design 讲义（课件 p5），三份原始文件是（课件 p6）：
+  </p>
+
+  <figure>
+    <img src="img/09_GDS_p004.jpg" alt="课件中本讲的目标清单：布局、布线、芯片收尾与 GDS 文件" loading="lazy">
+    <figcaption><b>图 9-1</b> 本讲的目标清单：布局、布线、芯片收尾与 GDS 文件。来源：课件 p4</figcaption>
+  </figure>
+
+  <div class="code-block">
+    <div class="code-title">本讲内容的原始讲义链接（照抄课件 p6）</div>
+    <pre><code>Placement      http://www.eng.biu.ac.il/temanad/files/2018/12/Lecture-7-Placement.pdf
+Routing        http://www.eng.biu.ac.il/temanad/files/2019/01/Lecture-9-Routing.pdf
+Chip finishing http://www.eng.biu.ac.il/temanad/files/2021/01/Lecture-11-Signoff-2020-21.pdf</code></pre>
+  </div>
+
+  <h3 id="ch09-2">9.2 布局：把成千上万个单元摆进行里</h3>
+  <p>
+    布局的输入是网表加上布图规划的结果：核心区域已经划好，标准单元行（row）已按 site 排好，电源轨也已预留。布局要决定的就是每个单元落在哪一行、哪一位。之所以能这样“摆积木”，是因为标准单元等高、等 site 宽，边界对齐后可以自动共享电源轨——这正是第 5 讲 LEF 中那些几何约定的用途。
+  </p>
+  <p>
+    但摆放方案的数量极其庞大，而且目标互相拉扯：单元摆得越近，连线越短、延迟越小，可是局部也越拥挤；把互连密集的单元堆在一起，布线就没有足够通道，只能用更长的绕线补救，时序反而变差。所以布局不可能手摆，课件也把“布局所用的算法与方法”单列为本讲内容之一（课件 p4）。这里要记住的结论是：<b>布局决定布线能不能做成</b>，拥塞与时序问题往往在布局阶段就已埋下。
+  </p>
+
+  <h3 id="ch09-3">9.3 布线：全局布线与详细布线</h3>
+  <p>
+    布线的问题只有一句话：如何把所有单元按网表连起来（课件 p4）。课件明确把它分成两级：
+  </p>
+  <ul>
+    <li><b>全局布线（global routing）</b>：先不追究精确几何，为每条网络决定大致走向——大致走哪一层、从哪片区域穿过、占用哪些布线资源，并据此估算拥塞。它输出一张“路线图”，用来判断布局造成的拥塞是否可接受。</li>
+    <li><b>详细布线（detailed routing）</b>：在全局布线给定的框架内，把每条网络落实成具体金属图形：精确坐标、层间切换所需的过孔（via）、满足工艺规则的线宽与间距，并保证图形之间不冲突。</li>
+  </ul>
+  <p>
+    为什么要分两级？因为完整布线是一个规模巨大的组合优化问题。如果要求所有多边形的精确坐标同时最优，搜索空间会大到无法处理；先粗略分配资源、再在受限范围内做精细几何，是把问题分解到可解规模的标准做法。反过来，如果全局布线给出的资源分配本身就不可行，详细布线无论怎么做都会失败。
+  </p>
+
+  <h3 id="ch09-4">9.4 芯片收尾与签核：填充单元、天线单元、DRC 与 LVS</h3>
+  <p>
+    布局布线完成并不等于可以交付。课件列出的收尾步骤（chip finishing）是插入填充单元和天线单元，然后做 DRC、LVS（课件 p4）。这几件事的分工如下表：
+  </p>
+
+  <table class="tbl">
+    <thead><tr><th>步骤</th><th>做什么</th><th>为什么需要</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>填充单元（filler）</td>
+        <td>把标准单元行里剩余的空位补齐，使整行图形连续。</td>
+        <td>保持阱、衬底、栅极等底层图形在整行上的连续性，并使图形密度均匀，满足工艺对密度与平坦化的要求。</td>
+      </tr>
+      <tr>
+        <td>天线单元（antenna cell）</td>
+        <td>为长导线所连的栅极提供电荷泄放路径，常见做法是在输入端插入二极管，或对过长导线做跳层处理。</td>
+        <td>等离子刻蚀等工艺中，长金属线像天线一样收集电荷；电荷没有泄放路径时可能击穿它所连接的薄栅氧，这就是天线效应。</td>
+      </tr>
+      <tr>
+        <td>DRC</td>
+        <td>设计规则检查（Design Rule Check）：检查版图几何是否合法。</td>
+        <td>最小宽度、最小间距、最小面积、图形密度、层间包围与延伸等规则必须全部满足，否则掩模做不出来，或做出来不工作。</td>
+      </tr>
+      <tr>
+        <td>LVS</td>
+        <td>版图与原理图一致性检查（Layout Versus Schematic）：由版图反提取器件与连接关系，与网表逐项比对。</td>
+        <td>几何合法不代表电路正确：器件类型与尺寸、连接关系、电源与地、悬空节点都必须与网表完全一致。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    DRC 与 LVS 回答的是两个互不替代的问题：<b>DRC 只看几何，LVS 只看电气</b>。版图完全可能几何上毫无问题，却把两个信号接在了一起；也完全可能连接关系正确，但某处线宽不达标。它们之所以放在流程最末端，是因为 filler、天线单元、线宽修复这些动作都会改动几何，而改动之后必须重新检查。
+  </p>
+
+  <div class="note"><b>注：</b>课件在本讲只列出了 filler、antenna cell、DRC、LVS 这几个名称，没有展开；上表中“做什么 / 为什么”两列是它们在收尾与签核流程中的惯常作用，用来帮助理解这一阶段在解决什么问题。</div>
+
+  <h3 id="ch09-5">9.5 GDS2 / GDSII：只描述几何的二进制格式</h3>
+  <p>
+    GDS 是 Graphic Design System 的缩写（课件 p7），GDS2 或 GDSII 则是物理版图的通用文件格式（课件 p8）。它与此前见过的 LEF、DEF、LIB、SDF 都不相同，最明显的差别是它属于<b>二进制</b>格式。课件对它的特征描述得很集中：
+  </p>
+
+  <table class="tbl">
+    <thead><tr><th>特征</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td>已使用数十年</td><td>它是物理版图领域事实上的标准文件，沿用时间很长。</td></tr>
+      <tr><td>较老的二进制格式</td><td>与此前见过的文本格式不同；课件指出这在 80 年代和 90 年代初是节省磁盘空间的典型做法。</td></tr>
+      <tr><td>格式本身不压缩</td><td>虽然是二进制，但并没有压缩；课件补充当年的计算能力也是限制因素。</td></tr>
+      <tr><td>没有官方标准或维护机构</td><td>课件明确指出它没有官方标准或组织来维护，靠工业界的事实惯例延续。</td></tr>
+      <tr><td>只包含几何描述</td><td>文件里只有三种基本图形：矩形（rectangle）、多边形（polygon）、路径（path）。</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="img/09_GDS_p001_cb496f40c8.jpg" alt="完成制造后的晶圆，表面是大量重复排布的芯片" loading="lazy">
+    <figcaption><b>图 9-2</b> 制造完成后的晶圆：版图最终变成的就是这样的几何图形，而且同一份几何在晶圆上被重复数十次。来源：课件 p1</figcaption>
+  </figure>
+
+  <p>
+    最后一条最值得强调。GDS 里没有晶体管、没有网络名、没有时序信息，只有按层组织起来的矩形、多边形和路径；这些语义只存在于设计数据库与网表中，是导出工具在写 GDS 时把它们翻译成几何的。这正好解释了签核检查的分工：DRC 可以在纯几何上做，而 LVS 必须回头去比对网表，因为几何本身并不携带连接关系。
+  </p>
+
+  <div class="note"><b>注：</b>课件 p8 给出了一份 GDSII 格式说明的地址：https://www.artwork.com/gdsii/gdsii/ ，需要查阅记录级细节时可以参考。</div>
+
+  <h3 id="ch09-6">9.6 layer–purpose 对：几何如何对应到掩模</h3>
+  <p>
+    几何图形光有形状还不够，还必须说明它对应工艺中的哪一层掩模。GDS 用两个数字来标记：<b>layer</b> 描述工艺中的不同掩模，是一个 8 位数；第二个数 <b>purpose</b> 用来区分同一层上的不同用途，同样是 8 位数（课件 p9）。课件给的例子很直观：金属层上真正要绘制的图形与引脚（pin）位置，可以共用同一个 layer，只靠 purpose 加以区分，这样几何与引脚标注叠在同一层而语义互不混淆。
+  </p>
+  <p>
+    课件还给出三条实践中的说明（课件 p9）：layer–purpose 的组合使 GDS 拥有大约 65k（6.5 万）种不同掩模的可能；每个工艺厂在自己提供的 PDK 中分配这些编号；工具负责把 CAD 数据库中的图形转换成 PDK 指定的 layer。换句话说，layer 编号本身<b>没有跨工艺的通用含义</b>，它是 PDK 定义的一部分。
+  </p>
+
+  <h3 id="ch09-7">9.7 层次化、阵列、旋转与镜像</h3>
+  <p>
+    层次化（hierarchy）是 GDS 文件的一个重要特性（课件 p10）：反复出现的单元只描述一次，其他地方通过“引用”来使用。课件 p10 的截图给出了一个小例子，照图转录如下：
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">课件 p10 截图中的 GDS 记录（照图转录，记录内部字段未展开）</div>
+    <pre><code>BGNSTR  TOP
+BOUNDARY
+SREF  CELL_A    180  2  3
+ENDSTR
+
+BGNSTR  CELL_A
+BOUNDARY
+BOUNDARY
+BOUNDARY
+BOUNDARY
+ENDSTR</code></pre>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>记录</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td><code>BGNSTR TOP</code> / <code>BGNSTR CELL_A</code></td><td>开始定义一个结构（structure，即一个“版图块”），名字分别是 TOP 与 CELL_A；每个结构都以对应的 <code>ENDSTR</code> 结束。</td></tr>
+      <tr><td><code>BOUNDARY</code></td><td>一块多边形几何。图中省略了该记录内部的字段（层号、datatype、顶点坐标），只保留记录名；CELL_A 中有四条，说明它由四块多边形构成。</td></tr>
+      <tr><td><code>SREF CELL_A</code></td><td>结构引用（structure reference）：在 TOP 里引用 CELL_A，而不是把它的几何再描述一遍。几何只定义一次、可在多处复用，这就是层次化。</td></tr>
+      <tr><td><code>180 2 3</code></td><td>这次引用所带的变换参数。课件截图只给出数字本身、未标注含义；按 GDSII 的规定，SREF 的变换由旋转、镜像与放大等字段共同描述。</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="img/09_GDS_p010_a0697bf732.jpg" alt="GDS 层次化示例：TOP 结构通过 SREF 引用 CELL_A" loading="lazy">
+    <figcaption><b>图 9-3</b> GDS 的层次化：左侧示意 TOP 单元（粉红边框）中，CELL_A 被放在坐标 (2,3) 处并带有旋转/镜像变换，右侧是与之对应的记录。来源：课件 p10</figcaption>
+  </figure>
+
+  <p>
+    除引用之外，GDS 还支持阵列（array）、旋转（rotation）与镜像（mirroring）（课件 p10）。阵列是把同一个单元按行列规律重复铺设，对应文件里的另一个引用记录 AREF：它不逐个列出实例位置，而是给出阵列的排布参数。
+  </p>
+
+  <figure>
+    <img src="img/09_GDS_p010_d58dafb3af.jpg" alt="带旋转的阵列引用：阵列方向不与坐标轴平行，需由角点坐标反算参数" loading="lazy">
+    <figcaption><b>图 9-4</b> 带旋转的阵列（AREF）：阵列的行列方向与坐标轴不平行，图中标出阵列角点坐标（如 (225.1666,330)、(305.1666,191.4359)、(80,61.4359)）与单元尺寸（2 与 30），图上的标注写明其主题是“computing coordinates for rotated AREF parameters”。来源：课件 p10</figcaption>
+  </figure>
+
+  <p>
+    图 9-4 想说明的是：当阵列整体被旋转之后，工具无法直接读取行间距与列间距，必须由阵列给出的角点坐标反算出列向量与行向量，才能把阵列正确铺开。引用省下了文件体积，代价是每一次引用都必须正确解释它的变换。
+  </p>
+
+  <h3 id="ch09-8">本讲要点</h3>
+  <div class="takeaway">
+    <ol>
+      <li>布局决定每个单元落在哪一行哪一位，也决定布线能否收敛；布线分为全局布线（分配资源、估算拥塞）与详细布线（落实精确几何与过孔）两级，是对问题规模的分解。</li>
+      <li>芯片收尾是提交前的最后步骤：填充单元保证行内图形连续与密度均匀，天线单元为长导线所连的栅极提供电荷泄放路径；随后用 DRC 检查几何合法性、用 LVS 检查版图与网表一致性，任何几何改动都要重跑这两项检查。</li>
+      <li>GDS2 / GDSII 是沿用数十年的二进制版图格式，不压缩、没有官方维护机构，并且只包含几何描述（矩形、多边形、路径），电气语义都留在设计数据库与网表中。</li>
+      <li>layer 与 purpose 都是 8 位数，组合出约 65k 种掩模可能，编号由各工艺厂的 PDK 分配；层次化、阵列、旋转与镜像让同一份几何可以复用，代价是每次引用都要正确解释其变换参数。</li>
+    </ol>
+  </div>
+</section>
+<section class="chapter" id="ch10">
+  <div class="ch-head">
+    <span class="ch-no">第 10 讲</span>
+    <h2>功耗分析与 VCD：动态功耗、漏电流与基于仿真的活动估计</h2>
+    <p class="ch-meta">对应课件：10_VCD.pdf ｜ 关键词：dynamic power、leakage、activity factor、clock gating、power gating、DVFS、VCD、IR drop</p>
+  </div>
+
+  <div class="lead">
+    前九讲解决了"把芯片做出来、做对、做快"。本讲处理另一个同样致命的约束：芯片会耗多少电。我们先从物理上讲清 CMOS 电路的能量到底耗散在哪四条路径上，推导出动态功耗公式并解释每一项为什么降不下去，再介绍常用的省电手段；后半部分说明为什么准确的功耗估计必须依赖真实开关活动，以及 VCD（Value Change Dump）文件如何把仿真中的每一次值变化记录下来供功耗工具使用。
+  </div>
+
+  <h3 id="ch10-1">10.1 工艺微缩已经变成"功耗受限"</h3>
+  <p>
+    课件开篇给出一组来自 Intel 制造工艺的数据（课件 p5）：从 7nm 到 5nm，逻辑密度提高到 1.83 倍、速度提升 13%、功耗下降 21%；从 5nm 到 3nm，密度再提高 1.7 倍、速度提升 11%，但功耗只下降 27%。把两个数放在一起看就发现问题了：<b>密度涨得比功耗降得快</b>。如果设计一块与旧工艺等面积的芯片，塞进去的晶体管更多，总功耗反而上升（等面积芯片功耗 1.24 倍）。换句话说，工艺微缩带来的红利在功耗这一项上已经被吃掉了，芯片能集成多少晶体管，越来越取决于"散得起多少热、供得起多少电流"，而不是"画得下多少晶体管"。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p005_993375219d.jpg" alt="7nm、5nm、3nm 三代工艺的密度、速度与功耗提升对比" loading="lazy">
+    <figcaption><b>图 10-1</b> 近几代逻辑工艺的微缩收益：密度持续增长，速度小幅提升，功耗降幅有限。来源：课件 p5</figcaption>
+  </figure>
+
+  <p>
+    处理器的发展趋势同样说明了这一点（课件 p6，数据来自 karlrupp/microprocessor-trend-data）：晶体管数量几十年来一直按指数增长，但单线程性能与主频在 2000 年代中期先后"撞墙"，典型功耗也随之走平——行业转而用多核消化新增的晶体管。功耗进不去了，只能换一种方式使用它。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p006_fa7950cdab.jpg" alt="1970 至 2020 年处理器晶体管数、单线程性能、主频、典型功耗与逻辑核数的趋势图" loading="lazy">
+    <figcaption><b>图 10-2</b> 微处理器趋势：晶体管数持续指数增长，而单线程性能、频率与典型功耗在 2000 年代后趋于平缓，增长转向核数。来源：课件 p6</figcaption>
+  </figure>
+
+  <h3 id="ch10-2">10.2 先分清：我们关心的是功率还是能量</h3>
+  <p>
+    日常语言里"功耗"混用了两个物理量，课件第一步就把它们分开（课件 p7）：
+  </p>
+  <ul>
+    <li><b>功率（power）</b>决定的是"当下"的约束：电源分配网络要多粗的导线、电迁移（electromigration）、IR 压降（IR drop），以及散热——必须把热带走电路才能持续工作。功率过大，芯片会烧毁或降频。</li>
+    <li><b>能量（energy）</b>决定的是"干完一件事"的代价：完成一个数据项、一份工作负载所需的功率乘以时间，即单位工作的能量。它决定电池续航，也决定做同样的事谁更省。</li>
+  </ul>
+  <p>
+    两者相关但不是一回事：把频率降低一倍，功率近似减半，但工作时间拉长一倍，能量几乎没省。所以我们两个都得关心，而且后面会看到，能量往往更值得优先优化。
+  </p>
+
+  <div class="note"><b>注：</b>本讲标题里有 "IR Drop"。课件正文中只在 p7 把它列为"为什么功率重要"的一条（电源网络有电阻，电流流过时产生压降，使局部实际供电电压低于标称值，可能影响速度与漏电），没有展开电源网络分析的方法细节，本讲也如实点到为止。</div>
+
+  <h3 id="ch10-3">10.3 CMOS 电路的能量到底耗在哪：四条路径</h3>
+  <p>
+    对 CMOS 电路，能量耗散有四个来源（课件 p8）：电荷转移（charge transfer）、短路电流（short-circuit currents）、静态负载（static loads）与漏电流（leakage currents）。之所以能这样干净地分类，是因为 CMOS 有三条结构性事实：负载是纯电容性的（没有电阻负载）；信号在电源轨之间满摆幅（VDD 到 GND）；静止时没有直流通路，只有在翻转时才有电流流动；且上升与下降翻转耗能对称。
+  </p>
+  <p>
+    先看最大头——电荷转移。以反相器为例（课件 p9），输入 0→1 时 nMOS 导通，把负载电容 C<sub>k</sub> 上的电荷放掉（discharge）；输入 1→0 时 pMOS 导通，由电源给 C<sub>k</sub> 充电（charge）。充进去的能量存在节点电容里：E = ½·C<sub>k</sub>·V<sub>DD</sub><sup>2</sup>；放电时这份能量在 nMOS 上变成热。充电过程同样耗掉 ½·C<sub>k</sub>·V<sub>DD</sub><sup>2</sup>（电源付出的能量一半存在电容、一半耗在 pMOS 上，这是能量守恒的直接结果）。所以一个完整周期（充一次、放一次）耗能 E<sub>cycle</sub> = C<sub>k</sub>·V<sub>DD</sub><sup>2</sup>。这里的 C<sub>k</sub> 既包括栅电容也包括连线电容——这正是第 8 讲寄生提取的成果在功耗上的意义。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p009_003bf252dd.jpg" alt="CMOS 反相器中充电与放电电流路径示意" loading="lazy">
+    <figcaption><b>图 10-3</b> 电荷转移：输入 0→1 时放电（蓝），1→0 时充电（红），每个方向各耗 ½·C<sub>k</sub>·V<sub>DD</sub><sup>2</sup>。来源：课件 p9（改绘自 Hubert Kaeslin《Top-Down Digital VLSI Design》Vol.2）</figcaption>
+  </figure>
+
+  <h3 id="ch10-4">10.4 翻转率与活动因子：动态功耗公式</h3>
+  <p>
+    并不是每个节点每个周期都翻转。在一个计算周期里，节点要么被充电、要么被放电，平均概率是 0.5；但很多节点根本不动。于是引入<b>活动因子</b>（activity factor）α<sub>k</sub>：节点 k 在一个周期内发生翻转的概率。单个节点每个计算周期的平均耗能为（课件 p11）：
+  </p>
+  <p>E<sub>k</sub> = 0.5 · α<sub>k</sub> · C<sub>k</sub> · V<sub>DD</sub><sup>2</sup></p>
+  <p>
+    把所有节点求和就得到总能量，再乘以每秒重复操作的次数 f（频率），得到平均动态功耗（课件 p14）：
+  </p>
+  <p>P<sub>dyn</sub> = 0.5 · α · C · f · V<sub>DD</sub><sup>2</sup></p>
+  <p>
+    这个公式是本讲最重要的结论之一，因为它直接告诉了我们四个降功耗的方向（课件 p15）：降低电压、降低频率、减小负载电容、降低活动。但课件紧接着给每一项配了一连串反问：降电压后还能不能完成同样的工作？降频率后同样的活要不要更多周期？负载电容当初为什么会那么大？现在的活动里有多少对结果毫无贡献？——每个方向都有代价或前提，后面 10.7、10.8 节会逐一回应。
+  </p>
+  <p>
+    α 实际是多少？它并不均匀。流水线寄存器每拍都翻，α ≈ 0.5；而配置数据、校准参数、模式/状态信息、缓慢变化的系数这些节点几乎不翻，活动远低于 0.5（课件 p13）。更麻烦的是<b>毛刺（glitch）</b>：组合逻辑输入到达时间不一致时，输出可能在一个周期内翻转多次，把 α 推到 0.5 以上，个别过度毛刺的节点 α 甚至大于 1（课件 p12、p13；长组合链比短流水级有更多毛刺机会）。这意味着：想准确知道 α，靠静态猜测不行，<b>必须做带延迟反标的版图后仿真</b>——这句话就是后半讲 VCD 的伏笔。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p012_b0b7a78f50.jpg" alt="按活动因子分档着色的数据处理通路：不同节点的 α 从小于 0.5 到大于 5 不等" loading="lazy">
+    <figcaption><b>图 10-4</b> 一个实际数据通路中各节点的活动因子差异（图例从 A: α&lt;0.5 到 G: α&gt;5，另有饱和/截断单元）。活动在电路内分布极不均匀，毛刺会显著抬高局部 α。来源：课件 p12（Bürgin 等，DAC 2006）</figcaption>
+  </figure>
+
+  <h3 id="ch10-5">10.5 短路电流、静态负载与漏电流</h3>
+  <p>
+    电荷转移是"有用的那部分能量"——它把信号从一级传到下一级，理想情况下这该是 CMOS 唯一的耗能。但还有三项额外开销（课件 p16）。
+  </p>
+  <p>
+    <b>短路电流。</b>反相器静止时，nMOS 与 pMOS 必有一个关断，VDD 与 GND 之间没有直流通路；但在输入翻转的短暂窗口内，两只管子同时导通，形成从 VDD 到 GND 的短路路径，这股电流对输出毫无贡献（课件 p17–18）。在一定假设下可以近似估计这部分能量（课件 p19，β 为 MOSFET 增益因子）。实践中有两点值得注意（课件 p20）：其一，库厂商通常不把短路电流单独建模，而是用一次电路仿真测得的总电流给出统一的功耗/频率数据，所以<b>解读功耗数字时要小心</b>，它分不清充电电流和短路电流；其二，控制短路电流的主要手段是控制信号的过渡时间（transition time），单元库通常规定最大过渡时间，它在设计规则中出现。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p019_68cbbf757e.jpg" alt="反相器翻转时两只晶体管同时导通形成的 crossover 短路电流路径" loading="lazy">
+    <figcaption><b>图 10-5</b> 翻转期间的交叠（crossover）电流：输入经过中间电平时 nMOS、pMOS 同时导通，电流直接从 VDD 流向 VSS。来源：课件 p19（改绘自 Hubert Kaeslin，Vol.2）</figcaption>
+  </figure>
+
+  <p>
+    <b>静态负载。</b>CMOS 之前的时代静态负载很常见；如今只在另类逻辑风格、上拉/下拉结构、端接电阻和模拟电路中还会遇到。此时电流持续流过电阻 R<sub>k</sub>，能耗乘上负载接通的时间占空比 δ<sub>k</sub>（课件 p21）。纯数字 CMOS 设计中这一项通常可以忽略。
+  </p>
+  <p>
+    <b>漏电流——真正的大问题。</b>理想世界里晶体管是理想开关、栅是理想电容、衬底没有电流；现实中漏电有四个来源（课件 p22）：关断 MOSFET 的亚阈值导通（I<sub>ds off</sub>）、反偏的漏-衬底与源-衬底结（I<sub>db rev</sub>）、反偏的阱-阱/阱-衬底结（I<sub>bb rev</sub>），以及穿过栅介质的电子隧穿（I<sub>g tun</sub>，即栅漏电）。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p023_4d67028572.jpg" alt="CMOS 反相器版图剖面中标出的各条漏电流路径" loading="lazy">
+    <figcaption><b>图 10-6</b> CMOS 门中的漏电路径（a: 输入高、b: 输入低）：亚阈值电流 I<sub>ds off</sub>、反偏结电流 I<sub>db rev</sub>、I<sub>bb rev</sub> 与栅隧穿电流 I<sub>g tun</sub>。来源：课件 p23（改绘自 Hubert Kaeslin，Vol.2）</figcaption>
+  </figure>
+
+  <p>
+    漏电为什么是个大问题？课件给了三个理由（课件 p26）。第一，<b>量变大</b>：单管漏 1 pA 看似无害，十亿只管子就是 1 pA × 10<sup>9</sup> = 1 mA 的持续电流，而且不做任何有用功。第二，<b>被我们主动恶化了</b>：漏电流随阈值电压指数变化，而为了开关更快、也为了配合更薄氧化层不得不降低的电源电压，业界一直在持续降低 V<sub>th</sub>。第三，<b>随温度急剧恶化</b>：100 ℃ 范围内漏电可增大 10 到 100 倍——这是一个正反馈：越热越漏，越漏越热。下表的实测数据（课件 p25）能同时看到这两点：250 nm 工艺 nMOS 关断电流在 25 ℃ 时为 3 pA/μm，到 125 ℃ 涨到 420 pA/μm；130 nm 工艺因阈值更低，同一温度下从 18 000 pA/μm 涨到 103 000 pA/μm。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p025_a3f5b6893a.jpg" alt="250nm、130nm、22nm 工艺在不同结温下的典型关断电流数据表" loading="lazy">
+    <figcaption><b>图 10-7</b> 典型漏电流数据：工艺越新漏电越大，且随结温急剧上升（注意温度依赖性）。来源：课件 p25（改绘自 Hubert Kaeslin，Vol.2）</figcaption>
+  </figure>
+
+  <h3 id="ch10-6">10.6 总能量与总功耗：公式简单，各项却互相牵制</h3>
+  <p>
+    把四条路径加总（课件 p27）：每周期能量 E<sub>cp</sub> 由电荷转移、短路、静态负载与漏电四项组成，其中静态负载和漏电流在整个周期 T<sub>cp</sub> 内持续贡献。近似之后（课件 p28），课件特别圈出结论：<b>VDD 是占主导地位的项</b>——动态能量带 V<sub>DD</sub><sup>2</sup>，漏电也随 VDD 下降而能降低的部分要通过降 V<sub>th</sub> 换来。
+  </p>
+  <p>
+    换成功率形式（课件 p29）：
+  </p>
+  <p>P<sub>total</sub> = P<sub>static</sub> + P<sub>dynamic</sub> = I<sub>static</sub> · V<sub>DD</sub> + 0.5 · α · f · C · V<sub>DD</sub><sup>2</sup></p>
+  <p>
+    其中 I<sub>static</sub> 是静止时流过的全部电流，α 取决于电路正在做什么，f 是时钟频率，C 是被充电的节点电容（即网表决定的负载），V<sub>DD</sub> 是电源电压。课件在这里提醒了两句非常容易忽视的话：<b>功率并不受你做了多少工作的影响</b>（空转的芯片照样漏电、时钟照样翻转），而<b>能量才是更该关心的量</b>。
+  </p>
+  <p>
+    那么照公式降每一项就行了？课件用整一页泼了冷水（课件 p31）：I<sub>static</sub>——我们要晶体管快，快的管子就漏；α——芯片总得干活；f——要性能就得有时钟频率；C——要功能就得有这些门；V<sub>DD</sub>——晶体管要达到给定速度至少需要某个电压。五项没有一项是免费的，而且它们互相纠缠（课件 p30 特意批注："要是它们相互独立就好了"）。于是得出本讲的一句纲领：<b>降低能耗的唯一真正办法是消灭浪费</b>。后面所有优化技术——门控、调压、关断——本质上都是在消灭某种浪费。
+  </p>
+
+  <h3 id="ch10-7">10.7 VDD 与 V<sub>th</sub> 的拉锯：过驱动、效率最优点与体偏置</h3>
+  <p>
+    既然 VDD 平方出现在动态功耗里，它就是最值得动的一项。但降压会变慢：传播延迟 t<sub>pd</sub> 取决于过驱动（overdrive）比率 V<sub>DD</sub>/V<sub>th</sub>（课件 p33，式中的 α 是速度饱和指数，早年约为 2，器件缩小后降到 1）。直觉是 V<sub>DD</sub> 高、V<sub>th</sub> 低则快；好消息是现代工艺里过驱动并不需要很大（课件 p34：小于 4 就够），所以只要能把 V<sub>th</sub> 压下来，VDD 也可以跟着降。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p034_a499157f55.jpg" alt="过驱动因子与计算速率、动态功耗、单位数据能量之间的关系曲线" loading="lazy">
+    <figcaption><b>图 10-8</b> 过驱动因子（V<sub>DD</sub>/V<sub>th</sub>）与各量的关系：动态功耗随过驱动上升，单位数据能量在低过驱动处有最小值。来源：课件 p34（改绘自 Hubert Kaeslin，Vol.2）</figcaption>
+  </figure>
+
+  <p>
+    但 V<sub>th</sub> 不能白降——它漏电。所以 V<sub>th</sub> 的选取本质上是<b>速度与漏电之间的平衡</b>（课件 p35）：降 V<sub>th</sub> 换速度的同时把亚阈值区整体抬高，漏电增大；提高 V<sub>th</sub> 则相反。把 V<sub>DD</sub> 一路降下去会发生什么（课件 p37）？电压降、速度降，但效率（每焦耳完成的工作量）反而升——直到某一点，漏电开始在总功耗中占主导，效率掉头向下。所以对每个电路存在一个<b>效率最优点</b>，它并不是电压最高或最低的点。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p037_685847bbf3.jpg" alt="某测试芯片的效率随 VDD 变化曲线：效率先升后降，存在最优点" loading="lazy">
+    <figcaption><b>图 10-9</b> 实测效率 vs VDD（Rossi 等，IEEE Micro 2017）：VDD 降低时最高频率下降，但 MOPs/mW 先升后降，漏电主导后效率下跌，存在最优点。来源：课件 p37</figcaption>
+  </figure>
+
+  <p>
+    时间维度上，电压的历次下降正是沿着这条逻辑走的（课件 p36）：5 V 时代是恒压微缩、大过驱动（约 6 倍）跑高速；进入恒场微缩（constant-field scaling）后 VDD 与 V<sub>th</sub> 同步下压；如今电压降到 1 V 附近后基本走平，进入 DVFS 与自适应阈值控制的年代——图表末尾那个大大的问号，是课件对"接下来还能怎么降"的诚实存疑。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p036_e4750db2b3.jpg" alt="1980 至 2020 年工艺电源电压与阈值电压的下降历程，标注恒压微缩、恒场微缩与 DVFS 三个阶段" loading="lazy">
+    <figcaption><b>图 10-10</b> 历年工艺的电源电压（蓝）与典型阈值电压（红）：从恒压微缩到恒场微缩，再到近年的 DVFS 与自适应阈值控制时代。来源：课件 p36（改绘自 Hubert Kaeslin，Vol.2）</figcaption>
+  </figure>
+
+  <p>
+    漏电与速度的矛盾还有两个工程出口（课件 p39）。其一，现代工艺（65 nm 及更新）提供多档阈值：SLVT、LVT、RVT、HVT、UHVT 等，有的库多达 6 档，工具和使用者可以按需混搭——关键路径用低阈值快管，其余用高阈值省漏电。其二，体偏置（body biasing）可以动态微调有效阈值：<b>反向体偏置</b>（reverse body bias）抬高有效阈值、减少漏电；<b>正向体偏置</b>（forward body bias, FBB）降低有效阈值、换取速度。课件给的两个实测例子说明 FBB 的用法（课件 p40、p41）：快工艺角（FF）与慢工艺角（SS）之间约有 22→37 MHz 到 490→730 MHz 量级的频率差，FBB 可以"BOOST"把慢芯片的频率拉上去吃掉功耗余量；反过来，在固定目标性能下施加 FBB 后可以用更低的 VDD（0.80 V 降到 0.65 V 量级）达到同样性能，功耗省约 20%。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p041_page.jpg" alt="利用正向体偏置在保持性能不变的情况下降低 VDD 从而省电的示意图" loading="lazy">
+    <figcaption><b>图 10-11</b> 用正向体偏置找回性能：目标频率不变，施加 FBB 后以更低 VDD 达成同样性能，功耗降低约 20%（示意图，比例未按实际）。来源：课件 p41</figcaption>
+  </figure>
+
+  <h3 id="ch10-8">10.8 消灭浪费：时钟门控、输入静默、DVFS 与电源门控</h3>
+  <p>
+    回到动态功耗公式，α 这一项的影响是<b>线性</b>的，而且活动很容易在数量级上变化，所以它是性价比最高的优化对象（课件 p44）。课件列出的手段：
+  </p>
+  <ul>
+    <li><b>时钟门控（clock gating）</b>：触发器未使能时停止向它传播时钟。时钟树本身每拍都在翻转，是纯粹的浪费源，这是数字设计中最常用的省电手段。</li>
+    <li><b>输入静默（input silencing）</b>：对不会被用到的那部分组合逻辑，停止输入信号的传播。课件举的例子是 ALU 或多个并行单元同时工作在同一组输入上、但最终只选一路——其余各路的工作全是浪费。</li>
+    <li><b>减少毛刺</b>：更短的流水级毛刺机会更少，工具也可以平衡路径来降低毛刺。</li>
+    <li><b>算法层选择</b>：数值表示会影响活动（符号/幅值码、格雷码 vs 二进制码）；并行化与推测执行都会带来额外活动，需要在性能与功耗之间权衡。</li>
+    <li><b>更好的算法</b>：用更少的资源做同样的事，量化、近似计算（课件 p43）。</li>
+  </ul>
+  <p>
+    <b>DVFS（动态电压频率调节）</b>则同时动 α、f 与 VDD。它的物理依据前面已经铺好：动态功耗随 f 线性、随 V<sub>DD</sub><sup>2</sup> 变化，而速度由过驱动决定，所以电压和频率必须配套调节（课件 p47）。课件 p32 先给了它的一个朴素用途——<b>热保护</b>：几十亿晶体管的芯片动态功耗产生的热可能太多，最简单有效的解法就是降频；现代动态频率控制系统寻找的是平衡，关键任务分到更多"电力"尽快干完，其他任务跑在慢核上——所有手机和现代处理器都在用这些技巧。课件 p45 的结构图给出了完整机制：片外可调降压转换器按电压 ID 输出实际电压，片上工作负载监视器根据队列中等待的数据量等负载指标，向时钟生成器请求频率、向电压调节器请求电压，还可同时调节体偏置。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p045_198340faea.jpg" alt="DVFS 系统结构：片外可调降压转换器与片上电压时钟域、负载监视控制器、可调时钟与体偏置生成器" loading="lazy">
+    <figcaption><b>图 10-12</b> 动态电压频率调节（DVFS）的闭环：负载监视与控制器根据队列等待数据量等指标，请求供电电压、时钟频率与体偏置电压。来源：课件 p45（改绘自 Hubert Kaeslin，Vol.2）</figcaption>
+  </figure>
+
+  <p>
+    静态功耗那一项的对策是<b>电源门控（power gating）</b>：用门控晶体管（sleep transistor）把暂时不用的模块与电源/地断开，模块不再消耗任何功率（课件 p46）。但课件紧接着用一串"但是"说明它绝不免费：断电会<b>丢失状态</b>，恢复前可能要保存/恢复（本身耗能）；重新上电时要给整个电源网络充电——给电容充电要能量、要时间、要大电流；电源分配网络本身需要大量电容。结论是：<b>只有关断足够长的时间才划算</b>。
+  </p>
+
+  <figure>
+    <img src="img/10_VCD_p046_31bcc1a0b2.jpg" alt="电源门控结构：在下拉网络与地之间插入加宽的休眠晶体管，由 SLEEP 信号切换运行与待备状态" loading="lazy">
+    <figcaption><b>图 10-13</b> 电源门控：下拉网络与 VSS 之间插入额外加宽（可多个共用）的休眠晶体管，SLEEP 信号在运行（operation）与待备（standby）之间切换。来源：课件 p46（改绘自 Hubert Kaeslin，Vol.2）</figcaption>
+  </figure>
+
+  <h3 id="ch10-9">10.9 为什么功耗估计需要 VCD</h3>
+  <p>
+    前面反复出现一个词：活动 α。公式里每个系数——C 来自网表和寄生提取、V<sub>DD</sub> 是设计选择、f 是时钟——都可以在设计数据库里查到，唯独 α 取决于"电路在干什么"，数据库里没有。怎么得到它？靠仿真（课件 p49）。功能仿真器（课件点名 Verilator）可以把仿真期间每个网络上每一次值的变化直接转储（dump）到一个文件里，信号每变一次就记一条——这个文件就是 VCD（Value Change Dump）。
+  </p>
+  <p>
+    拿到 VCD 之后，功耗分析分两种用法（课件 p49）：
+  </p>
+  <ul>
+    <li><b>统计式功耗分析</b>：只需要每个节点的翻转次数（开关活动），乘以节点电容、对所有节点求和即得功耗；此用法下频率与电压视为常数，每个节点归结为一个数。<b>不需要保留整个文件</b>，只要活动统计就够了——课件 p13 的流程图正是这条路：激励向量 + 提取后网表 → 门级仿真 → 累计翻转计数 → 与节点电容一起送入功耗计算。</li>
+    <li><b>逐周期动态功耗分析</b>（观察单个时钟周期内的电流）：这时 VCD 记录的波形本身才是关键；课件指出这类需求更多与信号完整性（signal integrity）分析相关，而非一般功耗分析。</li>
+  </ul>
+
+  <figure>
+    <img src="img/10_VCD_p013_87a519a661.jpg" alt="基于仿真的功耗估计流程：激励向量与提取网表经门级仿真得到累计翻转计数，再与节点电容一起计算功耗" loading="lazy">
+    <figcaption><b>图 10-14</b> 基于仿真的功耗估计流程：激励向量（stimuli vectors）与提取后网表进入门级仿真，产出的累计翻转计数（accumulated toggle counts）与节点电容一起送入功耗计算。来源：课件 p13</figcaption>
+  </figure>
+
+  <p>
+    把活动做准并不容易（课件 p50）。毛刺可能贡献可观的活动，要捕捉真实延迟就必须做反标（annotation）——用布局布线后带全部寄生效应对提取出的 SDF 延迟做门级仿真；这样的仿真很慢，跑不了太久，因此需要找到能"快速进入典型活动"的激励向量，而让芯片开机就跑在典型工作状态本身也不简单。课件把风险说得很直白：<b>你的精度上限就是你用的向量的精度</b>——开关活动直接线性缩放动态功耗，向量选错，功耗结果可以错出几个数量级。
+  </p>
+
+  <h3 id="ch10-10">10.10 VCD 文件剖析：逐行读一个真实片段</h3>
+  <p>
+    VCD 是 Verilog 语言标准（IEEE 1364）定义的文本格式，语义很简单：先声明有哪些信号、各用什么标识符表示，再按时间戳逐条记录值变化。课件 p51 给出了一个来自 Croc SoC 测试平台的片段（课件原样保留，两栏排版在文件中是先后两段）：
+  </p>
+
+  <div class="code-block">
+    <div class="code-title">VCD 文件片段（照抄课件 p51）</div>
+    <pre><code>$timescale
+        1ns
+$end
+$scope module tb_croc_soc $end
+$scope module i_croc_soc $end
+$var parameter 32 ! GpioCount $end
+$var wire 1 " clk_i $end
+$var wire 1 # rst_ni $end
+$var wire 1 $ ref_clk_i $end
+$var reg 16 @ gpio_o [15:0] $end
+# […]
+$upscope $end
+$enddefinitions $end
+
+$dumpvars
+#0
+1"
+0#
+1$
+b1111000011001100 @
+$end
+#25
+0"
+#50
+1"
+#56
+1#</code></pre>
+  </div>
+
+  <p>逐行解释如下：</p>
+  <table class="tbl">
+    <thead><tr><th>片段</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>$timescale 1ns $end</code></td>
+        <td>声明时间单位：文件里所有时间戳都以 1 ns 为单位。每个关键字块都以 <code>$end</code> 结束，这是 VCD 的通用配对规则。</td>
+      </tr>
+      <tr>
+        <td><code>$scope module tb_croc_soc $end</code><br><code>$scope module i_croc_soc $end</code></td>
+        <td>声明层次化作用域：先是测试平台顶层模块 <code>tb_croc_soc</code>，其内的实例 <code>i_croc_soc</code>。后续信号名都相对于当前 scope，和 Verilog 层次路径一一对应。</td>
+      </tr>
+      <tr>
+        <td><code>$var parameter 32 ! GpioCount $end</code></td>
+        <td>声明一个变量：类型 parameter、位宽 32、VCD 标识符为 <code>!</code>、名字 <code>GpioCount</code>。VCD 用短标识符代替可能很长的层次化信号名，标识符可以是 <code>!</code>、<code>"</code>、<code>#</code>、<code>$</code>、<code>@</code> 这类可打印字符，使文件更紧凑。</td>
+      </tr>
+      <tr>
+        <td><code>$var wire 1 " clk_i $end</code></td>
+        <td>1 位 wire 类型信号 <code>clk_i</code>（输入时钟），映射到标识符 <code>"</code>。</td>
+      </tr>
+      <tr>
+        <td><code>$var wire 1 # rst_ni $end</code></td>
+        <td>1 位信号 <code>rst_ni</code>（低有效复位），标识符 <code>#</code>。</td>
+      </tr>
+      <tr>
+        <td><code>$var wire 1 $ ref_clk_i $end</code></td>
+        <td>1 位信号 <code>ref_clk_i</code>（参考时钟），标识符 <code>$</code>。</td>
+      </tr>
+      <tr>
+        <td><code>$var reg 16 @ gpio_o [15:0] $end</code></td>
+        <td>16 位 reg 类型向量 <code>gpio_o [15:0]</code>（GPIO 输出），标识符 <code>@</code>。向量以 <code>b</code> 开头的二进制串记录。</td>
+      </tr>
+      <tr>
+        <td><code>$upscope $end</code> / <code>$enddefinitions $end</code></td>
+        <td>结束当前作用域（回到上一级）；<code>$enddefinitions</code> 表示声明段结束，之后全部是值变化记录。</td>
+      </tr>
+      <tr>
+        <td><code>$dumpvars … $end</code></td>
+        <td>转储初始值段：列出仿真开始时所有已声明信号的初值，使波形从 t=0 起就是完整的（否则工具只能从第一次变化开始画）。</td>
+      </tr>
+      <tr>
+        <td><code>#0</code></td>
+        <td>时间戳：t = 0 ns。其后各行都是该时刻的值变化。</td>
+      </tr>
+      <tr>
+        <td><code>1"</code> / <code>0#</code> / <code>1$</code></td>
+        <td>标量值变化：值在前、标识符在后。<code>1"</code> 即 clk_i 初值为 1，<code>0#</code> 即 rst_ni 初值为 0（复位有效），<code>1$</code> 即 ref_clk_i 初值为 1。</td>
+      </tr>
+      <tr>
+        <td><code>b1111000011001100 @</code></td>
+        <td>向量值变化：<code>b</code> 后跟二进制串，空格后是标识符——gpio_o 初值为 16'b1111000011001100。</td>
+      </tr>
+      <tr>
+        <td><code>#25</code> / <code>0"</code></td>
+        <td>t = 25 ns，clk_i 变 0。结合 #50 的上升沿，可知该时钟周期为 50 ns。</td>
+      </tr>
+      <tr>
+        <td><code>#50</code> / <code>1"</code></td>
+        <td>t = 50 ns，clk_i 变 1：又一个上升沿。</td>
+      </tr>
+      <tr>
+        <td><code>#56</code> / <code>1#</code></td>
+        <td>t = 56 ns，rst_ni 变 1：复位释放。芯片从这里开始正式工作——这也呼应了 10.9 节说的"让仿真尽快进入典型活动并不简单"。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note"><b>注：</b>统计式功耗分析并不需要看懂上面这些细节的"波形"，工具只从中统计每个标识符的变化次数；但理解格式有助于检查仿真是否真的覆盖了典型工作状态（比如复位是否释放、时钟是否在转）。</div>
+
+  <div class="note"><b>注（课件外补充）：</b>工业界还有只存开关活动统计而不存波形的替代格式，如 SAIF（Switching Activity Interchange Format），体积远小于 VCD、与统计式功耗工具配套使用。本讲课件只展开 VCD，未介绍 SAIF 的语法细节，这里仅指明其存在与定位。</div>
+
+  <h3 id="ch10-11">本讲要点</h3>
+  <div class="takeaway">
+    <ol>
+      <li>功耗已成为微缩的首要限制：新工艺密度涨幅大于功耗降幅，等面积设计的总功耗不降反升；功率约束供电与散热（电迁移、IR 压降、温度），能量决定单位工作的代价与续航，两者相关但不可互相替代。</li>
+      <li>CMOS 能量耗散有四条路径：电荷转移（有用部分，P<sub>dyn</sub> = 0.5·α·C·f·V<sub>DD</sub><sup>2</sup>）、短路电流（靠限制过渡时间控制）、静态负载与漏电流；漏电随 V<sub>th</sub> 指数变化且随温度在 100 ℃ 内可增 10–100 倍，是先进工艺的最大麻烦。</li>
+      <li>公式里的每一项都降不下去——要快就漏、要功能就要有门、要性能就要电压和频率；唯一真正的办法是消灭浪费：时钟门控、输入静默、减少毛刺降低活动，DVFS 按负载动态配平电压与频率，电源门控切断闲置模块的漏电但只在长时间关断时划算。</li>
+      <li>V<sub>DD</sub> 是主导项：降压省功耗最狠但会变慢，速度由过驱动 V<sub>DD</sub>/V<sub>th</sub> 决定，而降 V<sub>th</sub> 又增大漏电，因此存在效率最优点；多阈值单元混搭与正向/反向体偏置是工程上调节这对矛盾的常用手段。</li>
+      <li>活动因子 α 无法从数据库查到，只能靠带 SDF 延迟反标的版图后仿真获得；VCD 文件记录仿真中每个信号每次值的变化，统计式功耗分析从中提取各节点翻转数即可，波形本身只在逐周期电流/信号完整性分析中才需要；估计精度受限于激励向量的典型性，活动估计错一个数量级，功耗结果就错一个数量级。</li>
+    </ol>
+  </div>
+</section>
+<section class="chapter" id="ch11">
+  <div class="ch-head">
+    <span class="ch-no">第 11 讲</span>
+    <h2>IC 测试与 WGL：故障模型、扫描链、ATPG、JTAG、BIST 与测试波形文件</h2>
+    <p class="ch-meta">对应课件：11_WGL.pdf ｜ 关键词：yield、test coverage、defect level、stuck-at fault、ATPG、scan chain、DFT、boundary scan、JTAG / IEEE 1149.1、BIST、LFSR、BILBO、March test、WGL、timeplate</p>
+  </div>
+
+  <div class="lead">
+    前九讲把芯片从 RTL 一路做到了 GDS，并算清了它的功耗。但制造出来的芯片不一定是好的：工艺会让它们的参数各不相同，也会带来随机的开路与短路。本讲回答一个很实际的问题——怎样在几秒钟、几分钱的代价内判断一颗芯片是好是坏。我们先说清"为什么测试本质上是经济问题"，再建立故障模型（fault model）并推导测试覆盖率与缺陷率的关系；然后讲清自动测试向量生成（ATPG）为什么需要可测性设计（DFT）、扫描链（scan chain）如何把时序电路的测试退化成组合电路的测试；最后介绍存储器测试、内建自测试（BIST）、JTAG / IEEE 1149.1 边界扫描，以及向量最终落到测试机上的文件格式 WGL。
+  </div>
+
+  <h3 id="ch11-1">11.1 测试本质上是一道经济学题：十倍法则与失效的来源</h3>
+  <p>
+    课件开门见山：<b>IC 测试之所以存在，是因为它算得过账</b>（课件 p3）。课件用面包、汽车和 IC 做类比（课件 p4），比较它们的制造步骤数、原料成本、生产时间、批量还是单件生产、以及<b>故障能不能被修复</b>。最后一条最关键：面包烤坏了只能扔，汽车可以返修，而芯片一旦封装完成就几乎没有返工机会——正是"不能修"，把"出厂前把坏的挑出来"变成了唯一可行的手段。
+  </p>
+  <p>
+    第二个关键事实是<b>十倍法则</b>（rule of ten，课件 p5）：<b>故障每往后流经一个环节，代价就增加 10 倍</b>，课件给出的量级是 0.1、1、10、100、1000 美元这样一个序列。课件还补了三条不只是钱的理由：信誉、客户合同里的质量指标、以及"你的裸片会成为更大系统的一部分"。
+  </p>
+  <p>
+    芯片会怎么坏？课件用三个关键词分类：<b>BUGS</b>（设计缺陷）、<b>DEFECTS</b>（制造缺陷）、<b>RELIABILITY</b>（可靠性），来源包括规格有误、HDL 行为描述出错、工具流程问题、物理设计引入的寄生与制造问题、制造缺陷、参数波动、封装问题，以及老化与电迁移导致芯片工作一段时间后（部分）失效（课件 p6）。数量最大也最随机的一类是制造缺陷，课件引用的分析指出：<b>制造失效主要是开路与短路</b>（课件 p7）——落在关键区域（critical area）上的颗粒会造成导线断线，或让两根相邻的铜线搭在一起。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p007_3113f2aa6c.jpg" alt="颗粒缺陷落在关键区域导致开路与短路的示意图" loading="lazy">
+    <figcaption><b>图 11-1</b> 制造缺陷的两种基本形态：颗粒落在金属线的关键区域上，造成开路（左）或与相邻导线短路（右）。来源：课件 p7</figcaption>
+  </figure>
+
+  <p>
+    但开路与短路远不是全部。课件用一整页失效照片说明实际形貌复杂得多（课件 p8）：金属间介质失效、金属空洞、应力迁移、腐蚀、通孔空洞等。注意这个反差：<b>我们要用非常简单的模型去对付非常复杂的物理现实</b>。这是理解后面全部内容的前提——故障模型是"够用就好"的工程折中，而不是对物理的忠实描述。
+  </p>
+
+  <h3 id="ch11-2">11.2 良率、测试覆盖率与缺陷率：三个必须分清的指标</h3>
+  <p>
+    <b>良率</b>（yield）是制造出来的芯片里好片的比例（课件 p9）：Y = 好片数 / 制造出的芯片数。课件给出的性质是：理想情况 Y = 1.0；上述缺陷会让 Y 小于 1.0；<b>良率通常随时间改善，成熟工艺的良率大于 0.9</b>；而代工厂通常不愿意公布真实良率——这不只是商业秘密，它直接影响报价谈判，也解释了为什么必须再引入一个对客户更透明的指标。
+  </p>
+  <p>
+    <b>测试覆盖率</b>（test coverage）的定义是 TC = 我们能检测出的故障数 / 全部可能故障数（课件 p12）。注意这里的"故障"不是物理缺陷，而是<b>故障模型下的故障</b>：必须先把芯片里可能出的问题抽象成一批可枚举的模型故障，才能衡量测试方法抓住了其中多少。课件原文的措辞很到位："测试覆盖率告诉我们，在识别 IC 中哪怕最小的问题这件事上我们做得有多好。"
+  </p>
+  <p>
+    最终唯一真正重要的指标是<b>缺陷率</b>（defect level，课件 p13）：DL = 我们卖出但不会工作的 IC 数 / 我们卖出的 IC 总数。课件特别强调：<b>缺陷率不等于良率，也不等于制造出的坏片总数，而只是客户拿到手里的那批芯片里坏片的比例</b>——良率是工厂内部的成本问题，缺陷率是对客户的承诺问题。三者由下式联系起来（课件 p14）：
+  </p>
+  <p>
+    <b>DL = 1 − Y<sup>(1−TC)</sup></b>
+  </p>
+  <p>
+    若 TC = 0（完全不测），指数 (1−TC) = 1，于是 DL = 1 − Y，所有坏片都被卖了出去；只要 TC 足够接近 1，指数就趋近 0，Y 的这个幂趋近 1，无论良率多低，DL 都趋近 0。<b>换句话说，覆盖率足够高之后，良率低只会让你亏钱，而不会让客户收到坏片</b>——成本问题与质量问题被解耦了。这正是课件 p14 的标题"无论良率如何，我们都能用测试覆盖率控制缺陷率"的含义。
+  </p>
+  <p>
+    课件 p15、p16 用两张曲线画出这个关系。图 11-2 是课件 p15 的"缺陷率随良率与检测覆盖率变化"曲线族；图 11-3 是课件 p16 的另一个视角：以良率 Y = 0.5、0.75、0.9、0.95、0.99 为参数，横轴是检测覆盖率，纵轴是缺陷率（1 in 100 到 1 in 100 000）。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p015_7b07e71db4.jpg" alt="缺陷率随良率与检测覆盖率变化的曲线族" loading="lazy">
+    <figcaption><b>图 11-2</b> 缺陷率（Defect Level）与良率、检测覆盖率的关系曲线。来源：课件 p15</figcaption>
+  </figure>
+
+  <figure>
+    <img src="img/11_WGL_p016_7ff654e4b1.jpg" alt="以良率为参数的缺陷率—检测覆盖率曲线，横轴只覆盖 98% 到 100%" loading="lazy">
+    <figcaption><b>图 11-3</b> 以良率 Y 为参数的缺陷率—检测覆盖率曲线。横轴只取了 98%–100% 这一小段，纵轴却跨三个数量级。来源：课件 p16</figcaption>
+  </figure>
+
+  <p>
+    这两张图最有信息量的地方不是曲线形状，而是<b>坐标轴的取值范围</b>：横轴只画到 98%–100%，因为低于这个区间缺陷率根本降不下来；纵轴却横跨三个数量级。这意味着"把覆盖率从 99.0% 提到 99.9%"这样看似微小的改进，可能对应缺陷率一个数量级的下降。<b>测试的收益是非线性的，且集中在最右侧那一小段。</b>
+  </p>
+
+  <div class="note"><b>注：</b>课件 p14 的公式在原始幻灯片上以指数上标排版，文本抽取时上标丢失，在抽取出的纯文本里显示为 <code>DL = 1 - Y (1-TC)</code>。本书写作 <b>DL = 1 − Y<sup>(1−TC)</sup></b>，因为课件 p15、p16 两张曲线（覆盖率趋近 100% 时缺陷率趋近 0；良率越低曲线越靠上）与该解释一致。需要精确引用时请以原始课件页面为准。</div>
+
+  <h3 id="ch11-3">11.3 故障模型与 ATPG：固定故障、激活与传播</h3>
+  <p>
+    课件 p17 用"验证"的三种语境把测试的位置说清了：VLSI1 在<b>规格阶段</b>问"我要设计的电路真的是需要的吗"、在<b>设计阶段</b>问"我设计出的电路真的实现了规格吗"，而 VLSI2 在<b>测试阶段</b>问的是"芯片一旦制造出来，我能不能分辨出能工作的和故障的"。前两个问题靠仿真和形式验证回答，第三个只能靠在物理芯片上施加激励、观察响应来回答。按时间行为，故障可分三类（课件 p18）：
+  </p>
+  <table class="tbl">
+    <thead><tr><th>类型</th><th>行为特征</th><th>课件的典型例子</th></tr></thead>
+    <tbody>
+      <tr><td><b>永久故障</b>（permanent）</td><td>系统坏了，并以同样的方式一直坏下去</td><td>IC 中的开路/短路；设计中的 bug</td></tr>
+      <tr><td><b>瞬态故障</b>（transient）</td><td>暂时影响系统行为，之后系统恢复正常</td><td>粒子（particle）；电源波动</td></tr>
+      <tr><td><b>间歇故障</b>（intermittent）</td><td>有时造成失效，有时不造成</td><td>关键时序路径上的冒险与竞争；老化中的元件</td></tr>
+    </tbody>
+  </table>
+  <p>
+    三类里唯一能被确定性复现和筛除的是永久故障，所以制造业测试的重心在它身上。其中最简单也最著名的模型是<b>固定故障</b>（stuck-at fault，课件 p19）：假设唯一的故障形态是"某个门的输入或输出被永久接在逻辑 0 上"（stuck at 0，记 <b>sa0</b>）或"永久接在逻辑 1 上"（<b>sa1</b>）。课件坦率列出它的缺点：它<b>并不真实</b>，物理故障可以更微妙复杂；它<b>无法建模信号线之间的短路</b>；也<b>无法建模功能路径上变长的延迟</b>。但它被广泛使用，因为实践中<b>工作得相当好</b>（实际失效的 IC 与该模型的预测有良好相关性），用它自动找向量<b>非常高效</b>，而更物理的模型实现代价要高出几个数量级。最后这句是整讲的底色：<b>"记住，测试的一切都是钱。"</b>——工业界宁可接受一个不精确的模型，因为一个精确但跑不动的模型等于没有模型。
+  </p>
+  <p>
+    怎样检测固定故障？课件 p20 到 p26 用七页反复推演同一个例子（图 11-4，输入 A、B、C、E，输出 L，B 上假设存在 sa0 故障），归纳出三个必须同时满足的条件：
+  </p>
+  <figure>
+    <img src="img/11_WGL_p020_09ff3e543c.jpg" alt="用于说明固定故障检测的组合电路示例，输入 B 上标注 sa0 故障" loading="lazy">
+    <figcaption><b>图 11-4</b> 固定故障检测的示例电路：在 B 点上假设一个 sa0（stuck-at-0）故障。来源：课件 p20（取自 Bushnell &amp; Agrawal《Essentials of Electronic Testing for Digital Memory &amp; Mixed-Signal VLSI Circuits》）</figcaption>
+  </figure>
+
+  <ul>
+    <li><b>激活（activate）故障</b>：要检测 B 上的 sa0，必须让这个点"本该是 1"——若它本该是 0，则即使被永久接在 0 上我们也看不出差别。所以第一步是把 B 驱动到与故障值相反的值（课件 p20）。</li>
+    <li><b>传播（propagate）故障</b>：错误值必须能影响到某个可观察的输出。课件 p21 标注了每根线上的"正确值/故障值"（<code>correct/faulty</code>）：只要路径上某个门的其他输入把输出"钉死"了（例如与门有一个输入为 0），错误值就走不过去。能正确反映故障的连线称为对该故障<b>敏感</b>（sensitized），由它们组成的路径叫<b>敏感路径</b>（sensitized path，课件 p25）。</li>
+    <li><b>可满足（justify）</b>：课件 p23 指出还要确认这些线上的值能被外部输入"合理化"，即不存在相互冲突的要求——若为传播故障需要在同一个门的两个输入上分别置 0 和 1，而这个门又由同一个外部输入驱动，该故障就找不到向量。</li>
+  </ul>
+  <p>
+    代入这个例子，课件 p24 的结论是：<b>向量 0111（按 A、B、C、E 的顺序）会让输出 L 在有 sa0 故障时呈现不同的值</b>。课件 p25 用标准术语总结：我们控制了电路的<b>主输入</b>（primary inputs，PI）并施加测试 t，t 激活了故障 f，同时把错误传播到了<b>主输出</b>（primary output，PO），于是观察到故障电路的输出与正确电路不同——这就是 ATPG 工具内部算法的全部目标。
+  </p>
+  <p>
+    于是<b>自动测试向量生成</b>（Automatic Test Pattern Generation，ATPG）的定义水到渠成（课件 p27）：<b>输入</b>是一个电路（通常门级网表）加一种故障模型（通常固定故障类型）；<b>输出</b>是一组能检测出所有已建模故障的输入向量；<b>核心问题</b>是为给定故障找出一个测试向量。课件点出一个很值得注意的性质：这类工具做得非常好，而且<b>完全不需要知道电路的功能</b>——它只把电路看成门和连线的图，在图上搜索。这是它相比"手写功能测试"最本质的优势。练习课里使用的是商业 ATPG 工具 TetraMAX。
+  </p>
+  <p>
+    当然事情没那么完美（课件 p28）：故障必须能到达主输出，且必须存在能让故障传播的输入向量，但<b>这并不总是成立</b>——故障可能是<b>冗余</b>的（redundant，任何输入组合都无法使其影响输出）；此外<b>多个故障同时存在可能阻断传播</b>，所以工程上采用"<b>单固定故障</b>"（single stuck-at fault）假设，一次只针对一个故障求解；最后，以上讨论只针对<b>组合电路</b>。
+  </p>
+
+  <div class="note"><b>注：</b>课件在 p19 把"无法建模功能路径上变长的延迟"列为固定故障模型的局限，但整份课件没有进一步展开延迟类故障的建模与测试方法；课件 p52 列出的 TF（跳变故障）属于存储器简化功能故障中的一类。因此本讲不对 transition delay / path delay 故障多做推演，如实点到为止。</div>
+
+  <h3 id="ch11-4">11.4 扫描链与可测性设计：让时序电路变得可测</h3>
+  <p>
+    时序电路的问题在于"看不见、摸不着"。课件 p29 用一张只画了几个触发器和逻辑块、没有任何标注的图提问"时序电路会怎样？"答案很直观：触发器的状态既不能被外部直接控制，也不能被外部直接观察。而 ATPG 要在电路上"设置内部节点的值"，前提是它可控制；要"看到内部节点的错误"，前提是它可观察。
+  </p>
+  <p>
+    解决办法是 DFT 中最经典的一招：<b>把触发器改造成带扫描能力的触发器</b>（课件 p30、p31）。课件 p31 的原文流程如下：
+  </p>
+  <div class="code-block">
+    <div class="code-title">基于扫描的测试流程（课件 p31 原文，保留英文）</div>
+    <pre><code>All FFs are converted to scan FFs
+  -> You add some minor area, timing overhead
+
+ATPG generates test vectors that could cover (all) faults
+For each vector:
+  - Serially shift the test vector in so that you control all FF outputs (scan_en=1)
+  - Run the circuit for one cycle (scan_en=0)
+  - The output is captured by FFs
+  - Serially read out the observed results from all FFs and compare
+  - You can shift in the new vector while reading out the last result, saves time</code></pre>
+  </div>
+  <p>
+    翻译成一句话：<b>当 scan_en=1 时，所有触发器首尾相连成一条移位寄存器（扫描链），外部可用少数几个引脚把任意状态"移"进每一个触发器，也可把每个触发器的值"移"出来；当 scan_en=0 时，电路恢复成正常的组合逻辑加触发器，让它跑一个时钟周期，触发器就捕获了电路对该状态的响应。</b>图 11-5 是课件 p30 的示意图，可以看到多个触发器被串成一条链，并有 <code>Scan in</code>、<code>Scan Enable</code>、<code>Scanout</code> 三个外部接口。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p030_e0ba12ce69.jpg" alt="所有触发器串成一条扫描链的示意，外部接口为 Scan in、Scan Enable、Scanout" loading="lazy">
+    <figcaption><b>图 11-5</b> 把寄存器全部改成可扫描触发器并串成扫描链：一条链把每个触发器的状态暴露给外部，Scan Enable 在"移位"与"正常功能"两种模式间切换。来源：课件 p30</figcaption>
+  </figure>
+
+  <p>
+    这一招之所以威力巨大，是因为它<b>把时序电路的测试问题退化成了组合电路的测试问题</b>——触发器不再是"内部状态"，而变成了一批可被直接写入、再直接读出的伪主输入和伪主输出，11.3 节那套算法就能原封不动地用在任意规模的时序电路上（课件 p31 的标题正是"现在我们可以为任何数字电路生成 SAF 的测试了"）。代价是<b>需要增加一点面积和时序开销</b>：每个触发器要加一个多路选择器或等价的扫描逻辑，扫描路径本身也有延迟。
+  </p>
+  <p>
+    真要用在量产上还会遇到新问题（课件 p32）：ATPG 向量要判断芯片是否制造合格，<b>每一颗芯片都要测</b>，每颗芯片要跑很多条向量，而每条向量都要<b>串行移进移出</b>——这直接换算成测试时间。课件 p44 把降低测试成本的手段摆在一起，并明确指出"不存在魔法方案"：<b>减少测试时间</b>（减少向量数，可能降低覆盖率；提高频率，需要更贵的测试基础设施）；<b>并行化</b>（用多条较短的扫描链代替一条长链，但需要更多引脚）；<b>在芯片内部加入能自测的电路</b>（即 BIST——它不是现成方案，需要针对你的电路自行设计，而更大的面积同样要花钱）。课件对这一切的总结是：<b>设计时就把这些问题考虑进去，这就是 DFT</b>。
+  </p>
+
+  <div class="warn"><b>坑：</b>扫描链不是免费的午餐。它把问题从"写不出向量"变成了"测得起吗"，同时引入面积、时序和引脚三方面开销。在面积紧张或时序极紧的设计里，这三项开销必须和"覆盖率不达标就要承担缺陷率风险"放在同一张账上权衡——这正是课件反复强调"测试的一切都是钱"的用意。</div>
+
+  <h3 id="ch11-5">11.5 参数波动、分档与测试成本：测试插在流程的哪个位置</h3>
+  <p>
+    到目前为止我们都默认"好芯片"是二值的：能工作或者不能工作。但课件用四页说明了一个更真实的情况：<b>参数波动决定性能</b>——波动范围内的芯片都"能工作"，但有些更快、有些更慢，于是"合格"这条线本身就是个决策。课件 p34–p37 给出的对策是分档（binning）：若<b>把中位数（median）当作测试值</b>，则一半芯片达不到这条线，参数量率（parametric yield）只有 50%；若<b>把测试值放低</b>，参数量率升到 85%，但卖出的芯片"有保证的性能"更低；若<b>用两个测试值分档</b>，先判断是不是快芯片、不是再判断是不是慢芯片，更快的按更高价格卖（课件用的是"15% 不合格、85% 可卖，其中 50% 慢芯片、35% 快芯片"的分布）；<b>继续增加档位</b>会让测试成本（时间）上升，但在一定程度上有利于利润，而<b>找到最优分档并不容易，必须事先决定</b>。图 11-6 是课件 p38 给出的商业晶圆实测分档图：每颗裸片按测试结果被染成不同颜色，颜色分布本身就是一片晶圆的"健康地图"。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p038_70de6de537.jpg" alt="商业晶圆的分档结果图，每颗裸片按测试结果分类著色" loading="lazy">
+    <figcaption><b>图 11-6</b> 商业晶圆上的分档（binning）实例：每颗裸片按测试结果落入不同档位，用颜色区分。来源：课件 p38</figcaption>
+  </figure>
+
+  <p>
+    分档靠硬件实现，这就是<b>自动测试设备</b>（Automated Test Equipment，ATE）：课件给出的信息是价格<b>数百万美元量级</b>、数百条 I/O 通道、多于 16 条电源通道、高于 1 Gbps 的速度和很大的向量存储器（课件配图是课程 VLSI4 练习中使用的 Advantest 93000 测试机，课件 p39）。课件 p40 进一步说明，<b>测试机的每一条通道本身就是一台精密仪器</b>：可配置成输入和/或输出、工作在各自不同的频率、驱动不同电压电平、使用不同判决阈值，并配有快速存储器用于<b>激励芯片、接收芯片的输出、与预期结果比较</b>。课件 p41 归纳出 ATE 的三种用途：在工厂车间做<b>量产</b>（多台并行，唯一关注点是尽快把分档做正确）；在公司内部开发<b>量产测试程序</b>（优化测试流程使它更便宜，课件直言"<b>测试工程师的钱就是在这里挣的</b>"）；以及作为<b>调试工具</b>（芯片不按预期工作时用来找原因）。
+  </p>
+  <p>
+    接下来是成本账。课件 p42 给出的单位成本结构是：
+  </p>
+  <div class="code-block">
+    <div class="code-title">课件 p42 的单位成本结构（按课件页面重排，保留英文术语）</div>
+    <pre><code>Unit cost =  One-time costs / Number of ICs   +   Wafer cost / (ICs/wafer we sell)
+             + Package + Testing
+
+The three recurring costs are usually in the same order
+Of course depends on the volume and application, but testing can be 5-30% of
+the recurring cost of a chip.
+Testing is an important factor in the cost
+As volume increases, recurring costs (and testing) become more important</code></pre>
+  </div>
+  <p>
+    关键数字是：<b>测试可以占到一颗芯片重复性成本（recurring cost）的 5%–30%</b>；而且因为一次性成本（光罩、设计）被产量摊薄，<b>产量越大，重复性成本（含测试）越重要</b>。图 11-7 是这张成本结构幻灯片的原貌。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p042_page.jpg" alt="IC 单位成本结构：一次性成本除以芯片数，加上晶圆成本、封装与测试" loading="lazy">
+    <figcaption><b>图 11-7</b> IC 的单位成本结构：一次性成本被产量摊薄，封装与测试属于重复性成本，测试可占其中 5%–30%。来源：课件 p42</figcaption>
+  </figure>
+
+  <p>
+    <b>什么在推高测试成本？</b>课件 p43 给出两组因素。第一组是"测什么设备"：你要为 ATE 的能力付钱——测试所需的<b>向量存储器容量</b>、<b>I/O 通道数量</b>、<b>所用 I/O 通道的速度</b>。第二组是"测多久"：课件给了一个很好记的算法——<b>一天只有 86 400 秒，如果每颗芯片用 10 秒，一台 ATE 一天只能测 8.6k 颗芯片</b>。所以任何能降低这项成本的技巧都值得做：<b>"手机芯片的测试成本每省下 1 美分，可能就价值一百万美元"</b>。
+  </p>
+  <p>
+    测试也可以插在<b>封装之前</b>（课件 p65–p68）：技术路线分<b>光学</b>与<b>电学</b>（需接触探针）两类，厂商还会在裸片之间的<b>划片道</b>（saw lines）里布置<b>工艺控制监控结构</b>（Process Control Monitor，PCM）来监控良率与工艺；在单颗裸片层面测试的价值在于<b>能省下封装成本</b>，但需要提前规划。坏芯片能修吗？可以用激光、熔丝切割或修调（trim）芯片的某些部分，也可以用聚焦离子束（FIB）切割或沉积材料，但课件明确说这<b>不太实用，通常只用于调试</b>。既然修不了，另一种思路是<b>容忍故障</b>：课件 p69 以 Cerebras 晶圆级引擎（Wafer Scale Engine，WSE）为例，给出的对比数据是 <b>Cerebras WSE 有 46&nbsp;225 mm² 硅片、1.2 万亿（1.2 Trillion）晶体管，而一颗 GPU 是 815 mm²、211 亿（21.1 Billion）晶体管</b>；因为"<b>庞大的柔性核心阵列中，一些核心根本不会工作</b>"（课件 p70），设计上必须让互连结构能绕开坏掉的核心——这与"把所有坏片挑出来"是两条完全不同的路线：一条把故障筛掉，另一条把故障包起来。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p069_ca7db7d9d9.jpg" alt="Cerebras 晶圆级引擎与常规 GPU 的硅片面积对比" loading="lazy">
+    <figcaption><b>图 11-8</b> Cerebras Wafer Scale Engine（46&nbsp;225 mm²、1.2 万亿晶体管）与一颗 GPU（815 mm²、211 亿晶体管）的对比。来源：课件 p69</figcaption>
+  </figure>
+
+  <h3 id="ch11-6">11.6 存储器故障模型与 March 测试</h3>
+  <p>
+    前面所有讨论都围绕固定故障模型，课件 p52 提醒："固定故障不是唯一的故障模型。"对于<b>结构规整</b>的电路——最典型的就是存储器阵列——更接近物理实际的故障模型是可行的：固定故障（SAF）、<b>跳变故障</b>（Transition Faults，TF）、<b>耦合故障</b>（Coupling Faults，CF）、<b>桥接故障</b>（Bridging Faults，BF）、<b>状态耦合故障</b>（SCF）、<b>邻域敏感故障</b>（NPSF）、<b>地址译码器故障</b>（Address Decoder Faults，AF），以及读写逻辑故障。课件同时给出了典型的存储器阵列架构（图 11-9）：地址锁存、行列译码、存储单元阵列、读出放大器、写驱动器、数据寄存器与刷新逻辑。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p052_9f784b8eb4.jpg" alt="典型存储器阵列架构框图：地址锁存、行列译码、存储单元阵列、读出放大器、写驱动器、数据寄存器" loading="lazy">
+    <figcaption><b>图 11-9</b> 典型存储器阵列架构。正因为它由规则重复的单元构成，才能为它建立比固定故障更精细的物理故障模型。来源：课件 p52（取自 Bushnell &amp; Agrawal 教材）</figcaption>
+  </figure>
+
+  <p>
+    <b>为什么存储器需要单独的故障模型？</b>因为存储器里最典型的失效形式不是"某个逻辑门输出卡住"，而是<b>单元之间的相互影响</b>。课件 p53 的<b>邻域敏感故障</b>三种子类型最能说明问题，它用 <code>&lt; 邻居状态 ; 基本单元行为 &gt;</code> 的形式书写记号：
+  </p>
+  <ul>
+    <li><b>主动 NPSF</b>（ANPSF）：邻域单元发生跳变会让基本单元的值变化，课件例子是 <code>&lt; 0, ↑ , 0, 1 ; 1 &gt;</code>。</li>
+    <li><b>被动 NPSF</b>（PNPSF）：邻域中的某个图案会<b>阻止</b>基本单元跳变，课件例子是 <code>&lt; 0, 0, 0, 0 ; ↑ / 0 &gt;</code>。</li>
+    <li><b>静态 NPSF</b>（SNPSF）：邻域中的某个图案会把基本单元<b>强制</b>到特定值，课件例子是 <code>&lt; 1, 1, 1, 1 ; - / 1 &gt;</code>。</li>
+  </ul>
+  <p>
+    这三类都无法用固定故障模型表达：它们描述的是"一个单元的行为取决于它的邻居们当前是什么"，要测出它们就必须在邻域里精心构造图案。而在物理故障模型与可用测试之间需要一个"翻译层"，这就是课件 p54 的<b>存储器简化功能故障（Reduced Functional Faults）汇总表</b>：它把实际物理缺陷（单元卡住、驱动器卡住、读写线/片选线/数据线卡住、各类开路与短路、地址译码器故障、单元只能置 0 不能置 1、图案敏感的单元相互影响等）归类到 SAF、CF、AF、TF、NPSF 五类功能故障之下。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p054_page.jpg" alt="存储器简化功能故障汇总表：把物理缺陷归类到 SAF、CF、AF、TF、NPSF" loading="lazy">
+    <figcaption><b>图 11-10</b> 存储器中的物理缺陷与简化功能故障的对应关系（a–p 各条目）。<b>结构化的电路允许使用更物理的故障模型</b>，这张表就是模型与物理之间的桥梁。来源：课件 p54</figcaption>
+  </figure>
+
+  <p>
+    具体怎么测？答案是 <b>March 测试</b>（课件 p55）：它是存储器测试的一般化形式，结构非常规整——由<b>多个元素</b>（element）组成；每个元素都<b>遍历一遍整个地址范围</b>；每个元素只有<b>一条地址递增规则</b>；每个元素内部是一串<b>读/写操作</b>。课件的形式化例子是 <code>{ M0: ⇕ (w0) ; M1: ⇓ (r0,w1,r1) }</code>，课件 p55 给出的完整记号表如下：
+  </p>
+  <table class="tbl">
+    <thead><tr><th>记号</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td><code>⇑</code></td><td>地址递增：for address (0 to n-1)</td></tr>
+      <tr><td><code>⇓</code></td><td>地址递减：for address (n-1 downto 0)</td></tr>
+      <tr><td><code>⇕</code></td><td>地址单调变化，任一方向均可</td></tr>
+      <tr><td><code>r, r0, r1</code></td><td>读、读并期望 0、读并期望 1</td></tr>
+      <tr><td><code>w, w0, w1</code></td><td>写、写 0、写 1</td></tr>
+      <tr><td><code>↑</code></td><td>向一个含 0 的单元写入 1（0&nbsp;→&nbsp;1 跳变）</td></tr>
+      <tr><td><code>↓</code></td><td>向一个含 1 的单元写入 0（1&nbsp;→&nbsp;0 跳变）</td></tr>
+      <tr><td>补码记号</td><td>翻转单元的内容</td></tr>
+    </tbody>
+  </table>
+  <p>
+    有了这套记号，各种 March 测试就可以写成极短的表达式（课件 p56）。例如 MATS 是 <code>{⇕(w0); ⇕(r0,w1); ⇕(r1)}</code>，MATS+ 是 <code>{⇕(w0); ⇑(r0,w1); ⇓(r1,w0)}</code>，MARCH X 是 <code>{⇕(w0); ⇑(r0,w1); ⇓(r1,w0); ⇕(r0)}</code>；更长更密的还有 MATS++、MARCH C-、MARCH A、MARCH Y、MARCH B 等。它们的区别一眼可见：<b>元素越多、读写操作越密，能覆盖的故障类型越多，代价是复杂度（也就是测试时间）按 n 的倍数增长</b>。课件 p57 的"不可约 March 测试汇总表"把这个权衡列得很整齐：MATS 复杂度 4n，只覆盖 SAF 的"全部"和 AF 的"部分"；MATS+ 5n、MATS++ 6n 逐步补齐；MARCH X 6n、MARCH C- 10n、MARCH A 15n、MARCH Y 8n、MARCH B 12n，此时 SAF、AF、TF、CFin、CFid 全部为 "All"，而 CFdyn 与 Linked Faults 视具体算法为 "All" 或 "Some"。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p057_page.jpg" alt="不可约 March 测试汇总表：各算法的复杂度与对 SAF、AF、TF、CF 的覆盖情况" loading="lazy">
+    <figcaption><b>图 11-11</b> 不可约 March 测试汇总表：复杂度从 4n（MATS）到 15n（MARCH A），覆盖能力随之提升——这就是存储器测试里"覆盖率换时间"的具体形式。来源：课件 p57</figcaption>
+  </figure>
+
+  <div class="note"><b>注：</b>课件只给出了这张汇总表的结论，没有推导各算法覆盖了哪些具体故障、为什么 MARCH A 用 15n 换来了对动态耦合故障的覆盖。这类推导属于存储器测试的专门内容，本讲义不越界补足。</div>
+
+  <h3 id="ch11-7">11.7 内建自测试：LFSR、BIST 架构与 BILBO</h3>
+  <p>
+    回到 11.4 节末尾的问题：向量要一条条从外部移进移出，时间成本高。另一条路是<b>让芯片自己测自己</b>——<b>内建自测试</b>（Built-in Self Test，BIST）。但课件 p45 的标题先把期待降下来："<b>BIST 不是魔法方案</b>"。它列出的好处是：芯片逻辑与引脚的比例（内部逻辑增长远快于引脚数）、更快的内部时钟、测试生成与施加时间可以搬到内部、减少 ATE 中昂贵的向量存储、以及可以用更便宜的 ATE。代价则是<b>面积开销</b>（BIST 控制器、选择逻辑、图案发生器/压缩器，以及 BIST 硬件自身的测试）、<b>引脚开销</b>（至少 1 个引脚）、<b>性能开销</b>（额外路径延迟），以及最容易被忽略的一项——<b>良率/可靠性下降</b>，因为 BIST 带来的面积增加本身就会降低良率。
+  </p>
+  <p>
+    BIST 到底做什么？课件 p46 把它的职责列成四条：<b>产生激励</b>（在内部用 LFSR 生成，或把向量存在 ROM 里）；<b>让电路进入测试模式</b>（必须打断正常工作）；<b>把输出与期望结果比较</b>——这里课件区分了三个容易混淆的词：<b>压缩</b>（compression，无损缩减）、<b>压实</b>（compaction，有损缩减）、<b>签名分析</b>（signature analysis，把被测芯片的响应缩减成一个签名）；以及<b>提供期望值</b>（来自 ROM，或当场用 LFSR 算出签名）。图 11-12 是课件 p47 的 BIST 架构框图，把这些职责对应到具体硬件：<code>Hardware Pattern Generator</code>（产生激励）、<code>Input MUX</code>（在正常主输入与测试图案之间选择）、<code>Circuit-Under-Test</code>（被测电路）、<code>Output Response Compacter</code>（响应压实器）、<code>ROM</code>（存参考签名）、<code>Comparator</code>（比较器，输出 Good/Faulty），以及统管全局的 <code>Test Controller</code>。<b>注意那条从压实器输出回到比较器的 <code>Signature</code> 通路——这就是"把整颗芯片的行为压缩成一个数"的具体体现</b>：不必把几百万条响应位搬出芯片，只要比较最终签名。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p047_9f6ca2c6fa.jpg" alt="BIST 架构框图：图案发生器、输入多路选择器、被测电路、响应压实器、ROM 参考签名、比较器与测试控制器" loading="lazy">
+    <figcaption><b>图 11-12</b> BIST 架构：硬件图案发生器提供激励，响应压实器把响应压缩成签名，再与 ROM 中的参考签名比较。来源：课件 p47（取自 Bushnell &amp; Agrawal 教材）</figcaption>
+  </figure>
+
+  <p>
+    架构里的两个关键积木——图案发生器与签名分析器——其实是<b>同一个东西</b>：<b>线性反馈移位寄存器</b>（Linear Feedback Shift Register，LFSR）。课件 p48 给出的理由是：它<b>能用算法产生可重复的图案</b>、<b>具有良好的随机性质</b>、<b>硬件结构简单，只需要触发器和异或门</b>。课件 p49 给了一个具体例子（图 11-13），特征多项式
+  </p>
+  <p>
+    <b>F(x) = 1 + x<sup>2</sup> + x<sup>7</sup> + x<sup>8</sup></b>
+  </p>
+  <p>
+    对应的 LFSR <b>序列长度为 255</b>。课件给了三条经验：<b>序列越长越好</b>；<b>初始化很重要</b>（全零是 LFSR 的退化状态，必须避免）；这种结构<b>即使 n 很大也又快又简单</b>。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p049_92247bcbf5.jpg" alt="LFSR 示例：8 位线性反馈移位寄存器，特征多项式为 1 + x2 + x7 + x8" loading="lazy">
+    <figcaption><b>图 11-13</b> 一个 8 位 LFSR 示例（特征多项式 F(x) = 1 + x<sup>2</sup> + x<sup>7</sup> + x<sup>8</sup>，序列长度 255）。抽出原图把上标显示为平写形式 "F(x) = 1 + x2 + x7 + x8"。来源：课件 p49（取自 Bushnell &amp; Agrawal 教材）</figcaption>
+  </figure>
+
+  <p>
+    BIST 的最后一个经典积木是 <b>BILBO</b>（Built-in Logic Block Observer，内建逻辑块观察器，课件 p50、p51）。它是一个"标准积木"，把四种功能合并在一个寄存器里：<b>D 触发器、图案发生器、响应压实器、扫描链</b>；通过模式选择可工作在四种模式之一：普通寄存器、基于 LFSR 的图案发生器、基于 LFSR 的响应压实器、穿过整个寄存器的扫描链。这样一来，同一批寄存器在不同测试阶段担任不同角色，正好对上被测电路的分块结构（图 11-14）：<b>正常工作时</b> BILBO A 与 BILBO B 都是普通寄存器（Register）；<b>测试电路 A</b> 时 BILBO A 变成图案发生器（Pattern）给电路 A 提供激励，BILBO B 变成响应压实器（Response）；<b>测试电路 B</b> 时角色互换。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p050_page.jpg" alt="BILBO 的四种模式与电路 A、电路 B 的三种测试配置" loading="lazy">
+    <figcaption><b>图 11-14</b> BILBO（内建逻辑块观察器）：同一个寄存器在"正常/测 A/测 B"三种配置下分别充当寄存器、图案发生器或响应压实器。来源：课件 p50</figcaption>
+  </figure>
+
+  <div class="warn"><b>坑：</b>BIST 的每一项好处都有价格。课件 p45 明确列出四项代价——面积、引脚、性能、以及"因面积增加而降低的良率/可靠性"。尤其最后一项容易被忽略：BIST 逻辑本身也要占面积、也会坏，而它带来的良率损失是全局的。所以"要不要上 BIST"必须按 11.5 节的成本公式来算，而不是当成默认选项。</div>
+
+  <h3 id="ch11-8">11.8 JTAG / IEEE 1149.1 边界扫描</h3>
+  <p>
+    前面讲的技术都作用在<b>芯片内部</b>，但芯片最终要焊到 PCB 上，板级问题同样需要测试：引脚焊好了没有？芯片之间的走线通不通？<b>JTAG</b>（Joint Test Action Group）就是为此而生的工业标准（课件 p58）：它定义了统一的端口和命令，<b>所有厂商和元器件使用完全相同的端口</b>。课件评价它"非常通用"，用途覆盖板级/系统级测试、IC 测试、功能性使用、调试与编程——课件特别举例说 <b>FPGA 就是通过 JTAG 配置的</b>。课件 p59 把它的两种主要测试能力讲得很清楚，这两条其实是一对镜像：
+  </p>
+  <table class="tbl">
+    <thead><tr><th>能力</th><th>做法与用途</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>独立于芯片，读写 I/O 引脚</b></td>
+        <td>把芯片从板子上"断开"，由<b>边界扫描</b>（boundary scan）为 PCB 提供 I/O。这样就能测试 PCB 本身，也就能测试"系统互连"（system interconnect）。</td>
+      </tr>
+      <tr>
+        <td><b>独立于 I/O，读写芯片</b></td>
+        <td>同样把芯片从板子上"断开"，芯片的输入改由边界扫描提供，输出被边界扫描采样。这样芯片就可以<b>不受板上连接影响地被测试</b>。</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    这套能力靠四个主要部件实现（课件 p61）：<b>测试访问端口</b>（Test Access Port，TAP），固定的五个信号 <b>TCK、TMS、TDI、TDO、TRST</b>；<b>TAP 控制器</b>，只由 TCK、TMS、TRST 驱动（状态完全由这几个外部信号决定，是一个纯粹的状态机）；<b>边界寄存器</b>（Boundary Register），隔离并控制所有 I/O；以及<b>器件寄存器、指令寄存器、旁路寄存器</b>，可通过 TDI、TDO 被编程。TAP 控制器的完整状态图见课件 p62（图 11-15），它是整个 JTAG 标准的"操作手册"：所有通过 TDI/TDO 做的事——移位数据、捕获当前值、更新输出、进入各种测试模式、复位——都由这个状态机在 TCK 边沿上、按 TMS 的取值一步步选中。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p062_f0d14af1fe.jpg" alt="JTAG TAP 控制器状态图：由 TCK 与 TMS 驱动" loading="lazy">
+    <figcaption><b>图 11-15</b> TAP 控制器状态图。这个只由 TCK、TMS、TRST 驱动的状态机决定了 JTAG 上一切操作的时序。来源：课件 p62</figcaption>
+  </figure>
+
+  <p>
+    图 11-16（课件 p63）给出了 <b>JTAG 边界扫描单元</b>的结构：它把每个芯片引脚都改造成可配置单元，输入侧（INPUT CELL）与输出侧（OUTPUT CELL）各有通向芯片内部逻辑的通路，以及一条旁路通路；每条通路上有 <code>ShiftDR</code>、<code>ClockDR</code>、<code>UpdateDR</code> 和 <code>Mode</code> 四个控制信号，其中 <code>Mode</code> 决定这个单元处于"正常工作"还是"边界扫描工作"状态。这样每个引脚就获得了两种能力：<b>既可以用边界寄存器里的值去驱动引脚（而不是让芯片内部逻辑去驱动），也可以在引脚上采样，甚至把相邻引脚用板上的走线连起来做互连测试</b>。
+  </p>
+
+  <figure>
+    <img src="img/11_WGL_p063_bfda691872.jpg" alt="JTAG 边界扫描单元结构：输入单元与输出单元，含 ShiftDR、ClockDR、UpdateDR、Mode 控制" loading="lazy">
+    <figcaption><b>图 11-16</b> 边界扫描单元结构：每个引脚被一对输入/输出单元接管，从而实现"绕过芯片内部逻辑直接读写引脚"。来源：课件 p63（取自 Bushnell &amp; Agrawal 教材）</figcaption>
+  </figure>
+
+  <p>
+    课件 p64 说明，JTAG 已远远超出"边界扫描测试"这个原始目的，还被用于：<b>通用测试访问 IC</b>（让外部可以运行内部 BIST 命令、读入/读出 ATPG 向量、读取 BIST 结果）；<b>调试接口</b>（大多数处理器允许通过 JTAG 接调试器，这些额外功能需要额外设计但"相对容易"加入）；<b>编程接口</b>（加载数据、初始化芯片的一种方式，而且 JTAG 接口本来就在那里了——FPGA 和微控制器通常都通过 JTAG 编程）。
+  </p>
+
+  <h3 id="ch11-9">11.9 WGL：把测试波形写成文件</h3>
+  <p>
+    到这里我们已经知道：ATPG 会产出一批向量，扫描链决定它们如何被串行移入移出，ATE 负责把它们变成真实电信号并比较响应。那么<b>这一切在文件里长什么样？</b>这就是 <b>WGL</b>（Waveform Generation Language，波形生成语言）要解决的问题。课件 p72 给了它一个务实的定义：WGL 是"<b>一种用来表达数字波形的格式</b>"，是自动测试设备所识别的格式之一；它让你能够<b>生成/读入激励和期望响应</b>；它是 <b>ASCII 文件</b>，必要时可以用文本编辑器查看和修改；它的结构组织成"<b>每一个时钟周期一组向量</b>"，记录"在一个周期内发生了什么"；<b>每一个输入和输出都可以有自己的时间模板</b>（time template），用来定义信号在时钟周期内何时被施加、何时被采样；格式简单，相对容易适配到其他需要的格式；并具备用于压缩的特性——<b>重复计数</b>（repeat counts）。
+  </p>
+  <p>
+    课件 p73 给出了文件的开头，共两个块。原文如下：
+  </p>
+  <div class="code-block">
+    <div class="code-title">WGL 文件解剖（1）：signal 块与 timeplate 块（课件 p73 原文）</div>
+    <pre><code>signal
+ "InputSel_SI"      : input;
+ "OutputValid_SO"   : output;
+ "Rst_RBI"          : input;
+ "Clk_CI"           : input;
+# […]
+end
+timeplate "_default_WFT_" period 100ns
+ "InputSel_SI"      :=  input [ 0ns:S]; 
+ "OutputValid_SO"   := output [ 0ns:Z, 40ns:Q'edge]; 
+ "Rst_RBI"          :=  input [ 0ns:S]; 
+ "Clk_CI"           :=  input [ 0ns:D, 50ns:S, 80ns:D]; 
+# […]
+end { timeplate "_default_WFT_" }</code></pre>
+  </div>
+  <p>
+    逐句解释：
+  </p>
+  <ul>
+    <li><code>signal</code> 开头、<code>end</code> 结尾的块用来<b>声明本文件里出现的所有信号</b>，块内每行的形式是 <code>"信号名" : 方向;</code>。</li>
+    <li><code>"InputSel_SI" : input;</code> 声明它是一个<b>输入</b>（由测试机驱动）。信号名后缀是这套流程的命名习惯：<code>_SI</code> 提示"扫描输入"（scan in），<code>_SO</code> 提示"扫描输出"（scan out）。</li>
+    <li><code>"OutputValid_SO" : output;</code> 声明它是<b>输出</b>——由测试机采样并与期望值比较。<code>"Rst_RBI" : input;</code> 是复位信号，后缀中的 <code>B</code> 在这套命名里通常表示低有效（bar）；<code>"Clk_CI" : input;</code> 是时钟输入。</li>
+    <li><code># […]</code> 以 <code>#</code> 开头的行是<b>注释</b>；方括号是课件表示"此处省略了若干行同类声明"的记号。真实文件里这段会列出扫描链的全部信号。<code>end</code> 结束 <code>signal</code> 块。</li>
+    <li><code>timeplate "_default_WFT_" period 100ns</code> 开始一个<b>时间模板</b>块，名字叫 <code>_default_WFT_</code>，<b>周期是 100 ns</b>，即 10 MHz。周期长度定义了"一个向量占多长时间"。</li>
+    <li><code>"InputSel_SI" := input [ 0ns:S];</code> 在这个模板下，该引脚一个周期内的动作是：在 <b>0 ns</b> 执行动作码 <code>S</code>。方括号里是一串 <code>时刻:动作</code> 对，用逗号分隔。</li>
+    <li><code>"OutputValid_SO" := output [ 0ns:Z, 40ns:Q'edge];</code> 这一行是<b>输出</b>引脚，所以它描述的不是"驱动什么值"，而是"什么时候去看"。它有两个动作：<b>0 ns</b> 处的 <code>Z</code>，以及 <b>40 ns</b> 处的 <code>Q'edge</code>——后者带 <code>'edge</code> 后缀，提示这是与<b>边沿</b>相关的动作。整句在描述这个输出在一个周期内如何被采样判定。</li>
+    <li><code>"Rst_RBI" := input [ 0ns:S];</code> 与第一行同理，复位输入的动作发生在 0 ns。</li>
+    <li><code>"Clk_CI" := input [ 0ns:D, 50ns:S, 80ns:D];</code> 时钟有<b>三个</b>动作：0 ns 驱动、50 ns 采样、80 ns 再驱动。这一行最能说明课件所说的"<b>每个输入输出可以有自己的时间模板</b>"：同一个引脚在一个时钟周期内可以有多个不同时刻上的动作，具体时刻完全由模板定义。</li>
+    <li><code>end { timeplate "_default_WFT_" }</code> 结束这个时间模板块，并在 <code>end</code> 后用花括号重复名字作为配对确认。</li>
+  </ul>
+  <div class="note"><b>注：</b>关于动作码：课件 p72 对时间模板的用途给了明确措辞——"定义信号在时钟周期内何时被<b>施加</b>（applied）、何时被<b>采样</b>（sampled）"，所以上面这些单字母动作码所标记的正是这两类事件（例如时钟行上出现了两次驱动动作、一次采样动作）。但课件<b>没有给出动作码的完整对照表</b>，因此 <code>D</code>、<code>S</code>、<code>Z</code>、<code>Q'edge</code> 的精确语义应查阅 WGL / 相关测试数据格式规范，本讲义不替它补全。</div>
+  <p>
+    课件 p74 给出文件的后半部分：<code>pattern</code> 块，也就是真正的向量。原文如下：
+  </p>
+  <div class="code-block">
+    <div class="code-title">WGL 文件解剖（2）：pattern 块与 vector 行（课件 p74 原文）</div>
+    <pre><code>pattern "_flat_seq_" ("Clk_CI", "Rst_RBI", "InputSel_SI", "OutputValid_SO",
+# […]
+)
+vector("_default_WFT_")   := [ 0 1 1 X      ];
+vector("_default_WFT_")   := [ 1 0 1 1      ]; 
+vector("_default_WFT_")   := [ 1 1 1 1      ];
+# […]
+end
+end </code></pre>
+  </div>
+  <ul>
+    <li><code>pattern "_flat_seq_" ( ... )</code> 开始一个<b>测试序列</b>（pattern），名字是 <code>_flat_seq_</code>；圆括号里<b>按顺序</b>列出这个序列涉及的信号：<code>Clk_CI</code>、<code>Rst_RBI</code>、<code>InputSel_SI</code>、<code>OutputValid_SO</code>。<b>这个顺序至关重要</b>，因为后面每行方括号里的值就按这个顺序逐列对应。序列名由工具自动生成，课件没有解释 <code>_flat_seq_</code> 中 flat 的具体含义。</li>
+    <li><code># […]</code> 是注释行，表示信号列表里还省略了其他信号；右括号在下一行，说明列表可以跨多行书写。</li>
+    <li><code>vector("_default_WFT_") := [ 0 1 1 X ];</code> 这是<b>一条向量，也就是一个时钟周期</b>。等号左边的 <code>("_default_WFT_")</code> 指明这一行使用哪个时间模板（就是前面定义的那一个），所以不同向量可以套用不同模板。方括号里四个值按 pattern 头部顺序逐列对应：<code>Clk_CI = 0</code>、<code>Rst_RBI = 1</code>、<code>InputSel_SI = 1</code>、<code>OutputValid_SO = X</code>。</li>
+    <li><code>X</code> 在测试向量里表示"<b>不关心</b>"（don't care）：这一列输出取什么值都无所谓，不必比较。写 <code>X</code> 而不是具体值，可以让工具在生成和压缩向量时有更大自由度。</li>
+    <li>第二行 <code>[ 1 0 1 1 ]</code>：时钟变为 1、<code>Rst_RBI</code> 变为 0、<code>InputSel_SI</code> 保持 1、<code>OutputValid_SO</code> 期望为 1。因为 <code>Rst_RBI</code> 是低有效复位，这一行相当于把复位拉低。第三行 <code>[ 1 1 1 1 ]</code>：时钟保持 1、复位回到 1（释放）、其余保持。三行向量连起来，就把这四个引脚在三个连续周期里的行为完整描述了出来。</li>
+    <li>两个 <code>end</code>：内层 <code>end</code> 结束 <code>pattern</code> 块，外层 <code>end</code> 结束整个文件结构。</li>
+  </ul>
+  <p>
+    现在可以把 WGL 放回整个流程里看了。<b>ATPG 工具（如练习中使用的 TetraMAX）在门级网表上针对故障模型求解，输出一批向量；向量经格式转换写成 WGL；WGL 用 <code>signal</code> 声明引脚、用 <code>timeplate</code> 定义每个引脚在一个周期内的时序、用 <code>vector</code> 逐周期给出值和期望值；ATE 读入这个文件，把每一列变成对应通道上的真实电平，在模板指定的时刻驱动或采样，把采样结果与期望值比较，得出 Good/Faulty，进而完成 11.5 节所说的分档。</b>课件 p72 强调 WGL"简单、相对容易适配到其他格式"，这不是空话：正因为它是 ASCII、结构规整、并把时序信息集中放在 <code>timeplate</code> 里，同一批向量才能从一种 ATE 迁移到另一种 ATE。课件最后用一句话为整讲收尾，也回应了 11.1 节："<b>测试的一切都是钱。</b>"所有决策都建立在经济因素之上——把良率提得太高太贵，但测试本身仍是显著的成本，必须在两者之间取得平衡。
+  </p>
+
+  <h3 id="ch11-10">本讲要点</h3>
+  <div class="takeaway">
+    <ol>
+      <li><b>测试是经济学，不是物理学竞赛。</b>十倍法则说明失效越早发现越便宜；测试可占芯片重复性成本的 5%–30%，"测试的一切都是钱"是理解所有工程折中的前提。</li>
+      <li><b>良率 Y、测试覆盖率 TC、缺陷率 DL 三者必须分清。</b>DL = 1 − Y<sup>(1−TC)</sup> 意味着只要 TC 足够接近 1，即使良率不高，DL 也能压得很低——收益集中在 98%–100% 这一窄段，是非线性的。</li>
+      <li><b>固定故障（sa0/sa1）不真实，但够用。</b>检测它需要三步：激活故障、把错误传播到主输出（形成敏感路径）、保证路径上的值可以被合理化；ATPG 只需要门级电路和故障模型。</li>
+      <li><b>扫描链把时序测试退化成组合测试。</b>scan_en=1 时所有触发器串成移位寄存器（可控制、可观察），scan_en=0 时跑一个周期捕获响应；代价是面积、时序和引脚开销——这就是 DFT。</li>
+      <li><b>测试的成本结构决定优化方向。</b>ATE 是数百万美元级的设备，成本由向量存储容量、I/O 通道数、通道速度决定；一天只有 86 400 秒，省下的每一秒在大产量下都被放大。</li>
+      <li><b>存储器需要自己的故障模型与测试算法。</b>规则的结构让 SAF/TF/CF/AF/NPSF 等模型变得可行；March 测试用极紧凑的记号表达"遍历地址 + 一串读写"，复杂度从 4n（MATS）到 15n（MARCH A）。</li>
+      <li><b>BIST 不是魔法方案。</b>它用芯片内部的 LFSR 产生图案、把响应压缩成签名再比较，换来更少的引脚压力、更快的内时钟和更便宜的 ATE，代价是面积、引脚、性能和良率。</li>
+      <li><b>JTAG 提供统一的外部通道，WGL 是向量到测试机的最后一公里。</b>JTAG 用五个信号加一个 TAP 状态机，让边界扫描既能"绕过芯片测板子"也能"绕过板子测芯片"；WGL 用 <code>signal</code> 声明引脚、<code>timeplate</code> 定义时序、<code>vector</code> 逐周期给出值与期望值（<code>X</code> 表示不关心）。</li>
+    </ol>
+  </div>
+</section>
+<section class="chapter" id="ch12">
+  <div class="ch-head">
+    <span class="ch-no">第 12 讲</span>
+    <h2>PPA：如何规范地报告性能、功耗与面积</h2>
+    <p class="ch-meta">对应课件：12_PPA.pdf ｜ 关键词：Performance、Power、Area、工艺角（process corner）、门当量（gate equivalent, GE）、吞吐率（throughput）、能耗（energy）、设计空间探索（design space exploration）</p>
+  </div>
+
+  <div class="lead">一个芯片设计做完，最后总要回答一个问题：它到底有多好？本讲讨论如何用性能（Performance）、功耗（Power）、面积（Area）——合称 PPA——来刻画一个电路，以及为什么"报数字"这件事远比看上去困难：脱离边界条件的数字没有意义，不同的汇报方式可以讲出完全相反的故事。这一讲也是全课程的收束：前面各讲介绍的工艺库、时序、功耗分析、测试，最终都汇聚成一份可以负责任地交出去的 PPA 报告。</div>
+
+  <h3 id="ch12-1">12.1 两个世界：工业界与学术界如何看 PPA</h3>
+  <p>回答"哪个芯片更好"之前，先要明白提问的人是谁。工业界做芯片是为了卖产品：性能指标在设计之初就已经由需求和数据手册（datasheet）确定，工程师关心的反而是成本、设计工作量与可制造性（manufacturability）——即使最坏条件下电路也必须满足规格。因此工业界的实践总体保守：先有想法（IDEA）和客户需求，再定义架构，走完设计、综合、布局布线、验证、流片、封装、测试的完整周期，最终落到一份数据手册上，然后把产品卖出去，循环重新开始（见图 12-1）。</p>
+  <p>学术界的目标则不同：研究要探索可能性的边界，论文需要展示"比前人更好的 PPA"。测试、可制造性、可靠性在学术界不是优先事项——并非被忽视，只是投入的精力少得多。值得强调的是，两个世界用的是同一套 EDA 工具，但工具本身是为工业界的需求设计的：它保证电路在最坏条件下满足约束，而不是帮你榨出峰值性能。换句话说，学术界想从为"合格"设计的工具里得到"极限"数字，这本身就有困难：约束（constraints）在工业流程里用来定义规格，到了学术界却常被挪用来探索设计空间——同一份 RTL，松紧不同的约束会综合出截然不同的结果。</p>
+
+  <figure>
+    <img src="img/12_PPA_p006.jpg" alt="工业界芯片开发循环：从想法、客户需求到架构、设计、综合、布局布线、GDS2、封装、测试与数据手册" loading="lazy">
+    <figcaption><b>图 12-1</b> 工业界的芯片开发循环：PPA 数字最终以数据手册的形式对客户兑现。来源：课件 p6</figcaption>
+  </figure>
+
+  <p>为什么学术报告的数字常常"偏乐观"？因为现实世界有很多会吃掉性能的问题：寄生效应对时序的影响、时钟分配的偏斜（skew）与抖动（jitter）、串扰与信号完整性、I/O 速度限制、IR 压降（IR drop）、最大电流密度限制、PVT 偏差与可靠性、运行中的热效应等。这些问题都有解决方案，但每一个都有代价。学术报告有时不把这些代价算进去，例如：很大的 I/O 带宽需要串行接口、焊盘与缓冲器；很高的时钟频率离不开 PLL 和昂贵的时钟树；动态电压频率调节（DVFS）需要同步器和电平转换器；多种工作模式、多个时钟域接口会带来与电路规模无关的验证开销；有些电路（如异步电路）还特别难测试。这些"隐性开销"不体现在核心电路的数字里，却真实地决定着芯片能否工作。</p>
+  <p>此外，结果的质量还取决于报告数字时设计进行到哪一步：综合阶段的面积和时序是基于线负载模型（wireload model）和平均值模型的估计；后仿真（post-layout）阶段布线开销已知，时序更准，但并非所有后端设计都完整考虑了功耗、信号完整性和测试；而实测（measurement）才是真正的概念验证——性能通常比预期更差，而且需要昂贵的测试基础设施。图 12-2 是一个少见的诚实对比：同一批 SHA-3 候选算法，两个团队（GMU 与 ETH）各自流片实测后的吞吐率/面积归一化结果，同一种算法在不同团队的芯片上测出的数字差异可达一倍以上（如 SHA-2 归一化后为 215 与 174 kbits/GE，Keccak 为 685 对应 ETH 侧明显更高的取值）。可见"纸面后仿真数字"与"硅上实测数字"之间横着一条鸿沟。</p>
+
+  <figure>
+    <img src="img/12_PPA_p011_9fddba65ef.jpg" alt="SHA-3 候选算法在两批实测 ASIC 上的归一化吞吐率/面积对比柱状图，VDD=1.2V" loading="lazy">
+    <figcaption><b>图 12-2</b> 后仿真 versus 实测：SHA-3 候选算法归一化吞吐率/面积（5 颗 ASIC 平均，VDD = 1.2 V，单位 kbits/GE），GMU 与 ETH 两个团队的实测结果差异明显。来源：课件 p11</figcaption>
+  </figure>
+
+  <h3 id="ch12-2">12.2 一个例子：把 SHA-3 核加进接收机系统</h3>
+  <p>为了说明"绝对性能并不总是 relevant"，课件给了一个具体例子：一个演进型 EDGE 接收系统的数字前端，从射频模块接收数据，解码速率最高 600 kbit/s。我们想给它加一个可选的加密模块，用哈希算法为接收消息生成摘要。现成的 SHA-3 模块指标很好看：为小面积优化（约 10 kGE），最高可跑 350 MHz，摘要生成速率 24 Mbit/s。</p>
+  <p>但把它放进系统里看（图 12-3、图 12-4），情况完全不同：接收链上各模块的规模从 80k、50k、25k 到 240k、300k 门不等，时钟域从 26 MHz 一直到 350 MHz，而 SHA-3 是链上最小的那个方块。SHA-3 核对这套系统来说实在太快了，而且已经做到足够小，没有速度/面积折中的余地；想降压省电，开销又太大。它只占整个系统面积的 2% 不到——无论怎么优化它的面积、速度或功耗，对整机 PPA 的影响都可以忽略。此例的工程目标因此变成：尽量减少把这块 IP 集成进系统的工程开销，让它适配系统的电压和时钟频率；真正麻烦的是接口和 DFT 方案，而不是核本身的 PPA。</p>
+
+  <div class="fig-row">
+    <figure>
+      <img src="img/12_PPA_p014_1d9e4238de.jpg" alt="接收系统框图中加入 Crypto (SHA-3) 模块" loading="lazy">
+      <figcaption><b>图 12-3</b> 加入 SHA-3 后的接收机数字前端。来源：课件 p14</figcaption>
+    </figure>
+    <figure>
+      <img src="img/12_PPA_p016_99068e7fa1.jpg" alt="各模块门数与时钟域：80k/50k/25k/240k/300k/10k 门，26/52/104/350 MHz" loading="lazy">
+      <figcaption><b>图 12-4</b> 各模块的物理属性：门数与所属时钟域（26–350 MHz），SHA-3 仅 10k 门。来源：课件 p16</figcaption>
+    </figure>
+  </div>
+
+  <div class="note"><b>注：</b>这个例子揭示了报告 PPA 的第一条原则：指标必须放在使用场景里才有意义。孤立地看，"350 MHz、24 Mbit/s"很漂亮；放进 600 kbit/s 的接收机里，这些数字毫无用处。</div>
+
+  <h3 id="ch12-3">12.3 面积：看似最简单，其实最难说清</h3>
+  <p>三个指标里，面积似乎最客观：硅片成本直接由面积决定，它决定设计能不能放下（feasibility），而且在制造之后不会改变，后端出的数字也最可靠。但"面积是多少"这个问题的答案取决于你问的是哪个面积，单位选什么。</p>
+  <p>先说单位。面积的正确单位是平方毫米（mm²），但它是随工艺变化的：65 nm 下的 10 mm² 与 28 nm 下的 10 mm² 完全不是一回事。有人会想按比例折算，例如 10 mm² / (65nm/28nm)² ≈ 1.86 mm²——这种换算并不可靠。另一种常用单位是门当量（gate equivalent, GE）：把电路总面积除以一个 2 输入 NAND（或 NOR）的面积。GE 的历史可以追溯到 70、80 年代：当时 CMOS、TTL、DTL、ECL 等多种逻辑家族并存，实现同一功能所需的晶体管数不同，直接报晶体管数并不公平（CMOS 电路的晶体管数是 pMOS 电路的两倍），于是大家约定按功能归一化——实现一个 2 输入 NAND/NOR 所需的晶体管数定义为 1 GE，对 CMOS 就是 4 个晶体管。今天几乎所有数字电路都是 CMOS，GE 成为一种粗略的、跨工艺的复杂度度量：换一种工艺，电路面积可以据此大致推算。但必须记住它是近似值，误差可达 ±20% 左右；报告时永远不要写"21 456 GE"这种精度，写 20kGE 或 25kGE 才是诚实的做法。</p>
+  <p>GE 用来跨工艺比较也并不简单。图 12-5 是同一个设计（Design A 约 20kGE，Design B 大约十倍大）在不同代工厂、工艺节点和单元库下综合的结果：同在 65 nm，不同代工厂/库给出的面积从 0.030 到 0.035 mm²（Design A）不等；同一工艺节点下 kGE 数字也有 17.0 到 24.1 的波动。工艺、库、布线轨道数都会影响结果——报告 GE 时应当交代库的来源。</p>
+
+  <figure>
+    <img src="img/12_PPA_p023_c865d4e432.jpg" alt="同一设计在不同工艺节点、代工厂与单元库下的面积与门数表" loading="lazy">
+    <figcaption><b>图 12-5</b> 同一设计在不同工艺与库下的面积（mm²）与规模（kGE）：工艺、库与布线轨道数都影响结果。来源：课件 p23</figcaption>
+  </figure>
+
+  <p>再说"哪个面积"。综合器报出的门数不含布线、电源和时钟的开销；后端的门数也只是门本身占的面积，还需要额外空间给布线、信号完整性和电源网络。同一设计做两种版图，核面积可以是 0.719 mm² 与 1.183 mm²——差了 60% 以上（图 12-6）。电源网络尤其不能省：没有足够的电源布线，设计根本无法工作，IR 压降可能超过 20%，补救需要多出约 40% 的面积（图 12-7）。单元之间还必须留出布线通道，这些空间都不能算进"门面积"里。</p>
+
+  <div class="fig-row">
+    <figure>
+      <img src="img/12_PPA_p025_f7a6c51aac.jpg" alt="同一设计的两种版图，核面积 0.719 与 1.183 平方毫米" loading="lazy">
+      <figcaption><b>图 12-6</b> 同一设计的两种版图：核面积 0.719 mm² 对 1.183 mm²。来源：课件 p25</figcaption>
+    </figure>
+    <figure>
+      <img src="img/12_PPA_p026_f4aa90a94a.jpg" alt="电源布线不足导致超过 20% 的 IR 压降，补救需 40% 额外面积" loading="lazy">
+      <figcaption><b>图 12-7</b> 电源布线不足导致超过 20% 的 IR 压降；补救需要约 40% 的额外面积。来源：课件 p26</figcaption>
+    </figure>
+  </div>
+
+  <p>即便是流片后的整片面积，也未必等于某个模块的面积：芯片里可能有测试结构，封装或应用可能对管芯尺寸有实际限制，一颗芯片里也可能放不止一个设计。想在一颗 ASIC 内部精确划定某个模块的面积相当困难：可以取模块的最小外接矩形，可以取其"最大触及范围"覆盖的面积，但模块之间常常互相交叠、互相嵌套，内部结构犬牙交错，划线方式不同，答案就不同。课件给出的经验数字是：布线与电源开销随设计而异，低活性的线性反馈移位寄存器（LFSR）可以只有 10%，而 LDPC 译码器可以高达 500%；时钟频率越高，额外问题越多。</p>
+  <p>最后，从成本角度看芯片面积本身存在一个"甜点区"：管芯太小，硅片面积浪费在划片线上；管芯太大，良率下降、单颗成本上升。大致在 1 mm² 到 100 mm² 之间比较经济；低于一定尺寸后，你甚至享受不到摩尔定律的好处（工艺缩小的收益被划片线吃掉）。面对面积的不确定性，实践中靠经验与试探收敛：层次化设计为各模块预留直角形（rectilinear）区域，按过去的经验估计布线开销；留余量可以缩短设计时间，但余量本身就是成本。经验是关键因素。</p>
+
+  <h3 id="ch12-4">12.4 速度：单位很多，含义各异</h3>
+  <p>"我的电路有多快"至少有两种答案。吞吐率（throughput）是单位时间内能处理多少数据，可以通过并行化（一次做更多）、流水线（把处理分成多个更短的步骤）和提高时钟频率（把每一步做得更快）来提升；延迟（latency）是处理完一个数据项所需的时间，并行化和流水线都帮不上忙，而反馈系统恰恰对延迟有硬性要求。把这两个概念混为一谈是常见的错误。</p>
+  <p>常用的性能单位各有盲区：时钟频率（MHz）由关键路径（critical path）决定，在其他条件相同时确实反映速度，但"一个时钟周期做多少事"因电路而异；时钟周期（ns）更物理，对应关键路径上各门延迟之和；吞吐率（bit/s）适合流式架构，对处理器却不合适；处理器常用每秒浮点运算次数（GFLOPS）和每周期指令数（IPC），但 GFLOPS 可以是峰值、最小值或平均值，且取决于操作复杂度（NOP 也算"操作"），做的操作多不代表有用；IPC 反映架构的并行度，却依赖于所运行的程序，要乘上时钟频率才是真实性能。</p>
+  <p>速度的物理来源我们在前面的时序讨论中见过：想更快，要么加大驱动电流，要么减小负载电容（图 12-8）。麻烦在于寄生效应在先进工艺里越来越占主导：除了门电容，还有互连电容 C<sub>interconnect</sub>（图 12-9）。处理寄生参数有三代方法：早期干脆忽略；综合时使用按扇出查表的线负载模型，但它是统计估计，最好为每个电路定制；最准确的是布局布线完成后的寄生参数提取（2D、2.5D 或全 3D 精度），交给时序分析引擎计算延迟。</p>
+
+  <div class="fig-row">
+    <figure>
+      <img src="img/12_PPA_p043_1a32e044b6.jpg" alt="提高速度的两个途径：加大电流或减小电容" loading="lazy">
+      <figcaption><b>图 12-8</b> 怎样才能更快：加大驱动电流（I<sub>d</sub>~W/L），或减小栅电容（C<sub>g</sub>=W·L）。来源：课件 p43</figcaption>
+    </figure>
+    <figure>
+      <img src="img/12_PPA_p044_0473357525.jpg" alt="互连电容成为负载中不可忽视的一部分" loading="lazy">
+      <figcaption><b>图 12-9</b> 寄生效应的增长：互连电容 C<sub>interconnect</sub> 加入负载。来源：课件 p44</figcaption>
+    </figure>
+  </div>
+
+  <p>拿到准确的延迟还不够，还必须说明是在什么条件下得到的。同一个电路，用不同的工艺角（process corner）做时序分析，结果可以相差很远：1.08 V / 125 °C 的最坏角下关键路径为 3.49 ns（相对 64.2%），1.20 V / 27 °C 的典型角为 2.24 ns（100%），1.32 V / −40 °C 的最好角为 1.59 ns（140.9%）。也就是说，同一份网表，"最快"与"最慢"之间相差超过一倍。只报典型角的频率而不说明条件，是典型的选择性汇报。</p>
+
+  <figure>
+    <img src="img/12_PPA_p046_page.jpg" alt="同一电路在最坏、典型、最好工艺角下的关键路径对比表" loading="lazy">
+    <figcaption><b>图 12-10</b> 工艺角带来的裕量：同一电路，最坏/典型/最好角下关键路径 3.49 / 2.24 / 1.59 ns。来源：课件 p46</figcaption>
+  </figure>
+
+  <p>工艺本身也限定了"舒适的"速度范围：以 180–130 nm 设计为例，每个工艺都有一个容易达到的频率区间，太慢的电路浪费工艺能力，太快的电路则需要不成比例的设计投入（课件给出的经验分类中，50 MHz 以下基本没有问题，300–600 MHz 属于"需要精心设计"，600 MHz 以上往往要全定制）。此外，准确时序还面临几个系统性难题：工业界关心的是角点性能——最坏角无建立违例、最好角无保持违例，而最好与最坏之间偏差巨大；布线电容在综合阶段只能靠需要定制的线负载模型估计，可靠估计要等最终布线；时钟周期越短，关键路径的微小变化引起的频率变化越大，时钟偏斜、IR 压降和热问题也都随频率升高而加剧。</p>
+
+  <h3 id="ch12-5">12.5 面积–速度权衡与 AT 曲线</h3>
+  <p>面积和速度是一对经典权衡：约束越松，工具越倾向选更小更慢的实现；约束越紧，工具会用更大的面积换更短的路径。把同一设计在一系列约束下综合出的点画在"面积–关键路径"平面上，就得到一条 AT（Area-Time）曲线：沿着等 AT 积（constant AT product）的双曲线，越靠左下角的实现越高效（图 12-11）。但要注意，同一设计扫出的 AT 点并不都落在同一条双曲线上：约束得过紧（为速度过度约束）会得到"太大"的实现，约束得过松（为面积过度约束）会得到"太慢"的实现，只有中间一段是高效区。</p>
+
+  <figure>
+    <img src="img/12_PPA_p053_dd797be332.jpg" alt="AT 平面上的高效实现区与过度约束区" loading="lazy">
+    <figcaption><b>图 12-11</b> 面积–速度权衡：不同约束下的实现点，中间为高效区，两端分别为"为速度过度约束→太大"与"为面积过度约束→太慢"。来源：课件 p53</figcaption>
+  </figure>
+
+  <p>这个权衡可以在四个层面上利用：实现阶段通过约束让工具选择优化目标，重定时（retiming）等架构技巧也能自动完成；RTL 编码层面，同一功能有不同的写法，描述越贴近硬件，工具越容易优化；架构变换层面，并行化、迭代分解、流水线等（详见 VLSI 1 课程）；以及算法层面——同一功能往往有不止一种实现算法。</p>
+
+  <h3 id="ch12-6">12.6 实战：AES S 盒的设计空间探索</h3>
+  <p>课件用 AES S 盒（180 nm 工艺）演示了一次完整的设计空间探索：对每一种实现方案都扫一遍约束，得到一族 AT 点。图 12-12 是所有点叠在一起的散点图，外面套着若干条等 AT 积的参考双曲线。三种算法路线的"地盘"一目了然（图 12-13）：查找表（look-up table）方案给出最快的实现；把运算分解为两个相继步骤的两段式（two stage）方案居中，在需要求逆运算时有独特优势；把 GF(2<sup>8</sup>) 映射到 GF(2<sup>4</sup>) 的算术分解（arithmetic decomposition）方案最小。对查找表方案还可以改写 HDL——把大查找表拆成小查找表——让工具更容易综合；这种拆分随时间推移工具会越做越好，但大查找表至今仍是综合的难点，而且拆到某个程度后再拆就没有收益了。</p>
+
+  <div class="fig-row">
+    <figure>
+      <img src="img/12_PPA_p055_8dfb120b02.jpg" alt="AES S 盒所有实现方案的面积-关键路径散点图" loading="lazy">
+      <figcaption><b>图 12-12</b> 设计空间探索：AES S 盒（180 nm）所有方案的面积–关键路径散点，虚线为等 AT 积参考线。来源：课件 p55</figcaption>
+    </figure>
+    <figure>
+      <img src="img/12_PPA_p063_1dee5a028a.jpg" alt="三种算法路线在 AT 平面上的分布：查找表、两段式、算术分解" loading="lazy">
+      <figcaption><b>图 12-13</b> 三种算法路线的分布：查找表最快，算术分解最小，两段式居中。来源：课件 p63</figcaption>
+    </figure>
+  </div>
+
+  <p>这次探索还有一个容易被忽视的发现：EDA 工具的版本本身就会造成差异（图 12-14）。同一设计、同样的约束，用不同版本的工具综合，AT 点的位置并不重合。这给"公平对比"又增加了一条边界条件——报告结果时应注明工具及版本，否则两个数字的差别可能只是工具升级的噪声，而不是架构的优劣。</p>
+
+  <figure>
+    <img src="img/12_PPA_p064_91a4b0d226.jpg" alt="不同 EDA 工具版本综合得到的 AT 散点对比" loading="lazy">
+    <figcaption><b>图 12-14</b> 工具版本也是变量：不同 EDA 工具版本综合同一设计得到的 AT 点并不重合。来源：课件 p64</figcaption>
+  </figure>
+
+  <h3 id="ch12-7">12.7 功耗与能量：单位、构成与测量的难处</h3>
+  <p>功耗怎么报？先分清两个量。功率（Power，W）说明电路某一时刻消耗的快慢，可以报峰值、最小值或平均值，它决定电源引脚和电源轨的尺寸，功率密度（W/cm²）则是大芯片的限制因素；但功率不告诉我们单位时间内完成了多少工作，单纯追求低功率反而偏爱串行化——功率低不等于电池更耐用。能量（Energy，J）才与"做完这件事总共花多少电"挂钩，它不关心操作耗时多长，通常偏爱并行化；能量低才真正意味着电池更耐用。</p>
+  <p>功耗由两部分构成。动态功耗（dynamic power）由电路活动直接引起，与翻转的总电容（面积）、活动率（频率）以及电源电压的平方成正比；降压是最有希望的省电手段，但可用范围并不大，且它依赖于应用。静态功耗（static power）主要是晶体管漏电（leakage），与面积相关，电路什么也不做时也在消耗；晶体管越快（工艺越小、阈值电压 VT 越低）漏电越大，需要体偏置（body biasing）、高 VT 晶体管等工艺手段来对抗。</p>
+  <p>估算动态功耗的公式 P = α·C·V<sup>2</sup>·f 里，各项的"可得性"差别很大：静态部分相对简单，有了网表就能估；f 和 V<sup>2</sup> 是设计参数，综合后就已知；但电容 C 要等到布局布线之后才准确，需要用反标（back-annotated）网表做仿真，非常耗时；活动率 α 依赖于激励向量，找到"正确的"激励并不容易。这就解释了为什么功耗是三个指标里最难测准的一个。</p>
+  <p>也正因如此，功耗报告里充斥着误导。课件专门放了两页反面教材，整页打上大叉（图 12-15、图 12-16）：一页只给两条"功率–频率"曲线（1.2 V 与 0.9 V 下三种程序各自的功率），却不说清工作负载做了多少事、活动率怎么来的、功耗是估计还是实测；另一页把十颗芯片在"各自专属工作频率"下测得的功率画在同一张图上再连一条趋势线——不同芯片的数字对应不同的频率条件，这样的对比没有意义。反过来说，报告功耗/能量时必须交代三件事：<b>电压和时钟频率</b>（缺了这两项的功耗数字没有任何用处）；<b>电路活动是怎么得到的</b>（假设的全局活动率？从输入活动推导？还是真实功能仿真向量？）；<b>功耗是怎么得到的</b>（综合阶段估计？后端网表反标延迟仿真？还是流片实测？）。</p>
+
+  <div class="fig-row">
+    <figure>
+      <img src="img/12_PPA_p070.jpg" alt="反面教材：只给不同程序在不同电压频率下的功率曲线" loading="lazy">
+      <figcaption><b>图 12-15</b> 反面教材一：只给功率曲线，不交代负载做了多少工作、活动率来源与测量方法。来源：课件 p70</figcaption>
+    </figure>
+    <figure>
+      <img src="img/12_PPA_p071.jpg" alt="反面教材：十颗芯片在各自专属频率下的功率对比与趋势线" loading="lazy">
+      <figcaption><b>图 12-16</b> 反面教材二：十颗芯片在各自专属工作频率下测功率再画趋势线，对比条件不一致。来源：课件 p71</figcaption>
+    </figure>
+  </div>
+
+  <h3 id="ch12-8">12.8 复合指标的陷阱：以吞吐率/面积为例</h3>
+  <p>除了直接指标，文献里还有许多派生的复合指标，如单位面积吞吐率（throughput per area, TpA）、能耗延迟积（Energy Delay Product, EDP）。在合适的语境里它们有助于解释和评估架构，但它们会隐藏细节，甚至误导。课件给了一对真实数字：KECCAK 实现的 TpA 为 395 kbit/s·GE，SHA-2 为 215 kbit/s·GE——看起来 KECCAK 的效率是 SHA-2 的近两倍。真的是这样吗？拆开看：KECCAK 面积 80 kGE、吞吐率 32 Gbit/s；SHA-2 面积 25 kGE、吞吐率 5.4 Gbit/s。TpA 隐含的推理是"按比例缩小 KECCAK 就能得到又小又高效的实现"，但你不可能用 2.5 kGE 做出 1 Gbit/s 的 KECCAK——它的 TpA 高是因为大而快的实现摊薄了开销。对于不需要高吞吐率的小设计，SHA-2 才是更好的选择，尽管 TpA 并不直接显示这一点。</p>
+  <div class="warn"><b>坑：</b>复合指标把分子分母各自随规模的非线性变化压成一个数。看到"XX 效率是 YY 的两倍"，先问一句：这是在哪个工作点上测的？换成小规模工作点还成立吗？</div>
+
+  <h3 id="ch12-9">12.9 收尾：一份合格的 PPA 报告长什么样</h3>
+  <p>课程用一张"In a nutshell"的表为本讲和整个 PPA 话题收尾：</p>
+  <table class="tbl">
+    <thead><tr><th>指标</th><th>常用单位</th><th>要点与挑战</th></tr></thead>
+    <tbody>
+      <tr><td>性能（Performance）</td><td>MHz 或周期（ns）</td><td>并不真正说明电路做了多少事</td></tr>
+      <tr><td></td><td>bit/s</td><td>位处理速率，通常报的是峰值</td></tr>
+      <tr><td>功耗（Power）</td><td>mW</td><td>最难测准的指标，依赖活动率</td></tr>
+      <tr><td></td><td>J（如 pJ/Op）</td><td>更好的度量，因为它同时体现了完成的工作</td></tr>
+      <tr><td>面积（Area）</td><td>mm²</td><td>你真正为之付钱的东西；子模块的面积很难算准</td></tr>
+      <tr><td></td><td>GE</td><td>近似的、跨工艺的替代度量</td></tr>
+    </tbody>
+  </table>
+  <p>把这些原则合在一起，一份负责任的 PPA 报告至少应当交代：工艺节点、代工厂与单元库；电压、温度与工艺角；时钟频率与约束条件；工作负载/激励向量及其来源；结果的产生阶段（综合估计、后端反标，还是硅上实测）；以及 EDA 工具及版本。缺了任何一项，数字都无法被复现，也无法与他人公平比较。</p>
+  <p>至此课程主体内容结束。按课件的安排，下一周将补上尚未讲完的零散话题（如异步输入信号的处理），并留出时间讨论大家的期末项目、答疑和课程总结。</p>
+
+  <h3 id="ch12-10">本讲要点</h3>
+  <div class="takeaway"><ol>
+    <li>裸的 PPA 数字没有意义：工艺、电压、温度、工艺角、时钟约束、工作负载、工具版本等边界条件缺一不可，否则既不能复现也无法公平比较。</li>
+    <li>工业界用同一套 EDA 工具保证"最坏条件下满足规格"，学术界却想用它们探索"极限"——约束被挪用为设计空间探索的手段，这本身就使公平对比变得困难。</li>
+    <li>面积的正确单位是 mm²，GE 只是与工艺无关的粗略替身（±20%）；综合数字不含布线与电源开销（可在 10% 到 500% 之间波动），同一设计两种版图的核面积可差 60% 以上，芯片内部模块的边界更是难以划定。</li>
+    <li>速度要分清吞吐率与延迟，并说明测量条件：同一电路在最坏/典型/最好角下的关键路径可以是 3.49 / 2.24 / 1.59 ns，相差一倍以上。</li>
+    <li>面积–速度权衡用 AT 曲线刻画：过度约束（求快或求小）都会偏离高效区；AES S 盒的探索表明算法路线（查找表/两段式/算术分解）决定了各自的最优区域，工具版本也会引入差异。</li>
+    <li>功耗是最难测准的指标：报功耗必须同时给电压、频率、活动率来源和测量方法；能量（如 pJ/Op）比功率更能反映电池续航。复合指标（TpA、EDP）在特定语境有用，但会隐藏规模效应，容易被误读。</li>
+  </ol></div>
+</section>
+    <footer>本讲义依据 ETH Zürich《VLSI 2》公开课件整理，用于中文学习交流。所有图表版权归原课件作者所有。</footer>
+  </main>
+</div>
+<button id="top" title="回到顶部">↑</button>
+<div id="lb"><img alt="放大预览"></div>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.toc-top>a,.toc-ch>a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  var chs=[].slice.call(document.querySelectorAll('.toc-ch'));
+  function upd(){
+    var y=window.scrollY+120, cur=0;
+    for(var i=0;i<secs.length;i++){ if(secs[i] && secs[i].offsetTop<=y) cur=i; }
+    links.forEach(function(a,i){a.classList.toggle('active', i===cur);});
+    chs.forEach(function(li,i){li.classList.toggle('open', i===cur-1);});
+  }
+  window.addEventListener('scroll',upd,{passive:true}); upd();
+  document.getElementById('top').onclick=function(){window.scrollTo({top:0,behavior:'smooth'});};
+  var s=document.getElementById('side');
+  document.addEventListener('click',function(e){
+    if(e.target.closest('.toc-ch>a')){ setTimeout(function(){
+      var a=e.target.closest('a'); var t=document.querySelector(a.getAttribute('href'));
+      if(t) window.scrollTo({top:t.offsetTop-16,behavior:'smooth'});
+    },0);}
+  });
+  var lb=document.getElementById('lb'), lbi=lb.querySelector('img');
+  document.addEventListener('click',function(e){
+    var im=e.target.closest('.chapter figure img');
+    if(im){ lbi.src=im.src; lb.style.display='flex'; }
+  });
+  lb.onclick=function(){ lb.style.display='none'; };
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') lb.style.display='none'; });
+  window.addEventListener('scroll',function(){ document.getElementById('top').style.display = window.scrollY>700?'block':'none'; },{passive:true});
+})();
+</script>
+</body>
+</html>

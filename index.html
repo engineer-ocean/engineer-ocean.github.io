@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ocean — 数字 EDA 仿真器 / 时序验证</title>
+<meta name="description" content="数字 EDA 仿真器研发工程师。负责 GLS 中的 X 态语义与左移验证；关注 RTL 级仿真中的 XProp 与 SDC，门级仿真中的 SDF 反标、时序检查与 X 态悲观去除。技术笔记与领域知识记录。">
+<meta name="author" content="Ocean">
+<link rel="canonical" href="https://engineer-ocean.github.io/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ocean — 数字 EDA 仿真器 / 时序验证">
+<meta property="og:description" content="专注 GLS 中的 X 态语义与门级时序检查的技术笔记。">
+<meta property="og:url" content="https://engineer-ocean.github.io/">
+<meta name="twitter:card" content="summary">
+
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/img/favicon.svg">
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<script>
+/* 在首次绘制前确定主题，避免闪白 */
+(function () {
+  try {
+    var t = localStorage.getItem('yy-theme');
+    if (t !== 'dark' && t !== 'light') {
+      t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</head>
+
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">EO</span>
+        <span>Ocean</span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#about">关于</a></li>
+        <li><a href="#focus">方向</a></li>
+        <li><a href="#experience">经历</a></li>
+        <li><a href="#work">领域知识</a></li>
+        <li><a href="/blog/">技术笔记</a></li>
+        <li><a href="#contact">联系</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="icon-btn" type="button" data-theme-toggle aria-label="切换主题" title="切换主题">
+          <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/>
+          </svg>
+          <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.5 14.3A8.6 8.6 0 1 1 9.7 3.5a6.9 6.9 0 0 0 10.8 10.8z"/>
+          </svg>
+        </button>
+        <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="打开菜单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+            <path d="M3.5 7h17M3.5 12h17M3.5 17h17"/>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================================================ HERO -->
+  <section class="hero" id="top">
+    <div class="wrap">
+      <span class="eyebrow">EDA · 时序验证 · 数字仿真</span>
+
+      <!-- 替换：如需显示中文名，改这里 -->
+      <h1 class="hero-name">
+        Ocean
+        <span class="cn">数字 EDA 仿真器 / 时序验证</span>
+      </h1>
+
+      <p class="hero-lede">
+        我在做数字 EDA 仿真器。核心工作是 GLS（门级仿真）中的<strong>X 态语义</strong>与
+        <strong>左移验证</strong>；关注面覆盖 RTL 级仿真中的 <strong>XProp</strong>、<strong>SDC</strong>，
+        以及门级仿真中的 <strong>SDF 反标</strong>、<strong>时序检查</strong>与
+        <strong>X 态悲观去除</strong> —— 都是签核路径上容易被忽略、却绕不过去的角落。
+      </p>
+
+      <ul class="hero-meta">
+        <li>成都 · 中国</li>
+        <li>复旦大学 · 微电子学院</li>
+        <li>Gate-Level Simulation</li>
+        <li>X 态语义 · 时序检查</li>
+      </ul>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="/blog/">
+          读技术笔记
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn" href="/notes/vlsi2/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H14l6 6v8.5A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M14 4v6h6"/><path d="M8.5 14h7M8.5 17h4"/></svg>
+          VLSI 2 讲义
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================== ABOUT -->
+  <section id="about" data-nav-section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">01</span>
+        <div>
+          <h2 class="sec-title">关于</h2>
+          <p class="sec-sub">在国产数字 EDA 这条不算宽的路上</p>
+        </div>
+      </div>
+
+      <div class="prose-wrap" style="padding-inline:0;margin-inline:0;">
+        <div class="prose">
+          <p>
+            复旦大学微电子学院本硕，现在在成都做数字 EDA 仿真器研发。负责的是 GLS 中的
+            <strong>X 态语义</strong>与相应的<strong>左移验证</strong>；再往外一圈，
+            RTL 级仿真里的 <strong>XProp</strong>、<strong>SDC</strong>，门级仿真里的
+            <strong>SDF 反标</strong>、<strong>时序检查</strong>、
+            <strong>X 态悲观去除</strong>，都是我持续在跟的方向。此前在上海做数字前端 EDA 工具研发，
+            也是从那时起接触编译器与仿真器这条线，是 ArkCompiler 的内部贡献者。
+          </p>
+
+          <p>
+            具体一点说：我关心 X 在仿真器里到底该怎么被解释 —— 一条 X 从哪来、沿哪条路径传播、
+            在什么条件下应该被收敛成确定值，以及在时序检查里遇到 X 时该报、该放还是该降级。
+            这件事的标准是含糊的：IEEE 定义了四值逻辑，却没有定义悲观与乐观的边界，
+            工具之间口径也不一致。往上游走一步，就是<strong>左移验证</strong> ——
+            能不能在门级仿真之前，就把这些 X 相关的隐患暴露出来，而不是等 sign-off 才发现。
+          </p>
+
+          <p>
+            这块工作在签核流程里的位置比较特殊 —— DFT 扫描链、低功耗上电序列、X 传播、异步路径这些场景，
+            静态时序分析覆盖不到，必须让门级网表带真实延迟跑一遍。它不会产生最漂亮的性能数字，
+            但它是 sign-off 前的最后一道关。
+          </p>
+
+          <p>
+            这个站点用来放我的技术笔记。EDA 领域有大量问题在公开资料里几乎找不到答案，
+            标准含糊、工具行为不一致、只能自己踩。踩完记一笔，算是给自己留档，也欢迎同行来对。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================== FOCUS -->
+  <section id="focus" data-nav-section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">02</span>
+        <div>
+          <h2 class="sec-title">专注方向</h2>
+          <p class="sec-sub">两个互相咬合的领域，不是并列的两条线</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <span class="card-idx">01 / 门级仿真</span>
+          <h3>SDF 反标、时序检查与 X 态悲观去除</h3>
+          <p>
+            门级仿真的 SDF 反标，setup / hold / recovery / removal / pulse-width 检查，
+            以及 X 态悲观去除（X-pessimism removal）。关注在真实工艺角下，
+            门级仿真给出的违例与静态分析为什么会对不上。
+          </p>
+          <ul class="card-tags">
+            <li>GLS</li><li>SDF</li><li>STA</li><li>X-pessimism</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <span class="card-idx">02 / RTL 仿真</span>
+          <h3>XProp 与 SDC 语义</h3>
+          <p>
+            RTL 级仿真中的 X 态传播规则与 SDC 约束语义。X 从哪来、往哪去、
+            遇到不确定分支时该走悲观还是乐观 —— 门级网表的 X 来源比 RTL 复杂得多，
+            但两套规则必须能对上，否则前后端会各说各话。
+          </p>
+          <ul class="card-tags">
+            <li>XProp</li><li>SDC</li><li>RTL</li><li>Verilog</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================== EXPERIENCE -->
+  <section id="experience" data-nav-section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">03</span>
+        <div>
+          <h2 class="sec-title">经历</h2>
+          <p class="sec-sub">一条从编译器到仿真器、从上海到成都的线</p>
+        </div>
+      </div>
+
+      <ol class="timeline">
+        <li class="is-current">
+          <span class="tl-when">2025 — 现在</span>
+          <h3 class="tl-where">数字 EDA 仿真器研发 · 成都</h3>
+          <p class="tl-desc">
+            国产 EDA 公司数字仿真器项目组，高级工程师。负责 GLS 中的 X 态语义与相应的左移验证，
+            同时维护门级仿真的 SDF 反标、时序检查与 X 态悲观去除，并参与 RTL 级 XProp、
+            SDC 相关模式的开发。
+          </p>
+        </li>
+
+        <li>
+          <span class="tl-when">2023 — 2025</span>
+          <h3 class="tl-where">数字前端 EDA 工具研发 · 上海</h3>
+          <p class="tl-desc">
+            头部通信芯片公司数字前端 EDA 方向。编译器与工具链研发，由此建立起对 HDL 前端、
+            中间表示与仿真调度的系统性理解。是 ArkCompiler 的内部贡献者。
+          </p>
+        </li>
+
+        <li>
+          <span class="tl-when">2016 — 2023</span>
+          <h3 class="tl-where">复旦大学 · 微电子学院</h3>
+          <p class="tl-desc">
+            本科与硕士，集成电路设计方向。全国重点实验室 EDA 方向完成学位工作。
+          </p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================ WORK -->
+  <section id="work" data-nav-section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">04</span>
+        <div>
+          <h2 class="sec-title">领域知识</h2>
+          <p class="sec-sub">踩过的坑、定过的规则，以及整理成册的讲义</p>
+        </div>
+      </div>
+
+      <div>
+        <article class="note">
+          <div class="note-head">
+            <h3>X 态语义与 SDC 约束</h3>
+            <span class="chip chip-doing">持续更新</span>
+          </div>
+          <p>
+            RTL 侧是 XProp 的乐观与悲观策略之争，门级侧则叠加了未初始化寄存器、多驱动冲突、
+            亚稳态，以及 SDF 反标本身引入的不确定性；再加上同一份 SDC 在静态分析里被当作约束、
+            在仿真里被当作检查判据，两边读出的语义并不完全一致。这些问题的共同点是 —— 查文档解决不了。
+          </p>
+        </article>
+
+        <article class="note">
+          <div class="note-head">
+            <h3>门级时序检查与 SDF 反标</h3>
+            <span class="chip chip-doing">持续更新</span>
+          </div>
+          <p>
+            setup / hold / recovery / removal / pulse-width 五类检查，加上反标的覆盖范围与工艺角口径。
+            核心问题只有一个：什么条件下该报违例、什么条件下不该报。标准在这里留了太多解释空间，
+            工具默认行为又不一致，只能靠真实设计一遍遍对出来。
+          </p>
+        </article>
+
+        <article class="note">
+          <div class="note-head">
+            <h3>X 态悲观去除的判定规则</h3>
+            <span class="chip chip-plan">梳理中</span>
+          </div>
+          <p>
+            X 在时序检查里的角色很尴尬：既可能是真实的不定态，也可能只是建模过度悲观带来的幻影。
+            哪些 X 可以安全地当作 don't-care 收敛掉、哪些必须显式报出，业界至今没有统一标准。
+            这里需要的是可判定的规则，而不是经验主义的默契。
+          </p>
+        </article>
+
+        <article class="note">
+          <div class="note-head">
+            <h3>VLSI 2 中文课堂讲义</h3>
+            <span class="chip chip-doc">讲义</span>
+          </div>
+          <p>
+            从 RTL 到一颗完整芯片的一遍走通：SystemVerilog 回顾、逻辑综合与门级网表，
+            再逐层拆开 ICT / LEF / DEF / LIB / SDF / GDS 这些交换格式，以及 VCD、WGL 与 PPA 收口。
+            十二个章节、一百六十余张图，是我给自己留的一份索引，也欢迎同行取用。
+          </p>
+          <div style="margin-top:16px;">
+            <a class="btn" href="/notes/vlsi2/">
+              打开讲义
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= WRITING -->
+  <section id="writing" data-nav-section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">05</span>
+        <div>
+          <h2 class="sec-title">技术笔记</h2>
+          <p class="sec-sub">记录那些在公开资料里查不到的东西</p>
+        </div>
+      </div>
+
+      <ul class="post-list">
+        <li class="post-item">
+          <a class="post-link" href="/blog/posts/gls-x-propagation.html">
+            <span class="post-date">2026-09-06</span>
+            <div>
+              <h3 class="post-title">GLS 时序检查中的 X 传播：一个没有统一标准的角落</h3>
+              <p class="post-excerpt">
+                门级网表的 X 从哪来、SDF 反标如何制造新的不定态，以及三种处理策略对签核结论的实际影响。
+              </p>
+              <ul class="post-meta"><li>GLS</li><li>XProp</li><li>时序验证</li></ul>
+            </div>
+            <span class="post-read">9 分钟</span>
+          </a>
+        </li>
+
+        <li class="post-item">
+          <a class="post-link" href="/blog/posts/sdf-sta-consistency.html">
+            <span class="post-date">2026-08-24</span>
+            <div>
+              <h3 class="post-title">SDF 反标与 STA 时序结果对不上？七类常见根因</h3>
+              <p class="post-excerpt">
+                从工艺角与 OCV 建模、串扰处理方式，到 borrow 语义与 SDF 覆盖范围，
+                逐项拆开两类时序分析的建模差异。
+              </p>
+              <ul class="post-meta"><li>STA</li><li>SDF</li><li>一致性</li></ul>
+            </div>
+            <span class="post-read">12 分钟</span>
+          </a>
+        </li>
+
+        <li class="post-item">
+          <a class="post-link" href="/blog/posts/gls-profiling-notes.html">
+            <span class="post-date">2026-07-29</span>
+            <div>
+              <h3 class="post-title">门级仿真的时间都花在哪了：一次 profiling 记录</h3>
+              <p class="post-excerpt">
+                把一次完整的门级仿真跑程拆成读入、反标、编译、求值、检查五个阶段，
+                看每一段的耗时分布，以及优化应该从哪里下手。
+              </p>
+              <ul class="post-meta"><li>GLS</li><li>性能</li><li>Profiling</li></ul>
+            </div>
+            <span class="post-read">8 分钟</span>
+          </a>
+        </li>
+      </ul>
+
+      <div style="margin-top:28px;">
+        <a class="btn" href="/blog/">
+          全部文章
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= CONTACT -->
+  <section id="contact" data-nav-section style="padding-bottom:96px;">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-num">06</span>
+        <div>
+          <h2 class="sec-title">联系</h2>
+          <p class="sec-sub">同行交流、技术讨论都欢迎</p>
+        </div>
+      </div>
+
+      <div class="contact-links">
+        <a class="contact-link" href="/notes/vlsi2/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.6C10.6 5.4 8.7 4.8 6.5 4.8H4v12.9h2.5c2.2 0 4.1.6 5.5 1.7"/><path d="M12 6.6c1.4-1.2 3.3-1.8 5.5-1.8H20v12.9h-2.5c-2.2 0-4.1.6-5.5 1.7"/><path d="M12 6.6v12.8"/></svg>
+          <span>
+            <span class="contact-k">VLSI 2 讲义</span>
+            <span class="contact-v">/notes/vlsi2/</span>
+          </span>
+        </a>
+
+        <a class="contact-link" href="mailto:yyang16@126.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M3 7l8.2 6.1a1.4 1.4 0 0 0 1.6 0L21 7"/></svg>
+          <span>
+            <span class="contact-k">Email</span>
+            <span class="contact-v">yyang16@126.com</span>
+          </span>
+        </a>
+
+        <a class="contact-link" href="/blog/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H14l6 6v8.5A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M14 4v6h6"/><path d="M8.5 14h7M8.5 17h4"/></svg>
+          <span>
+            <span class="contact-k">技术笔记</span>
+            <span class="contact-v">/blog/</span>
+          </span>
+        </a>
+
+        <a class="contact-link" href="#top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+          <span>
+            <span class="contact-k">回到顶部</span>
+            <span class="contact-v">#top</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <span>© <span data-year>2026</span> Ocean</span>
+    <ul class="footer-links">
+      <li><a href="/blog/">技术笔记</a></li>
+      <li><a href="/notes/vlsi2/">VLSI 2 讲义</a></li>
+      <li><a href="mailto:yyang16@126.com">Email</a></li>
+      <li><a href="/sitemap.xml">Sitemap</a></li>
+    </ul>
+    <span class="footer-note">Hosted on GitHub Pages</span>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>
