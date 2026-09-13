@@ -20,8 +20,10 @@
 │   ├── vlsi2/                 VLSI 2 中文课堂讲义（自包含页面 + 160 张配图）
 │   │   ├── index.html
 │   │   └── img/
-│   └── formal-verification/   《形式验证》第二版中文译本（单文件、图片全内联）
-│       └── index.html
+│   ├── formal-verification/   《形式验证》第二版中文译本（单文件、图片全内联）
+│   │   └── index.html
+│   └── systemverilog-1800-2023/  《IEEE 1800-2023 SystemVerilog 标准》中文译本
+│       └── index.html            （单文件 14 MB、286 张图全内联、41 章）
 ├── assets/
 │   ├── css/style.css          设计系统（全部样式，含明暗双主题）
 │   ├── js/main.js             交互（主题切换、移动端菜单、标签筛选）
