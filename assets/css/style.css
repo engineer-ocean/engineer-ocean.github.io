@@ -545,13 +545,13 @@ section + section { border-top: 1px solid var(--border); }
   width: 1px;
   background: var(--border);
 }
-.timeline li {
+.timeline > li {
   position: relative;
   padding-left: 30px;
   padding-bottom: 34px;
 }
-.timeline li:last-child { padding-bottom: 0; }
-.timeline li::before {
+.timeline > li:last-child { padding-bottom: 0; }
+.timeline > li::before {
   content: "";
   position: absolute;
   left: 0;
@@ -562,7 +562,7 @@ section + section { border-top: 1px solid var(--border); }
   border: 2px solid var(--border-strong);
   background: var(--bg);
 }
-.timeline li.is-current::before { border-color: var(--accent); background: var(--accent); }
+.timeline > li.is-current::before { border-color: var(--accent); background: var(--accent); }
 .tl-when {
   font-family: var(--font-mono);
   font-size: 11.5px;
@@ -582,6 +582,51 @@ section + section { border-top: 1px solid var(--border); }
   font-size: 14.3px;
   line-height: 1.75;
   max-width: 620px;
+}
+
+.tl-awards {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  max-width: 620px;
+}
+.tl-awards li {
+  position: relative;
+  display: block;          /* 关键：grid 子项会让 .aw-note / .aw-year 各占一行 */
+  padding-left: 15px;
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--text-2);
+}
+.tl-awards li + li { margin-top: 5px; }
+.tl-awards li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: .58em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.tl-awards .aw-year {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: var(--faint);
+  margin-left: 6px;
+}
+.tl-awards .aw-note {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: var(--muted);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  white-space: nowrap;
 }
 
 /* -------------------------------------------------------------- 11. Notes */
