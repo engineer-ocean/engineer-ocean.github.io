@@ -1,0 +1,21 @@
+name = "ocean-site-counter"
+main = "worker.js"
+compatibility_date = "2026-09-14"
+
+# KV 命名空间绑定名必须是 COUNTER（worker.js 里按这个名字取）
+#
+# 创建命名空间：  npx wrangler kv namespace create COUNTER
+# 命令会输出一个 id，填到下面。
+[[kv_namespaces]]
+binding = "COUNTER"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+[vars]
+# 只影响独立访客去重哈希的强度，不影响「是否记录 IP」（答案是不记录）。
+# 随便改成一串你自己的随机字符即可。
+SALT_SECRET = "REPLACE_WITH_A_RANDOM_STRING"
+
+# 想让统计接口只在你自己的域名下可达，可以加路由：
+# [[routes]]
+# pattern = "your-domain.example/*"
+# zone_name = "example.com"
