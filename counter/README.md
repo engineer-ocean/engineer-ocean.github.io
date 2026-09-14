@@ -79,8 +79,28 @@ python .dev/stamp_assets.py
 
 改完之后推送即可。
 
-> `ENDPOINT` 留空时，`counter.js` 完全不发任何网络请求 ——
-> 也就是说在你启用之前，站点行为与未安装统计时完全一致。
+> **未启用时的行为**：`ENDPOINT` 留空时，`counter.js` 在第一行就 `return`，
+> 不发任何网络请求；页脚那块统计区（数字 + 隐私说明）整块带 `hidden`，
+> 高度为 0。也就是说在你启用之前，站点的外观与行为与未安装统计时**完全一致**。
+> 这一点有线上探针守着：`python .dev/probe_live_counter.py`。
+
+> **覆盖范围**：所有引用了 `counter.js` 的页面都会计一次访问；
+> 只有带 `[data-visits]` 展示位的页面（目前是首页）才渲染数字。
+> 博客列表页与文章页只计数、不显示。
+> `notes/` 下三份收编讲义是自带样式的独立文档，未接入统计。
+
+## 自检
+
+三个脚本，改完统计相关代码后都跑一遍：
+
+```bash
+python  .dev/check_counter.py       # 静态隐私审计：9 条红线，读 worker.js 源码
+node    .dev/test_worker.mjs        # 逻辑测试：25 条，用假 KV 跑 worker 真实分支
+python  .dev/probe_live_counter.py  # 线上探针：17 条，验「未启用 = 零可见影响 + 零请求」
+```
+
+`check_counter.py` 会把「`wrangler.toml` 占位值未替换」按预期状态处理（显示为 `--`），
+所以**未部署时也应当是 9/9 通过**。
 
 ## 已知局限
 
@@ -88,7 +108,11 @@ python .dev/stamp_assets.py
   个人站点量级下误差可忽略；量大了之后把 `bump` 换成 Durable Object 即可。
 - **计数可以被刷**：`/hit` 只靠 CORS 限制来源，而 CORS 是浏览器行为，
   用 curl 可以绕过。个人站点通常不值得为此加验证码。
+- **「独立访客」是按日去重后累加**：同一个人连续来 10 天会计成 10。
+  它衡量的是「不同人·天」，不是自然人数量。
 - **城市键超过 1000 个时** KV 的 `list` 需要分页，届时改成只维护 top N。
+- **`request.cf.city` 的中文名**由 Cloudflare 给出（如 `Chengdu` 是英文）。
+  想显示中文城市名，需要在 `/stats` 里加一层映射。
 
 ## 想扩展时
 
