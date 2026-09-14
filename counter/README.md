@@ -37,13 +37,58 @@
 python .dev/deploy_counter.py --token <CF_API_TOKEN> --enable-frontend
 ```
 
-token 在 `My Profile → API Tokens → Create Token → Custom token` 建，
-权限只勾这两条（**不需要任何 Zone 权限**，本 Worker 不挂在域名上）：
+### 怎么拿 token
 
-| 权限 | 级别 |
-|---|---|
-| Account · Workers Scripts | Edit |
-| Account · Workers KV Storage | Edit |
+打开 **<https://dash.cloudflare.com/profile/api-tokens>**（或左侧栏 `My Profile → API Tokens`）：
+
+1. **Create Token**
+2. 选最下面的 **Create Custom Token**（不要用上面的模板，见下方说明）
+3. 起个名，比如 `ocean-site-counter deploy`
+4. **Permissions** 里加**两行**，逐字对上：
+
+   | Permission | Resource | Access |
+   |---|---|---|
+   | `Workers Scripts` | Account · 你的账号 | Edit |
+   | `Workers KV Storage` | Account · 你的账号 | Edit |
+
+5. **Continue to summary → Create Token**
+6. **立刻复制** —— 这串只显示一次，关掉就再也看不到
+
+> **为什么不用上面那个 `Edit Cloudflare Workers` 模板？**
+> 那个模板还带一条 **Zone 级** 的 `Workers Routes: Write`，绑定路由用的。
+> 我们的 Worker 走 workers.dev 子域、**不挂在你自己的域名上**，
+> 而你账号里很可能压根没有 zone —— 勾了它要么选不出资源、要么白白扩大 token 的爆炸半径。
+> 自定义 token 两条就够了。
+
+> **token 字符串以 `cf_` 或一长串随机字符开头**，是账号级的，不是 API Key。
+> 别把 API Key（旧的 Global API Key）当成它用 —— 权限模型完全不同。
+
+### 先预检，再部署
+
+最容易犯的错是**两条权限只勾了一条**，而那时 Cloudflare 只回一句
+`[10000] Authentication error`，完全看不出少了什么。所以先跑预检：
+
+```bash
+python .dev/deploy_counter.py --token <CF_API_TOKEN> --check-token
+```
+
+它会逐条试读并指名道姓地报出来：
+
+```
+权限预检（只读，不改任何东西）
+  OK   Workers KV Storage · Edit      （建/复用 KV 命名空间）
+  OK   Workers Scripts · Edit         （上传 worker.js）
+  OK   workers.dev 子域已注册          （xxxx.workers.dev）
+```
+
+缺权限的话会直接告诉你**缺哪一条**，并且：
+**去同一个页面「编辑」这个 token 补上即可，不用重新生成 —— 改完立即生效，token 字符串不变。**
+
+预检通过后，正式部署：
+
+```bash
+python .dev/deploy_counter.py --token <CF_API_TOKEN> --enable-frontend
+```
 
 脚本会做的事：
 
@@ -61,6 +106,9 @@ token 在 `My Profile → API Tokens → Create Token → Custom token` 建，
 > **如果卡在 `[6/7] 该账号还没注册 workers.dev 子域`**：这是账号级的**一次性**设置，
 > API 建不了。去 `Workers & Pages` 首页点一下 “Choose your subdomain”，
 > 填一个名字后重跑脚本即可（前几步会复用，不会重复建）。
+
+> **token 用完就删。** 部署是一次性动作，删掉最干净；
+> 留着的话建议在创建时把 TTL 设短（比如 1 天）。
 
 ## 部署方式 B：Cloudflare 控制台（手动）
 
