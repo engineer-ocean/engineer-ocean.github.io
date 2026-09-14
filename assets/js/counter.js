@@ -15,7 +15,7 @@
   'use strict';
 
   // 例：'https://ocean-site-counter.your-subdomain.workers.dev'
-  var ENDPOINT = '';
+  var ENDPOINT = 'https://ocean-site-counter.yangee1638.workers.dev';
 
   if (!ENDPOINT) return;
 
