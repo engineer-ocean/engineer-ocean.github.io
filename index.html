@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ocean — 数字 EDA 仿真器 / 时序验证</title>
-<meta name="description" content="数字 EDA 仿真器研发工程师。负责 GLS 中的 X 态语义与左移验证；关注 RTL 级仿真中的 XProp 与 SDC，门级仿真中的 SDF 反标、时序检查与 X 态悲观去除。技术笔记与领域知识记录。">
+<title>Ocean — SoC 验证 / 逻辑仿真 / X 态语义</title>
+<meta name="description" content="逻辑仿真器研发工程师。负责 GLS 中的 X 态语义与左移验证；关注 RTL 级仿真中的 XProp 与 SDC，门级仿真中的 SDF 反标、时序检查与 X 态悲观去除。技术笔记与领域知识记录。">
 <meta name="author" content="Ocean">
 <link rel="canonical" href="https://engineer-ocean.github.io/">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Ocean — 数字 EDA 仿真器 / 时序验证">
+<meta property="og:title" content="Ocean — SoC 验证 / 逻辑仿真 / X 态语义">
 <meta property="og:description" content="专注 GLS 中的 X 态语义与门级时序检查的技术笔记。">
 <meta property="og:url" content="https://engineer-ocean.github.io/">
 <meta name="twitter:card" content="summary">
@@ -77,16 +77,16 @@
   <!-- ============================================================ HERO -->
   <section class="hero" id="top">
     <div class="wrap">
-      <span class="eyebrow">EDA · 时序验证 · 数字仿真</span>
+      <span class="eyebrow">SoC 验证 · 逻辑仿真 · X 态语义</span>
 
       <!-- 替换：如需显示中文名，改这里 -->
       <h1 class="hero-name">
         Ocean
-        <span class="cn">数字 EDA 仿真器 / 时序验证</span>
+        <span class="cn">SoC 验证 / 逻辑仿真 / X 态语义</span>
       </h1>
 
       <p class="hero-lede">
-        我在做数字 EDA 仿真器。核心工作是 GLS（门级仿真）中的<strong>X 态语义</strong>与
+        我在做逻辑仿真器。核心工作是 GLS（门级仿真）中的<strong>X 态语义</strong>与
         <strong>左移验证</strong>；关注面覆盖 RTL 级仿真中的 <strong>XProp</strong>、<strong>SDC</strong>，
         以及门级仿真中的 <strong>SDF 反标</strong>、<strong>时序检查</strong>与
         <strong>X 态悲观去除</strong> —— 都是签核路径上容易被忽略、却绕不过去的角落。
@@ -94,7 +94,7 @@
 
       <ul class="hero-meta">
         <li>成都 · 中国</li>
-        <li>复旦大学 · 微电子学院</li>
+        <li>复旦大学 · 集成电路与微纳电子创新学院</li>
         <li>Gate-Level Simulation</li>
         <li>X 态语义 · 时序检查</li>
       </ul>
@@ -119,14 +119,14 @@
         <span class="sec-num">01</span>
         <div>
           <h2 class="sec-title">关于</h2>
-          <p class="sec-sub">在国产数字 EDA 这条不算宽的路上</p>
+          <p class="sec-sub">在国产 EDA 工具链这条不算宽的路上</p>
         </div>
       </div>
 
       <div class="prose-wrap" style="padding-inline:0;margin-inline:0;">
         <div class="prose">
           <p>
-            复旦大学微电子学院本硕，现在在成都做数字 EDA 仿真器研发。负责的是 GLS 中的
+            复旦大学微电子学院本硕，现在在成都做逻辑仿真器研发。负责的是 GLS 中的
             <strong>X 态语义</strong>与相应的<strong>左移验证</strong>；再往外一圈，
             RTL 级仿真里的 <strong>XProp</strong>、<strong>SDC</strong>，门级仿真里的
             <strong>SDF 反标</strong>、<strong>时序检查</strong>、
@@ -211,8 +211,8 @@
 
       <ol class="timeline">
         <li class="is-current">
-          <span class="tl-when">2025 — 现在</span>
-          <h3 class="tl-where">数字 EDA 仿真器研发 · 成都</h3>
+          <span class="tl-when">2025.9 — 现在</span>
+          <h3 class="tl-where">逻辑仿真器研发 · 成都</h3>
           <p class="tl-desc">
             国产 EDA 公司数字仿真器项目组，高级工程师。负责 GLS 中的 X 态语义与相应的左移验证，
             同时维护门级仿真的 SDF 反标、时序检查与 X 态悲观去除，并参与 RTL 级 XProp、
@@ -221,19 +221,21 @@
         </li>
 
         <li>
-          <span class="tl-when">2023 — 2025</span>
-          <h3 class="tl-where">数字前端 EDA 工具研发 · 上海</h3>
+          <span class="tl-when">2023.7 — 2025.7</span>
+          <h3 class="tl-where">数字前端 EDA 研发 · 上海</h3>
           <p class="tl-desc">
-            头部通信芯片公司数字前端 EDA 方向。编译器与工具链研发，由此建立起对 HDL 前端、
-            中间表示与仿真调度的系统性理解。是 ArkCompiler 的内部贡献者。
+            国内最大的芯片公司，高级工程师。先后负责 emu 编译工具链中端优化、模型检测 App
+            连线检查与 ArkCompiler 插件模块的交付，由此建立起对编译前端、中间表示与
+            仿真调度的系统性理解。
           </p>
         </li>
 
         <li>
-          <span class="tl-when">2016 — 2023</span>
-          <h3 class="tl-where">复旦大学 · 微电子学院</h3>
+          <span class="tl-when">2016 — 2023.6</span>
+          <h3 class="tl-where">复旦大学 · 微电子学院（现集成电路与微纳电子创新学院）</h3>
           <p class="tl-desc">
-            本科与硕士，集成电路设计方向。全国重点实验室 EDA 方向完成学位工作。
+            工学学士（微电子科学与工程）、理学硕士（集成电路与系统设计，EDA 方向）。
+            全国重点实验室 EDA 方向完成学位工作。
           </p>
         </li>
       </ol>
@@ -365,7 +367,7 @@
               <p class="post-excerpt">
                 门级网表的 X 从哪来、SDF 反标如何制造新的不定态，以及三种处理策略对签核结论的实际影响。
               </p>
-              <ul class="post-meta"><li>GLS</li><li>XProp</li><li>时序验证</li></ul>
+              <ul class="post-meta"><li>GLS</li><li>XProp</li><li>逻辑仿真</li></ul>
             </div>
             <span class="post-read">9 分钟</span>
           </a>
