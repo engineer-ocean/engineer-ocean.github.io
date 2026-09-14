@@ -212,3 +212,46 @@ python  .dev/probe_live_counter.py  # 线上探针：17 条，验「未启用 = 
   在 `/stats` 里循环读最近 7 天即可。
 - **只统计中国城市的显示名**：`/stats` 返回的 `country` 目前未在页面上使用，
   需要按国家分组展示时用它。
+
+## 排错
+
+### 本机连不上 `*.workers.dev`
+
+现象：脚本第 7 步冒烟测试报 `HTTP 0`，或浏览器打不开 Worker 地址。
+**这多半不是你的配置问题，是本机 DNS 把它拦了。** 判据：
+
+```bash
+nslookup ocean-site-counter.<你的子域>.workers.dev
+```
+
+正常应解析到 Cloudflare 的地址（`104.x` / `172.67.x`）。如果解析出的是
+**完全无关的 IP**（实测过解析到 Meta 的网段 `2a03:2880:...:face:b00c`，
+`face:b00c` 是它标志性的选择），那就是 DNS 劫持/拦截页——
+常见于公司网络、部分运营商、以及带域名白名单的沙箱环境。
+
+这时**Worker 本身是好的，只是本机测不了**：
+
+- 用浏览器直接打开 Worker 地址（浏览器常常能通，不走同一套 DNS）
+- 或换个网络（手机热点）试
+- 部署流程可以加 `--skip-smoke` 跳掉这一步，不影响其余步骤
+
+### 冒烟测试通过但页面上没有数字
+
+按顺序查三处：
+
+1. `counter.js` 里的 `ENDPOINT` 是否等于 Worker 地址（跑 `--enable-frontend` 会自动填）
+2. 有没有**跑过 `stamp_assets.py`** —— 没跑的话回访用户吃的是缓存的旧脚本
+3. 浏览器控制台有没有 CORS 报错 —— 若你在别的域名下测试，
+   要把该来源加进 `worker.js` 的 `ALLOWED_ORIGINS`
+
+### 想直接确认有没有访问被记下来
+
+不依赖页面，直接问 KV（把 `<ACCOUNT_ID>`、`<KV_ID>`、`<TOKEN>` 换掉）：
+
+```bash
+curl -s "https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/storage/kv/namespaces/<KV_ID>/keys?per_page=100" \
+  -H "Authorization: Bearer <TOKEN>" | python -m json.tool
+```
+
+访问过后应该能看到 `pv`、`uv:total`、`city:CN|Chengdu` 这类键。
+空的话就是请求根本没到 Worker。
