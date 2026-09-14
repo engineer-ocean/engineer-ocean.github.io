@@ -27,20 +27,64 @@
 匿名化后的聚合计数不属于《个人信息保护法》定义的个人信息（该法第四条），
 所以页面上展示城市分布不涉及公开他人个人信息的问题（同法第二十五条）。
 
-## 部署方式 A：Cloudflare 控制台（推荐，无需本地工具）
+## 部署方式 A：一行脚本（推荐）
 
-1. 登录 <https://dash.cloudflare.com>（没有账号就注册，免费额度足够）
-2. **Storage & Databases → KV → Create namespace**，名字填 `ocean-site-counter`
-3. **Compute (Workers) → Create → 从 Hello World 模板开始**，
-   Worker 名字也填 `ocean-site-counter`
-4. **Edit code**，把 `worker.js` 全文粘贴进去，**Deploy**
-5. **Settings → Variables and Secrets** 加两项：
-   - **KV Namespace binding**：变量名必须是 `COUNTER`，选中第 2 步建的命名空间
-   - **Text variable**：`SALT_SECRET`，值填一串你自己的随机字符
-6. 再 **Deploy** 一次，拿到形如
-   `https://ocean-site-counter.<你的子域>.workers.dev` 的地址
+控制台的 Worker 编辑器每个季度都在改版，`Edit code` 的位置时有时无。
+`.dev/deploy_counter.py` 走公开 REST API，一次跑完建 KV、传脚本、写 secret、
+开 workers.dev 路由、冒烟测试：
 
-## 部署方式 B：wrangler CLI
+```bash
+python .dev/deploy_counter.py --token <CF_API_TOKEN> --enable-frontend
+```
+
+token 在 `My Profile → API Tokens → Create Token → Custom token` 建，
+权限只勾这两条（**不需要任何 Zone 权限**，本 Worker 不挂在域名上）：
+
+| 权限 | 级别 |
+|---|---|
+| Account · Workers Scripts | Edit |
+| Account · Workers KV Storage | Edit |
+
+脚本会做的事：
+
+1. 校验 token → 列账号（只有一个就自动选，多个要 `--account <id>`）
+2. 建 KV 命名空间 `ocean-site-counter`（已存在则复用，不会重复建）
+3. 上传 `worker.js`（ES module，绑定名 `COUNTER`）
+4. 写 `SALT_SECRET` —— 走 **encrypted secret** 接口，不落 `plain_text`，
+   控制台里也回读不到；不传 `--salt` 就自动随机生成
+5. 打开 workers.dev 路由，打印 `https://ocean-site-counter.<子域>.workers.dev`
+6. 冒烟测试 `/` → `POST /hit` → `/stats`，确认计数真的涨
+7. 加了 `--enable-frontend` 就会把地址填进 `assets/js/counter.js` 并刷新版本号
+
+先空跑确认无误：`--dry-run`。
+
+> **如果卡在 `[6/7] 该账号还没注册 workers.dev 子域`**：这是账号级的**一次性**设置，
+> API 建不了。去 `Workers & Pages` 首页点一下 “Choose your subdomain”，
+> 填一个名字后重跑脚本即可（前几步会复用，不会重复建）。
+
+## 部署方式 B：Cloudflare 控制台（手动）
+
+如果偏好手动点，路径如下（2026-09 时点有效）：
+
+1. 登录 <https://dash.cloudflare.com>，左侧栏 **Compute (Workers) → Workers & Pages**
+   （旧版就是 **Workers & Pages**）
+2. 右上 **Create** → 选 **Start with Hello World!** → **Get started**
+   ⚠️ 别选 "Import a repository" / "Connect to Git" —— 那条路**没有代码编辑器**
+3. 起个名字（如 `ocean-site-counter`）→ **Deploy**
+4. 部署完点 **Continue to project** 进入 Worker 页面，
+   右上角 **Edit code** 就是编辑器（某些版本叫 **Quick edit**，也可能收在部署卡片的
+   `⋯` 菜单里）→ 全选删掉模板代码 → 粘贴 `counter/worker.js` → **Deploy**
+5. **Settings → Variables and Secrets → Add**：
+   - **KV Namespace binding**：变量名必须叫 `COUNTER`，选第 2 步建的命名空间
+   - **Secret**：`SALT_SECRET`，值填一串自己的随机字符
+
+   每加一项都要 **Deploy** 一次才会生效
+6. 地址形如 `https://ocean-site-counter.<你的子域>.workers.dev`
+
+> 找不到 **Edit code** 的常见原因：① 走了 Git 连接的部署方式（无编辑器）；
+> ② 停在 Deployments 标签页没点进 project；③ 账号还没注册 workers.dev 子域。
+
+## 部署方式 C：wrangler CLI
 
 ```bash
 cd counter
