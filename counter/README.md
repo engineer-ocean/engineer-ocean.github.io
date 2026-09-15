@@ -190,7 +190,7 @@ python .dev/stamp_assets.py
 ```bash
 python  .dev/check_counter.py       # 静态隐私审计：读 worker.js 源码
 node    .dev/test_worker.mjs        # 逻辑测试：25 条，用假 KV 跑 worker 真实分支
-python  .dev/probe_live_counter.py  # 线上探针：15 条，验「未启用 = 零可见影响 + 零请求」
+python  .dev/probe_live_counter.py  # 线上探针：17 条，验「未启用 = 零可见影响 + 零请求」
 CF_TOKEN=xxx node .dev/diag_stats.mjs  # 拉生产 KV 灌进 worker，看线上 /stats 到底返回什么
 ```
 
