@@ -11,7 +11,7 @@
 |---|---|---|
 | 总访问量 | KV `pv` | 页面显示 |
 | 独立访客（按日去重后累加） | KV `uv:total` | 页面显示 |
-| 城市级计数 | KV `city:<国家>\|<城市>` | 页面显示 |
+| 城市级计数 | KV `cityAgg`（一个 JSON 对象，键是 `<国家>\|<城市>`） | 页面显示 |
 | 当日去重用的哈希 | KV `uv:<日期>:<哈希>`，**TTL 24 小时自动删除** | 仅用于「今天这个人算过了」 |
 
 **明确不收集**（这几条是设计约束，改 `worker.js` 时不要破坏）：
@@ -100,6 +100,8 @@ python .dev/deploy_counter.py --token <CF_API_TOKEN> --enable-frontend
 5. 打开 workers.dev 路由，打印 `https://ocean-site-counter.<子域>.workers.dev`
 6. 冒烟测试 `/` → `POST /hit` → `/stats`，确认计数真的涨
 7. 加了 `--enable-frontend` 就会把地址填进 `assets/js/counter.js` 并刷新版本号
+8. 把部署结果（账号 / KV id / Worker 地址）写进 `.dev/_counter_deploy.json`，
+   供 `check_counter.py` 判断部署是否真的完成
 
 先空跑确认无误：`--dry-run`。
 
@@ -186,13 +188,21 @@ python .dev/stamp_assets.py
 三个脚本，改完统计相关代码后都跑一遍：
 
 ```bash
-python  .dev/check_counter.py       # 静态隐私审计：9 条红线，读 worker.js 源码
+python  .dev/check_counter.py       # 静态隐私审计：读 worker.js 源码
 node    .dev/test_worker.mjs        # 逻辑测试：25 条，用假 KV 跑 worker 真实分支
-python  .dev/probe_live_counter.py  # 线上探针：17 条，验「未启用 = 零可见影响 + 零请求」
+python  .dev/probe_live_counter.py  # 线上探针：15 条，验「未启用 = 零可见影响 + 零请求」
+CF_TOKEN=xxx node .dev/diag_stats.mjs  # 拉生产 KV 灌进 worker，看线上 /stats 到底返回什么
 ```
 
-`check_counter.py` 会把「`wrangler.toml` 占位值未替换」按预期状态处理（显示为 `--`），
-所以**未部署时也应当是 9/9 通过**。
+`diag_stats.mjs` 专门用来**区分「worker 逻辑有 bug」和「前端/时序问题」** ——
+本机网络到不了 `*.workers.dev`（见下方排错），但 KV 能通过 REST API 读到，
+于是把真实数据灌进假 KV 调 worker 的 `fetch()`，就能确定线上会返回什么。
+改完 `handleStats` 之类的读取逻辑后值得跑一次。
+
+`check_counter.py` 用 `.dev/_counter_deploy.json` 判断部署是否真的完成 ——
+这份记录由 `deploy_counter.py` 每次部署后自动落盘，比看 `wrangler.toml` 准：
+**走 REST API 部署时 toml 里的占位值永远是原样，那不是「没部署」。**
+所以未部署时应当是 9/9 通过（部署记录那条会被跳过），部署完成后是 10/10。
 
 ## 已知局限
 
@@ -202,7 +212,11 @@ python  .dev/probe_live_counter.py  # 线上探针：17 条，验「未启用 = 
   用 curl 可以绕过。个人站点通常不值得为此加验证码。
 - **「独立访客」是按日去重后累加**：同一个人连续来 10 天会计成 10。
   它衡量的是「不同人·天」，不是自然人数量。
-- **城市键超过 1000 个时** KV 的 `list` 需要分页，届时改成只维护 top N。
+- **城市表是一个 JSON 值，读-改-写有竞争**：`cityAgg` 整张表一次读一次写，
+  并发命中时两次写入会互相覆盖（个人站点量级可忽略）。
+  换来的是**强一致**：`/stats` 只走 `get()`，绝不会出现「刚写进去却读不到」。
+  早期版本按城市分散成 `city:<国家>|<城市>` 键、再用 `list({prefix})` 汇总，
+  于是稳定复现了「来自 0 个城市」—— 成因见下方排错一节。
 - **`request.cf.city` 的中文名**由 Cloudflare 给出（如 `Chengdu` 是英文）。
   想显示中文城市名，需要在 `/stats` 里加一层映射。
 
@@ -244,6 +258,25 @@ nslookup ocean-site-counter.<你的子域>.workers.dev
 3. 浏览器控制台有没有 CORS 报错 —— 若你在别的域名下测试，
    要把该来源加进 `worker.js` 的 `ALLOWED_ORIGINS`
 
+### 页面上显示「来自 0 个城市」，但后台看 KV 里明明有数据
+
+这是 KV **`list()` 的缓存**造成的，不是没记上。
+
+同一个键刚 `put()` 进去，`list({prefix})` 往往要**几十秒**后才认得它；
+而 `get()` 在**写入的那个机房**是强一致的。于是出现这种自相矛盾的现象：
+
+| 读法 | 刚写完立刻读 | 页面表现 |
+|---|---|---|
+| `get('pv')` | 立刻看得到 | 总访问量正常增长 |
+| `list({prefix:'city:'})` | 要等缓存过期 | 城市数还是 0 |
+
+> **判据**：「总访问量」在涨、只有「城市数」是 0 —— 两者一个走 `get()`、
+> 一个走 `list()`，那就一定是这个问题。若两个都不涨，是请求根本没到 Worker。
+
+现在的实现把整张城市表存成单个 JSON 值 `cityAgg`，只走 `get()`/`put()`，
+不再依赖 `list()`。首次读到空的 `cityAgg` 时会自动把老的
+`city:<国家>|<城市>` 键汇总写回，**老数据不会丢**。
+
 ### 想直接确认有没有访问被记下来
 
 不依赖页面，直接问 KV（把 `<ACCOUNT_ID>`、`<KV_ID>`、`<TOKEN>` 换掉）：
@@ -253,5 +286,16 @@ curl -s "https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/storage/kv/n
   -H "Authorization: Bearer <TOKEN>" | python -m json.tool
 ```
 
-访问过后应该能看到 `pv`、`uv:total`、`city:CN|Chengdu` 这类键。
+访问过后应该能看到 `pv`、`uv:total`、`cityAgg` 这类键。
 空的话就是请求根本没到 Worker。
+
+想确认线上跑的到底是哪一版脚本（排查「本地改了、线上没变」），
+可以直接把线上脚本拉下来跟本地逐行对比：
+
+```bash
+curl -s "https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/workers/scripts/ocean-site-counter" \
+  -H "Authorization: Bearer <TOKEN>"      # 返回 multipart，里面那段就是线上 worker.js
+```
+
+注意 `/content` 那个端点对 API token 会回 `10405 Method not allowed`，
+上面这个不带 `/content` 的路径才能拿到（返回 `multipart/form-data`）。

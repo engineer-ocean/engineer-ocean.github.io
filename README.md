@@ -17,6 +17,8 @@
 │       ├── sdf-sta-consistency.html
 │       └── gls-profiling-notes.html
 ├── notes/
+│   ├── eda-knowledge-map/     数字前端验证工具研发 · 领域知识地图（单文件自包含）
+│   │   └── index.html
 │   ├── vlsi2/                 VLSI 2 中文课堂讲义（自包含页面 + 160 张配图）
 │   │   ├── index.html
 │   │   └── img/

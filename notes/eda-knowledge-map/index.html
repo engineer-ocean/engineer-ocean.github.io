@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数字前端验证工具研发 · 领域知识地图</title>
+<meta name="description" content="数字前端验证工具研发的领域知识地图：从硬基础、仿真内核、验证方法学，到工程基础设施、AI × EDA 前沿与产业生态，共七层知识域、62 个模块，附能力自评雷达与分层补全路径。"/>
+<link rel="canonical" href="https://engineer-ocean.github.io/notes/eda-knowledge-map/"/>
+<meta name="robots" content="index,follow"/>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f3f5f9; --card:#fff; --card2:#fafbfd;
+  --bd:#e3e7ee; --bd2:#d0d7e2;
+  --tx:#151a21; --tx2:#4f5867; --tx3:#828b9b;
+  --accent:#1f5fa8; --accent-soft:#e9f1fb; --accent-line:#b9d3ee;
+  --l1:#2f6fd0; --l2:#d1861a; --l3:#2b9469; --l4:#7a5cbe;
+  --l5:#c4454a; --l6:#2b8ba1; --l7:#96682a;
+  --ok:#2b9469; --mid:#d1861a; --gap:#c4454a;
+  --sh:0 1px 2px rgba(16,24,40,.04),0 3px 10px rgba(16,24,40,.045);
+  --r:10px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--tx);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:14px; line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px 100px}
+
+/* ============ HEADER ============ */
+header.top{
+  background:linear-gradient(180deg,#fff 0%,#f8fafd 100%);
+  border-bottom:1px solid var(--bd);
+  padding:34px 0 30px; margin-bottom:26px;
+}
+header.top .wrap{padding-bottom:0}
+.eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px}
+h1{font-size:29px;line-height:1.3;font-weight:700;letter-spacing:-.01em}
+h1 .sub{display:block;font-size:14px;font-weight:400;color:var(--tx2);margin-top:9px;letter-spacing:0}
+.hd-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--tx2);
+  background:#fff;border:1px solid var(--bd);border-radius:999px;padding:3px 11px}
+.chip b{color:var(--tx);font-weight:600}
+
+/* ============ LAYOUT ============ */
+.layout{display:grid;grid-template-columns:206px 1fr;gap:34px;align-items:start}
+nav.toc{position:sticky;top:18px;font-size:12.5px;max-height:calc(100vh - 40px);overflow-y:auto;padding-right:4px}
+nav.toc .t{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);font-weight:600;margin:0 0 9px 9px}
+nav.toc a{display:block;color:var(--tx2);text-decoration:none;padding:5px 9px;border-radius:6px;
+  border-left:2px solid transparent;line-height:1.45}
+nav.toc a:hover{background:#fff;color:var(--tx)}
+nav.toc a.sub{padding-left:20px;font-size:12px;color:var(--tx3)}
+nav.toc a.on{background:#fff;color:var(--accent);border-left-color:var(--accent);font-weight:600}
+nav.toc::-webkit-scrollbar{width:5px}
+nav.toc::-webkit-scrollbar-thumb{background:#d6dbe4;border-radius:3px}
+
+/* ============ SECTION ============ */
+section{margin-bottom:44px;scroll-margin-top:16px}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;padding-bottom:11px;border-bottom:2px solid var(--bd)}
+.sec-h .ln{font-size:12px;font-weight:700;color:#fff;background:var(--accent);border-radius:5px;
+  padding:2px 8px;letter-spacing:.03em;flex:none;font-variant-numeric:tabular-nums}
+.sec-h h2{font-size:19.5px;font-weight:700;letter-spacing:-.01em}
+.sec-h .en{font-size:11.5px;color:var(--tx3);font-weight:400;letter-spacing:.02em}
+.sec-lead{color:var(--tx2);margin:13px 0 18px;font-size:13.5px;max-width:900px}
+.sec-lead strong{color:var(--tx);font-weight:600}
+
+/* layer accent */
+#s2 .sec-h .ln{background:var(--l1)} #s2 .card{border-top:2px solid var(--l1)}
+#s3 .sec-h .ln{background:var(--l2)} #s3 .card{border-top:2px solid var(--l2)}
+#s4 .sec-h .ln{background:var(--l3)} #s4 .card{border-top:2px solid var(--l3)}
+#s5 .sec-h .ln{background:var(--l4)} #s5 .card{border-top:2px solid var(--l4)}
+#s6 .sec-h .ln{background:var(--l5)} #s6 .card{border-top:2px solid var(--l5)}
+#s7 .sec-h .ln{background:var(--l6)} #s7 .card{border-top:2px solid var(--l6)}
+#s8 .sec-h .ln{background:var(--l7)} #s8 .card{border-top:2px solid var(--l7)}
+
+/* ============ CARD ============ */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(335px,1fr));gap:14px}
+.grid.wide{grid-template-columns:1fr}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:15px 17px 16px;box-shadow:var(--sh)}
+.card-h{display:flex;align-items:center;gap:9px;margin-bottom:11px;flex-wrap:wrap}
+.card-h .num{font-size:11px;font-weight:700;color:var(--tx3);font-variant-numeric:tabular-nums;letter-spacing:.02em;flex:none}
+.card-h h4{font-size:14.5px;font-weight:650;letter-spacing:-.005em;flex:1;min-width:120px}
+.card-h h4 .e{font-size:11px;color:var(--tx3);font-weight:400;margin-left:5px}
+.card ul{list-style:none}
+.card li{position:relative;padding-left:15px;margin-bottom:6.5px;font-size:13px;color:var(--tx2);line-height:1.65}
+.card li::before{content:"";position:absolute;left:2px;top:9px;width:4px;height:4px;border-radius:50%;background:var(--bd2)}
+.card li b,.card li strong{color:var(--tx);font-weight:600}
+.card li code{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace;font-size:11.5px;
+  background:#f1f3f7;border:1px solid var(--bd);border-radius:4px;padding:.5px 4px;color:#2d4a6b}
+.card li .why{display:block;color:var(--tx3);font-size:12.3px;margin-top:1px}
+
+/* tags */
+.tag{font-size:10.5px;font-weight:600;border-radius:4px;padding:1.5px 7px;letter-spacing:.02em;flex:none;white-space:nowrap}
+.tag.core{background:#fdf3e3;color:#9c6410;border:1px solid #f2d9ae}
+.tag.k{background:var(--accent-soft);color:#1a4d87;border:1px solid var(--accent-line)}
+.tag.use{background:#eef6f1;color:#22734f;border:1px solid #c3e2d1}
+.tag.hard{background:#fceeee;color:#a03a3e;border:1px solid #eec6c8}
+.tag.new{background:#f3effc;color:#5c45a0;border:1px solid #d8cdf0}
+.tag.lv1{background:#eef4fb;color:#33617f;border:1px solid #cfdeed}
+.tag.lv2{background:#fdf4e8;color:#8f6212;border:1px solid #f0dcba}
+.tag.lv3{background:#fbeeee;color:#9a3c40;border:1px solid #eec9cb}
+
+/* status dots */
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex:none}
+.dot.ok{background:var(--ok)} .dot.mid{background:var(--mid)} .dot.gap{background:var(--gap)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;background:#fff;border:1px solid var(--bd);border-radius:var(--r);
+  padding:13px 17px;margin-bottom:20px;font-size:12.5px;color:var(--tx2);align-items:center;box-shadow:var(--sh)}
+.legend .it{display:flex;align-items:center;gap:6px}
+.legend .sep{width:1px;height:16px;background:var(--bd)}
+
+/* ============ STACK OVERVIEW ============ */
+.stack{display:flex;flex-direction:column;gap:7px;margin:6px 0 6px}
+.lv{display:grid;grid-template-columns:52px 168px 1fr;gap:14px;align-items:center;
+  background:#fff;border:1px solid var(--bd);border-radius:8px;padding:11px 15px;box-shadow:var(--sh);
+  text-decoration:none;color:inherit;transition:.14s;border-left-width:4px;border-left-style:solid}
+.lv:hover{transform:translateX(3px);box-shadow:0 3px 14px rgba(16,24,40,.09)}
+.lv .idx{font-size:11px;font-weight:700;color:var(--tx3);font-variant-numeric:tabular-nums}
+.lv .nm{font-size:13.5px;font-weight:650}
+.lv .nm span{display:block;font-size:10.5px;color:var(--tx3);font-weight:400;letter-spacing:.02em}
+.lv .kw{font-size:11.8px;color:var(--tx2);line-height:1.6}
+.lv.a{border-left-color:var(--l1)} .lv.b{border-left-color:var(--l2)}
+.lv.c{border-left-color:var(--l3)} .lv.d{border-left-color:var(--l4)}
+.lv.e{border-left-color:var(--l5)} .lv.f{border-left-color:var(--l6)}
+.lv.g{border-left-color:var(--l7)}
+
+/* focus box */
+.focus{background:#fff;border:1px solid var(--accent-line);border-left:4px solid var(--accent);
+  border-radius:var(--r);padding:17px 20px;margin:20px 0;box-shadow:var(--sh)}
+.focus .ft{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px}
+.focus p{font-size:13.3px;color:var(--tx2);margin-bottom:9px}
+.focus p:last-child{margin-bottom:0}
+.focus p strong{color:var(--tx)}
+
+/* two-col compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+.cmp .col{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh)}
+.cmp .col.hl{border-color:var(--accent-line);background:linear-gradient(180deg,#fbfdff,#fff)}
+.cmp .col h5{font-size:13.5px;font-weight:700;margin-bottom:4px}
+.cmp .col .role{font-size:11px;color:var(--tx3);margin-bottom:11px;letter-spacing:.02em}
+.cmp .col ul{list-style:none;font-size:12.7px;color:var(--tx2)}
+.cmp .col li{padding-left:14px;position:relative;margin-bottom:5px;line-height:1.6}
+.cmp .col li::before{content:"";position:absolute;left:2px;top:8.5px;width:4px;height:4px;border-radius:50%;background:var(--bd2)}
+
+/* ============ RADAR ============ */
+.radar-wrap{display:grid;grid-template-columns:500px minmax(0,1fr);gap:28px;background:#fff;border:1px solid var(--bd);
+  border-radius:var(--r);padding:22px 24px;box-shadow:var(--sh);align-items:center}
+.radar-wrap svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
+.sliders{display:flex;flex-direction:column;gap:11px}
+.sl{display:grid;grid-template-columns:1fr 44px;gap:10px;align-items:center}
+.sl label{font-size:12.5px;color:var(--tx2);grid-column:1/-1;margin-bottom:-3px}
+.sl input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;
+  background:linear-gradient(90deg,var(--accent) 0%,var(--accent) var(--p,50%),#e3e7ee var(--p,50%),#e3e7ee 100%);outline:none}
+.sl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:#fff;border:2.5px solid var(--accent);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.16)}
+.sl input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;
+  border:2.5px solid var(--accent);cursor:pointer}
+.sl .val{font-size:12.5px;font-weight:700;color:var(--accent);text-align:right;font-variant-numeric:tabular-nums}
+.radar-note{font-size:12px;color:var(--tx3);margin-top:14px;line-height:1.6}
+
+/* ============ TIMELINE ============ */
+.tl{position:relative;padding-left:26px;margin-top:8px}
+.tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--bd)}
+.tl-item{position:relative;margin-bottom:22px}
+.tl-item::before{content:"";position:absolute;left:-26px;top:6px;width:14px;height:14px;border-radius:50%;
+  background:#fff;border:3px solid var(--accent);box-shadow:0 0 0 4px var(--bg)}
+.tl-item h5{font-size:14px;font-weight:700;margin-bottom:2px}
+.tl-item .when{font-size:11.5px;color:var(--accent);font-weight:600;letter-spacing:.03em;margin-bottom:8px}
+.tl-item ul{list-style:none;font-size:13px;color:var(--tx2)}
+.tl-item li{padding-left:15px;position:relative;margin-bottom:6px;line-height:1.65}
+.tl-item li::before{content:"";position:absolute;left:2px;top:9px;width:4px;height:4px;border-radius:50%;background:var(--bd2)}
+.tl-item li b{color:var(--tx);font-weight:600}
+
+/* ============ RESOURCE TABLE ============ */
+table.rt{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--bd);
+  border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);font-size:12.8px}
+table.rt th{background:#f7f9fc;text-align:left;padding:10px 14px;font-size:11.5px;font-weight:700;
+  color:var(--tx2);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--bd)}
+table.rt td{padding:10px 14px;border-bottom:1px solid #eef1f5;color:var(--tx2);vertical-align:top;line-height:1.6}
+table.rt tr:last-child td{border-bottom:none}
+table.rt tr:hover td{background:#fbfcfe}
+table.rt td b{color:var(--tx);font-weight:650}
+table.rt td .cat{font-size:11px;font-weight:600;border-radius:4px;padding:1px 7px;background:#eef1f5;color:var(--tx2);white-space:nowrap}
+
+footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--bd);font-size:12px;color:var(--tx3);line-height:1.8}
+
+@media (max-width:1040px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:4px;background:#fff;
+    border:1px solid var(--bd);border-radius:var(--r);padding:11px 12px;margin-bottom:6px}
+  nav.toc .t{width:100%;margin-bottom:4px}
+  nav.toc a{border-left:none;border-radius:6px;padding:4px 10px;background:#f5f7fa}
+  nav.toc a.sub{display:none}
+  .radar-wrap{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px 70px}
+  h1{font-size:23px}
+  .grid{grid-template-columns:1fr}
+  .lv{grid-template-columns:1fr;gap:3px}
+  .lv .idx{display:none}
+}
+@media print{
+  nav.toc,.sliders{display:none}
+  .layout{grid-template-columns:1fr}
+  body{background:#fff}
+  .card,.lv,.focus,.radar-wrap,.cmp .col{box-shadow:none;break-inside:avoid}
+}
+
+/* ── 收编时补：返回站点首页（否则从搜索直接落地就成了死胡同） ─────── */
+nav.toc a.back{color:var(--accent);font-weight:600;background:#fff;
+  border-left-color:var(--accent-line);margin-bottom:10px}
+nav.toc a.back:hover{background:var(--accent-soft)}
+
+/* ── 收编时补：表格滚动容器 ────────────────────────────────────────
+   源文件那张 .rt 表把前两列写死成 78px / 250px，320px 视口下（内容区 288px）
+   必然撑破。给个 min-width 让它自己横向滚动，而不是把列压成一列一个字。 */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl-wrap>table.rt{min-width:540px}
+
+/* ⚠️ 上面那句 min-width 会顺着 grid 项目的 min-width:auto(=min-content)
+   一路顶出去：main 被撑到 540px -> 整页横向滚动。实测过 —— 加了表格
+   min-width 却忘了这条，320px 下文档 scrollWidth 直接变成 556px。
+   显式放开网格项目的最小宽度，滚动才会发生在 .tbl-wrap **内部**。 */
+.layout>*{min-width:0}
+
+/* 窄屏下 nav.toc 变成横向 chip 行，白底 chip 在白卡上看不见 -> 换成强调色底 */
+@media (max-width:1040px){
+  nav.toc a.back{background:var(--accent-soft);margin-bottom:4px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Domain Knowledge Map</div>
+    <h1>数字前端验证工具研发 · 领域知识地图
+      <span class="sub">以「造验证工具的人」为主体视角，覆盖硬基础 → 仿真内核 → 方法学 → 工程设施 → AI 前沿 → 产业生态共七层知识域</span>
+    </h1>
+    <div class="hd-meta">
+      <span class="chip">适用读者 <b>EDA 工具研发 · 数字前端验证方向</b></span>
+      <span class="chip">视角 <b>造工具的人</b></span>
+      <span class="chip">知识域 <b>7 层 · 62 个模块</b></span>
+      <span class="chip">最后修订 <b>2026-09-15</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="layout">
+
+<nav class="toc" id="toc">
+<a class="back" href="/">← 返回站点首页</a>
+  <div class="t">目录</div>
+  <a href="#s0">00 · 先分清两条能力栈</a>
+  <a href="#s1">01 · 全景观：七层知识栈</a>
+  <a href="#s2">02 · L1 硬基础</a>
+  <a href="#s3">03 · L2 仿真内核</a>
+  <a href="#s4">04 · L3 验证方法学与工具族</a>
+  <a href="#s5">05 · L4 工程基础设施</a>
+  <a href="#s6">06 · L5 AI × EDA 前沿</a>
+  <a href="#s7">07 · L6 产业与生态</a>
+  <a href="#s8">08 · L7 非技术能力</a>
+  <a href="#s9">09 · 能力自评雷达</a>
+  <a href="#s10">10 · 分层学习路径</a>
+  <a href="#s11">11 · 资源清单</a>
+</nav>
+
+<main>
+
+<!-- ============================ 00 ============================ -->
+<section id="s0">
+  <div class="sec-h"><span class="ln">00</span><h2>先分清两条能力栈</h2><span class="en">Role Disambiguation</span></div>
+  <p class="sec-lead">「数字前端验证」这个说法在同行业里指两类完全不同的岗位。它们共享一部分词汇，但<strong>能力栈的交集不到三成</strong>。看错地图，投入的时间和精力会持续走偏。</p>
+
+  <div class="cmp">
+    <div class="col">
+      <h5>数字前端验证工程师</h5>
+      <div class="role">Design Verification Engineer · DV · 「用工具的人」</div>
+      <ul>
+        <li>核心产出：testbench、激励、参考模型、覆盖率报告</li>
+        <li>技能栈重心：SystemVerilog + UVM 方法学</li>
+        <li>协议知识：AXI / CHI / PCIe / DDR / USB / 以太网</li>
+        <li>脚本与流程：Python、Makefile、回归管理、CI</li>
+        <li>成败度量：覆盖率收敛速度、逃逸缺陷数</li>
+        <li>雇主：Fabless / IDM / IP 公司 / 系统厂</li>
+        <li>职业纵深：验证专家 → 验证架构师 → 项目负责人</li>
+      </ul>
+    </div>
+    <div class="col hl">
+      <h5>数字前端验证<u>工具</u>研发工程师</h5>
+      <div class="role">EDA Tool Developer · 「造工具的人」 · 本图视角</div>
+      <ul>
+        <li>核心产出：仿真内核、分析引擎、规则引擎、调试器</li>
+        <li>技能栈重心：C++ 系统编程 + 编译技术 + 算法与数据结构</li>
+        <li>标准知识：IEEE 1800 LRM 语义、SDF、UPF、SARIF</li>
+        <li>系统能力：性能工程、内存、并发、跨平台构建</li>
+        <li>成败度量：仿真吞吐、编译时间、误报率、标准符合度</li>
+        <li>雇主：Synopsys / Cadence / Siemens EDA / 华大九天 / 合见工软 / 芯华章</li>
+        <li>职业纵深：模块 owner → 技术领域定义者 → 架构师</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="focus">
+    <div class="ft">这张地图的判断</div>
+    <p><strong>工具研发的核心壁垒不在「会用」，在「能实现语义」。</strong>一个 DV 工程师知道 <code>always_ff</code> 和 <code>always @(posedge clk)</code> 都能写触发器；一个工具研发工程师必须知道这两者在 IEEE 1800 调度语义上落入不同的调度区域，以及为什么前者能让仿真器在编译期做出更强的静态检查。</p>
+    <p>所以本图<b>七成篇幅给底层实现</b>（L1、L2、L4），<b>三成给方法学与生态</b>（L3、L5–L7）。方法学部分不是可选项——它是<b>需求来源</b>：不理解 UVM 和覆盖率驱动验证在干什么，就设计不出好的覆盖率数据库和调试视图。</p>
+    <p><b>一个容易被忽略的自检问题：</b>一个人写的代码里，有多少行是「被别人的工具调用」，有多少行是「实现了某个标准里的某条规定」？后者才是这条路径上真正的资本积累形式。</p>
+  </div>
+</section>
+
+<!-- ============================ 01 ============================ -->
+<section id="s1">
+  <div class="sec-h"><span class="ln">01</span><h2>全景观：七层知识栈</h2><span class="en">The Stack</span></div>
+  <p class="sec-lead">自下而上分层。下层是上层的前提，上层是下层的兑现方式。<strong>越靠下越通用、越保值；越靠上越接近产品和市场、越容易过时也越容易变现。</strong>点击任意一层跳到详细内容。</p>
+
+  <div class="stack">
+    <a class="lv a" href="#s2"><div class="idx">L1</div><div class="nm">硬基础<span>Foundation</span></div>
+      <div class="kw">数字电路与体系结构 · Verilog/SystemVerilog 语言 · 数字设计全流程 · 文件格式与标准</div></a>
+    <a class="lv b" href="#s3"><div class="idx">L2</div><div class="nm">仿真内核<span>Simulation Kernel</span></div>
+      <div class="kw">事件驱动调度 · 多值逻辑与 X 传播 · 设计数据库 · 编译与代码生成 · 性能工程 · 高级特性</div></a>
+    <a class="lv c" href="#s4"><div class="idx">L3</div><div class="nm">验证方法学与工具族<span>Methodology &amp; Tool Families</span></div>
+      <div class="kw">动态仿真 · 门级/混合信号 · 静态检查 · 形式验证 · 覆盖率 · 低功耗 · DFT</div></a>
+    <a class="lv d" href="#s5"><div class="idx">L4</div><div class="nm">工程基础设施<span>Engineering Infra</span></div>
+      <div class="kw">C++/Rust · 编译器基础设施 · 并发与 HPC · 测试与质量 · 数据与可视化</div></a>
+    <a class="lv e" href="#s6"><div class="idx">L5</div><div class="nm">AI × EDA 前沿<span>AI Frontier</span></div>
+      <div class="kw">LLM 辅助验证 · ML for EDA · 神经符号 · 数据飞轮</div></a>
+    <a class="lv f" href="#s7"><div class="idx">L6</div><div class="nm">产业与生态<span>Industry &amp; Ecosystem</span></div>
+      <div class="kw">三巨头与国产厂商 · 开源生态 · 标准组织 · 客户场景</div></a>
+    <a class="lv g" href="#s8"><div class="idx">L7</div><div class="nm">非技术能力<span>Meta Skills</span></div>
+      <div class="kw">技术写作 · 专利与论文 · 需求定义 · 跨团队协作</div></a>
+  </div>
+
+  <div class="focus" style="margin-top:22px">
+    <div class="ft">读图规则</div>
+    <p><b>L2 是分水岭。</b>L1 和 L3 可以靠读书和用工具补上；L2 只能靠自己写出来。一个能把 SV 前端解析、elaboration、事件调度、代码生成跑通的玩具仿真器（哪怕只有 5% 的标准覆盖面），对能力的证明远大于读完一本 LRM。</p>
+    <p><b>L4 是瓶颈。</b>绝大多数算法上想得清楚、写不出来的情况，本质是 C++ 工程能力和性能直觉不够，不是不懂 EDA。这一层不性感，但它决定了 L2 能走多远。</p>
+    <p><b>L5 的成熟度。</b>这一层目前处在「技术路线已验证、产品格局未定」的阶段：三大厂与国产头部都在 2026 年落地了产品，但尚未形成像逻辑仿真器那样被三家锁死的市场结构。它既是知识更新最快的一层，也是当下信息差最大的一层。</p>
+  </div>
+</section>
+
+<!-- ============================ L1 ============================ -->
+<section id="s2">
+  <div class="sec-h"><span class="ln">L1</span><h2>硬基础</h2><span class="en">Foundation · 不可跳过的一层</span></div>
+  <p class="sec-lead">这一层的知识本身不难，但<strong>缺了它，上层的一切都是背下来的而不是推出来的</strong>。典型症状：知道 X 传播有乐观/悲观之分，却说不清某段 RTL 为什么是悲观的。</p>
+
+  <div class="legend">
+    <span class="it"><span class="tag lv1">基础</span>读文档即可入门</span>
+    <span class="it"><span class="tag lv2">进阶</span>需要动手实践</span>
+    <span class="it"><span class="tag lv3">硬核</span>需长期投入</span>
+    <span class="sep"></span>
+    <span class="it"><span class="tag core">核心</span>本方向必备</span>
+    <span class="it"><span class="tag k">工具视角</span>造工具才需要</span>
+    <span class="it"><span class="tag use">使用视角</span>理解客户即可</span>
+  </div>
+
+  <div class="grid">
+    <article class="card">
+      <div class="card-h"><span class="num">1.1</span><h4>数字电路与体系结构</h4><span class="tag core">核心</span><span class="tag lv1">基础</span></div>
+      <ul>
+        <li>组合 / 时序逻辑、有限状态机（Moore / Mealy）、亚稳态与同步器 <span class="why">工具视角：时序检查（setup/hold/recovery/removal）的物理含义来源</span></li>
+        <li>流水线、冒险与旁路、握手协议与反压（valid/ready）</li>
+        <li>存储层次：Cache、TLB、一致性协议 MESI / MOESI / CHI</li>
+        <li>片上互连：AXI4 / AHB / APB / ACE / CHI / NoC <span class="why">验证工具需要理解协议以支持断言库与激励生成</span></li>
+        <li>内存模型：顺序一致、TSO、弱内存序 <span class="why">多线程仿真与形式化建模共同的基础</span></li>
+        <li>时钟：多时钟域、门控时钟、时钟分频 / 倍频、时钟树</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">1.2</span><h4>硬件描述语言</h4><span class="tag core">核心</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>Verilog-2001 / IEEE 1364-2005</b>：语法的历史包袱要清楚（隐式线网、<code>`include</code> 顺序依赖、<code>tri0/tri1</code>）</li>
+        <li><b>SystemVerilog IEEE 1800-2017 / 1800-2023</b>：这是主战场。重点：<code>interface</code>、<code>package</code>、<code>class</code>、参数化与 <code>generate</code>、约束随机、SVA、covergroup、DPI <span class="why">每一块都对应仿真器里的一个子系统</span></li>
+        <li><b>VHDL-2008/2019</b>：混合语言仿真绕不开 <span class="why">VHDL 与 SV 混合仿真的信号解析规则是硬骨头</span></li>
+        <li>Verilog-AMS / SystemC / SystemC-AMS：数模混仿的建模语言</li>
+        <li><b>关键区分：可综合子集 ≠ 仿真全语义</b>。<span class="why">验证工具必须支持全量仿真语义（延迟、force/release、层次化引用、四态、动态数组、关联数组、队列、句柄）</span></li>
+        <li>版本兼容性负担：同一份代码在不同工具 / 不同 <code>-std</code> 开关下的行为差异</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">1.3</span><h4>数字设计全流程与接口格式</h4><span class="tag core">核心</span><span class="tag lv1">基础</span></div>
+      <ul>
+        <li>流程链：规格 → RTL → 功能验证 → 逻辑综合 → DFT 插入 → 形式等价性 → 布局布线 → STA → 物理验证 → 流片</li>
+        <li>验证工具的<b>输入</b>：RTL、门级网表、<code>.lib</code>（Liberty）、SDF、UPF/CPF、SPEF、仿真模型库</li>
+        <li>验证工具的<b>输出</b>：波形（VCD/FSDB/FST）、覆盖率数据库、日志、诊断报告</li>
+        <li>其他格式：SAIF（功耗活动）、DEF/LEF、GDSII、SDC（约束）</li>
+        <li>SIM 模型与仿真器的契约：<code>specify</code> 块、模块路径、时序检查任务 <span class="why">GLS 场景的核心接口</span></li>
+        <li>要能读懂 <b>Liberty 与 SDF 的关系</b>：综合从 Liberty 取时序、反标时按 SDF 覆盖</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">1.4</span><h4>标准与规范阅读能力</h4><span class="tag k">工具视角</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>IEEE 1800 LRM</b>：不是读一遍，是当字典用。必须能定位到具体条款 <span class="why">实现与标准不符 = 客户报 bug + 可能被认证卡住</span></li>
+        <li>IEEE 1364-2005（Verilog）、IEEE 1076（VHDL）、IEEE 1801（UPF）</li>
+        <li><b>IEEE 1800 第 4 章调度语义</b>（17 个区域）与第 16 章断言语义</li>
+        <li>Accellera 标准：UVM、PSL、SystemC、UPF 的前身</li>
+        <li>IEEE 1800.2（UVM 标准化）</li>
+        <li>能力要求：能从一段含糊的英文条款里推出实现决策，并写进设计文档</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ============================ L2 ============================ -->
+<section id="s3">
+  <div class="sec-h"><span class="ln">L2</span><h2>仿真内核</h2><span class="en">Simulation Kernel · 这一层决定你是不是「造工具的人」</span></div>
+  <p class="sec-lead">仿真器的全部商业价值集中在这一层。功能完备性人人都能追平，<strong>能拉开差距的只有三件事：语义正确性（尤其 X）、性能、生态接口</strong>。这一层无法通过读书获得——只能力透纸背地实现一遍。</p>
+
+  <div class="grid">
+
+    <article class="card">
+      <div class="card-h"><span class="num">2.1</span><h4>事件驱动仿真理论</h4><span class="tag core">内核核心</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>三类仿真范式</b>：event-driven（通用、慢）、cycle-based（快、语义受限）、dataflow / transaction-level（抽象高、精度低）<span class="why">选型直接决定产品定位</span></li>
+        <li><b>Delta cycle（零延迟迭代）</b>：同一仿真时刻内的事件反复求值直到稳定 <span class="why">组合环、NBA、<code>always_comb</code> 的正确性都依赖它</span></li>
+        <li><b>IEEE 1800 调度区域</b>：<code>preponed → pre-active → active → inactive → pre-NBA → NBA → post-NBA → observed → reactive → postpone</code>。<span class="why">这是仿真器正确性的宪法。写错一个区域，断言采样点、覆盖采样点、时钟沿值就会全错，而且错得很隐蔽</span></li>
+        <li><b>时间管理</b>：时间轮 / 桶队列 / 优先队列；时间精度与 <code>`timescale</code> / <code>timeprecision</code> 的传播规则</li>
+        <li><b>竞态（race）</b>：来源（阻塞赋值 vs 非阻塞、多个 always 写同一变量）、为什么 <code>NBA</code> 能消除大部分竞态</li>
+        <li><b>确定性</b>：标准留白处（求值顺序未定义）导致不同工具结果不同 <span class="why">客户对比 VCS 与自家结果时的第一类争议来源</span></li>
+        <li>终止控制：<code>$finish</code> / <code>$stop</code> / <code>$fatal</code>、最大时间步、仿真超时</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">2.2</span><h4>多值逻辑系统与 X 传播</h4><span class="tag core">内核核心</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>值域</b>：2-state（0/1）vs 4-state（0/1/X/Z）vs 工业扩展（9-state、几十态带强度的解析系统）<span class="why">Z 需要强度（strength）才能正确建模多驱动与上拉/下拉</span></li>
+        <li><b>X 的来源分类</b>：未初始化寄存器 / 多驱动冲突 / 未连接端口 / 越界或非法索引 / 组合环 / SDF 反标 / 时序违例 / 亚稳态 / 未赋值的 always 分支</li>
+        <li><b>X-optimism（乐观）</b>：X 在传播中被吞掉 → <b>漏检</b>（复位缺失、未初始化状态被掩盖）</li>
+        <li><b>X-pessimism（悲观）</b>：X 被过度放大 → <b>大量假失败</b>，客户开始关掉 X 检查</li>
+        <li><b>建模风格对 X 传播的影响</b>：<code>if-else</code> vs 三元表达式 vs <code>case</code> vs <code>casez</code> / <code>casex</code>，写法的微小差异会导致 X 收敛结果完全不同</li>
+        <li><b>抽象层级差异</b>：RTL-X（多来自未初始化与建模风格）vs Gate-X（多来自 SDF / 时序违例 / 未知器件输出）</li>
+        <li><b>X-index</b>：数组 / 位选 / 变量索引为 X 时的读行为（读 0、读 X、还是整体变 X）<span class="why">业界无统一约定，各家工具策略不同，是差异点也是专利点</span></li>
+        <li>工业界策略：VCS Xprop、Xcelium X-Propagation、Questa 的 X 处理档位；三档语义（标准 / 乐观 / 悲观）通常可配置</li>
+        <li><b>GLS 特有的 X 处理</b>：门级网表 X 来源更复杂（未初始化寄存器、多驱动、亚稳态），SDF 反标后时序违例本身会制造不定态，且<b>时序检查遇 X 的处理规则业界至今没有统一标准</b></li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">2.3</span><h4>设计数据库与核心数据结构</h4><span class="tag k">工具视角</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>层次化设计数据库</b>：层次树、作用域链、符号表、名字解析（含 upward reference、<code>$root</code>、<code>this</code>）<span class="why">LSDB 类模块；名字解析是仿真启动耗时的大头之一</span></li>
+        <li><b>值的表示</b>：位向量打包（bit-parallel，把 64 bit 塞进一个 machine word）、4-state 用 2 平面（value plane + control plane）</li>
+        <li><b>网表表示</b>：邻接表、CSR 稀疏格式、扇入扇出表、驱动-负载图</li>
+        <li><b>事件调度结构</b>：分层时间轮、桶队列、斐波那契堆、侵入式链表 <span class="why">数据结构选错，性能上限就被锁死</span></li>
+        <li><b>内存管理</b>：arena / pool 分配器、引用计数、写时复制（COW）、对象池 <span class="why">仿真器内存峰值动辄几十 GB，分配器比算法更影响实测性能</span></li>
+        <li>快照与增量：save / restore、checkpoint / restart、fork 复制、增量 elaboration</li>
+        <li>符号与常量的全局驻留（interning），跨模块值共享</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">2.4</span><h4>编译与代码生成</h4><span class="tag k">工具视角</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>前端</b>：手写递归下降 vs 生成器（Flex+Bison / ANTLR4 / tree-sitter）；SV 语法的真实难点在 <code>typedef</code> 与变量声明歧义、宏展开、预处理器与语言语义的耦合</li>
+        <li><b>Elaboration（展开）</b>：参数解析与覆盖、<code>generate</code> 展开、层次实例化、端口连接与位宽推断、类型解析、<code>defparam</code> 顺序、编译单元作用域</li>
+        <li><b>中间表示</b>：AST → 语义图 → CFG → SSA <span class="why">MSA/IR 设计决定后续优化能走多远</span></li>
+        <li><b>执行策略四选一</b>：纯解释器（启动快、吞吐低）／编译到 C++（吞吐高、编译慢，Verilator 路线）／编译到字节码虚拟机／JIT（LLVM ORC）<span class="why">多数商业工具是混合式：编译式为主 + 解释式兜底 + 增量编译</span></li>
+        <li><b>优化技术</b>：常量折叠与传播、死代码消除、公共子表达式、位宽推断与截断、循环展开、内联、<b>位并行化</b>（把 N 位运算折叠成一次机器字运算）</li>
+        <li><b>断言编译</b>：SVA → 自动机（DFA/NFA）→ 监视器电路；序列匹配、时窗、局部变量、<code>throughout</code> / <code>within</code></li>
+        <li><b>约束求解器</b>：SV 随机约束 → SAT/SMT；变量序启发式、冲突学习、软约束与权重、<code>randc</code> 状态机、<code>solve...before</code></li>
+        <li>覆盖组编译：coverpoint / cross / bins / transition 的编译与采样</li>
+        <li><b>经典实现参考</b>：Verilator（C++ 代码生成）、slang（MIT，C++17 前端 + 完整 elaboration）、Surelog + UHDM、Verible（只解析不展开）</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">2.5</span><h4>性能工程</h4><span class="tag core">内核核心</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>四大指标</b>：events/sec（运行时吞吐）、编译时间（大型 SoC 动辄数小时）、峰值内存、增量编译的响应时间</li>
+        <li><b>热点定位</b>：事件调度 → 表达式求值 → 名字解析 → 内存分配，通常这四者吃掉 80% 时间</li>
+        <li><b>单线程优化</b>：cache 友好布局（结构体数组 vs 数组结构体）、分支预测友好、内联、模板特化、去虚函数、位并行</li>
+        <li><b>SIMD</b>：SSE / AVX2 / AVX-512 手写向量化，尤其是位向量与覆盖采样的批量处理</li>
+        <li><b>多线程仿真</b>：分区（partitioning）、同步屏障、保守同步 vs 乐观同步（Time Warp / 回滚）<span class="why">并行仿真的难点不是并行，是回滚与确定性的代价</span></li>
+        <li><b>增量与惰性</b>：增量编译、惰性求值、按需展开、延迟物化</li>
+        <li><b>Profile 工具</b>：perf、Intel VTune、gprof、自研采样器；要做到「拿到一个慢 case 能定位到函数行」</li>
+        <li>基准体系：自建 benchmark suite（开源 SoC + 自研压力用例），带性能回归门禁</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">2.6</span><h4>高级仿真特性</h4><span class="tag k">工具视角</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>断言引擎</b>：并发断言、采样点（preponed）、失败报告与波形联动、断言覆盖率</li>
+        <li><b>功能覆盖率</b>：covergroup 采样、cross 组合爆炸控制、覆盖率数据库合并（merge）与去重</li>
+        <li><b>编程接口</b>：PLI / VPI / VHPI / DPI-C / SystemC TLM、回调机制、值读写与对象句柄的边界</li>
+        <li><b>波形记录</b>：VCD（文本、体积巨大）、FSDB、FST、WLF；分块写入、压缩、按需 dump、信号筛选 <span class="why">dump 常常占仿真总时间的 30%+，是性能战场之一</span></li>
+        <li><b>调试能力</b>：断点、单步、反向调试、驱动链追踪（谁把这条线拉高）、X 溯源（这个 X 从哪来）、事务级调试</li>
+        <li><b>Save / Restore</b>：全状态快照、增量快照、跨版本兼容 <span class="why">长回归与形式化加速的关键设施</span></li>
+        <li><b>混仿接口</b>：Verilog-AMS 与 SystemC 协同仿真的时间同步、连接模块（connect module）插入、精度与速度权衡</li>
+        <li><b>门级仿真</b>：SDF 反标（<code>IOPATH</code> / <code>INTERCONNECT</code> / <code>TIMINGCHECK</code>）、时序检查（setup / hold / recovery / removal / width / period / skew / nochange）、负时序检查、条件时序、脉冲过滤与围堵（pulse filtering / X-generation）</li>
+        <li><b>低功耗仿真</b>：UPF 电源域、隔离单元、电平转换、保持寄存器、电源开关序列、电源状态覆盖率</li>
+      </ul>
+    </article>
+
+  </div>
+
+  <div class="focus" style="margin-top:20px">
+    <div class="ft">L2 的自检题 · 能答上来才算真的到过这一层</div>
+    <p>① 一个 <code>always_comb</code> 里写 <code>if (sel) y = a;</code>，当 <code>sel = X</code> 且 <code>a = 0</code> 时，<code>y</code> 应该是什么？两种策略分别是什么？标准怎么说的？</p>
+    <p>② 同一个时钟沿上，两个 <code>always_ff</code> 分别写 <code>a &lt;= b;</code> 和 <code>b &lt;= a;</code>，仿真结果确定吗？为什么？如果换成阻塞赋值呢？</p>
+    <p>③ 一个 1000 万门的门级网表，SDF 全部反标，仿真 1 ms 的仿真时间，你预计内存峰值是多少？时间是多少？瓶颈会在哪里？</p>
+    <p>④ 客户说「你们的仿真器和 VCS 结果不一样」。列出你的排查顺序——前五步是什么？</p>
+  </div>
+</section>
+
+<!-- ============================ L3 ============================ -->
+<section id="s4">
+  <div class="sec-h"><span class="ln">L3</span><h2>验证方法学与工具族</h2><span class="en">Methodology &amp; Tool Families · 需求从这里来</span></div>
+  <p class="sec-lead">这一层的价值不在「会用」，在于<strong>知道每一类工具在客户流程里的哪个位置、替客户解决什么问题、失败时客户会怎么骂</strong>。产品定义、需求优先级、竞品分析的原始素材全部来自这里。</p>
+
+  <div class="grid">
+
+    <article class="card">
+      <div class="card-h"><span class="num">3.1</span><h4>动态仿真工具族</h4><span class="tag use">使用视角</span><span class="tag lv1">基础</span></div>
+      <ul>
+        <li><b>数字逻辑仿真器</b>：VCS / Xcelium / Questa / Riviera-PRO / Verilator / XSIM；国产：华大九天数字仿真器、合见工软 UVS <span class="why">这是正面战场，需要逐项对标能力矩阵</span></li>
+        <li><b>门级仿真（GLS）</b>：SDF 反标 + 时序检查，签核路径最后一道关（DFT 扫描链、低功耗上电序列、X 传播、异步路径是 STA 查不了的）</li>
+        <li><b>混合信号仿真（AMS）</b>：数字 + 模拟协同，SerDes / PLL / ADC-DAC / 电源管理 / 传感器接口场景</li>
+        <li><b>硬件加速</b>：Emulation（ZeBu / Palladium / Veloce）vs Prototyping（HAPS / Protium / 国微思尔芯）；编译时间与调试可见性是核心竞争点</li>
+        <li><b>验证方法学</b>：UVM（主流）、OVM/VMM（历史）、e/Specman（遗留）、Cocotb（Python testbench，快速增长）</li>
+        <li>TLM 2.0 事务级建模、SystemC 虚拟平台</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">3.2</span><h4>静态检查与静态程序分析</h4><span class="tag k">工具视角</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>工具</b>：Synopsys SpyGlass（标杆）、Questa Lint、Verible lint、slang-tidy、Meridian CDC</li>
+        <li><b>分析技术栈</b>：AST 遍历 → 控制流图（CFG）→ 数据流分析（到达定值、活跃变量、可用表达式）→ 抽象解释 → 指针 / 别名分析 → 路径敏感分析</li>
+        <li><b>检查类别</b>：位宽不匹配、多驱动、锁存器推断、未使用/未驱动信号、敏感列表不完整、组合环、FSM 可达性与死锁、时钟域跨越（CDC）、复位域（RDC）</li>
+        <li><b>误报治理是壁垒</b>：商业工具的价值 70% 在「不报假警」。手段：路径可行性判定、约束驱动的过滤、waiver 机制与基线管理、按严重度分级</li>
+        <li><b>规则引擎设计</b>：规则 DSL、规则库版本管理、规则的可组合性、规则作者与引擎解耦</li>
+        <li>标准输出：<b>SARIF</b>（静态分析结果交换格式）、诊断分级与定位（文件/行/列/信号路径）</li>
+        <li>为什么值得投入：<b>SpyGlass 的壁垒不是解析，是「完整展开 + 跨模块结构分析 + 规则 IP + 误报治理」</b></li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">3.3</span><h4>形式验证</h4><span class="tag k">工具视角</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>等价性检查（LEC / Formal Equivalence）</b>：RTL vs 网表、综合前后、ECO 后、不同优化档位 <span class="why">这是形式化在工业界最赚钱、最刚需的落点</span></li>
+        <li><b>属性验证（FPV）</b>：SVA/PSL → 形式化 → 求解；工具：JasperGold、VC Formal、Questa Formal、SymbiYosys</li>
+        <li><b>模型检验算法</b>：BMC（有界）、k-induction、IC3 / PDR（无界）、抽象精化 CEGAR、BDD 符号模型检验</li>
+        <li><b>求解器</b>：SAT（MiniSat、CaDiCaL、Kissat）、SMT（Z3、Boolector、Yices）、位向量理论</li>
+        <li>工业落点：连接性检查、X 检查、死锁 / 活锁、寄存器初始化、不可达状态、安全属性</li>
+        <li>与仿真的分工：形式化证「不可能发生」，仿真证「确实能发生」，两者互补不可替代</li>
+        <li>难点：状态爆炸、反例最小化、约束（constraint）工程、收敛性判断</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">3.4</span><h4>覆盖率与验证管理</h4><span class="tag use">使用视角</span><span class="tag lv1">基础</span></div>
+      <ul>
+        <li><b>代码覆盖率</b>：line / branch / condition / toggle / FSM / expression；由仿真器插桩产生 <span class="why">工具视角：插桩点怎么放、如何做到「零性能损失」是工程难点</span></li>
+        <li><b>功能覆盖率</b>：covergroup / coverpoint / cross / bins / transition / illegal_bins</li>
+        <li><b>覆盖率合并</b>：多 test、多 seed、多机并行的数据库 merge，去重与冲突处理</li>
+        <li><b>覆盖率驱动验证（CDV）</b>：覆盖率 → 缺口分析 → 激励调整 → 回归的闭环</li>
+        <li><b>验证计划与追溯</b>：vPlan、需求 ↔ 测试 ↔ 覆盖率的双向追溯</li>
+        <li>Sign-off 标准：覆盖率目标、逃逸缺陷率、回归通过率与稳定性</li>
+        <li>工具视角关注点：覆盖率数据库格式、跨工具可移植性、增量回归的覆盖率差分</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">3.5</span><h4>低功耗验证</h4><span class="tag k">工具视角</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>标准</b>：IEEE 1801（UPF 1.0 / 2.0 / 2.1 / 3.0）、Cadence CPF（历史）</li>
+        <li><b>建模要素</b>：电源域（power domain）、电源状态、供电网络、电源开关（power switch）、隔离单元（isolation）、电平转换（level shifter）、保持寄存器（retention）</li>
+        <li><b>静态检查</b>：UPF 语法与语义 lint、UPF 与 RTL 的一致性、隔离/电平转换的覆盖完整性</li>
+        <li><b>动态仿真</b>：电源上下电序列仿真、电源状态覆盖率、X 在断电域的传播规则</li>
+        <li>与 GLS 的交叉：低功耗单元插入后的门级仿真、retention 单元的保存/恢复时序</li>
+        <li>验证工具要提供的：UPF 解析器、电源域语义引擎、与 RTL 网表的绑定（binding）机制</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">3.6</span><h4>DFT 与可测性</h4><span class="tag use">使用视角</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>结构</b>：扫描链（scan chain）、scan enable / scan mode / test mode、压缩（compression）、MBIST、JTAG / IJTAG（IEEE 1149.1 / 1687）</li>
+        <li><b>故障模型</b>：stuck-at、transition（delay）、bridging、cell-aware</li>
+        <li><b>ATPG</b>：自动测试向量生成与测试覆盖率评估</li>
+        <li><b>为什么验证工具要懂</b>：扫描模式下的仿真语义、test mode 下的时序约束、扫描链移位的时序检查、shifting/capture 的 SDF 反标差异</li>
+        <li><b>故障仿真（fault simulation）</b>：与逻辑仿真共享内核，但调度完全不同（并行故障传播）</li>
+        <li>工具链接口：DFT 插入工具 → 门级网表 + 测试协议 → 仿真器</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">3.7</span><h4>抽象层级与建模</h4><span class="tag k">工具视角</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>层级谱系</b>：功能级 → 事务级（TLM）→ 周期精确（cycle-accurate）→ RTL → 门级 → 晶体管级</li>
+        <li><b>核心权衡</b>：抽象每上一级，速度提升 10–1000 倍，但可验证的问题类型收窄</li>
+        <li>SystemC / SystemC-AMS 作为系统级建模载体；TLM 2.0 的阻塞/非阻塞接口</li>
+        <li>Verilog-AMS 的连续时间 + 离散事件混合语义 <span class="why">数模混仿的基础</span></li>
+        <li>工具视角关键问题：<b>跨抽象层的一致性</b>——事务级模型与 RTL 的行为是否等价，如何验证</li>
+        <li>抽象裁剪带来的语义陷阱：哪些标准语义在高层模型里被默认了、哪些被丢掉了</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============================ L4 ============================ -->
+<section id="s5">
+  <div class="sec-h"><span class="ln">L4</span><h2>工程基础设施</h2><span class="en">Engineering Infra · 决定上限的瓶颈层</span></div>
+  <p class="sec-lead">这一层不产生任何「EDA 知识」，但它决定这些知识能不能变成产品。<strong>绝大多数「算法想清楚了但做不出来」的情况，根因都在这里。</strong>同时它也是最可迁移的一层——换个行业照样用。</p>
+
+  <div class="grid">
+
+    <article class="card">
+      <div class="card-h"><span class="num">4.1</span><h4>系统编程语言与工具链</h4><span class="tag core">核心</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>C++17 / C++20（主力）</b>：RAII、智能指针、移动语义、模板元编程、SFINAE / concepts、ranges、<code>constexpr</code>、协程；<b>尤其要熟「零开销抽象」的写法与代价</b></li>
+        <li>语言选型对比：<b>C++</b>（性能 + EDA 生态惯性）／<b>Rust</b>（内存安全 + 增量编译，新项目趋势）／<b>Python</b>（原型 + 脚本 + 测试）</li>
+        <li><b>构建系统</b>：CMake（主流）、Bazel（大仓）、Ninja；编译缓存 ccache / distcc / sccache</li>
+        <li>依赖管理：Conan、vcpkg、vendored 第三方</li>
+        <li><b>调试与诊断</b>：GDB / LLDB、rr（反向调试，定位偶发 bug 的利器）、Valgrind、perf</li>
+        <li>跨平台：Linux 为主（客户环境 RHEL / Ubuntu 特定版本）、Windows 支持、跨架构（x86-64 / ARM64）</li>
+        <li>二进制与 ABI：符号版本、动态库 vs 静态库、<b>License 兼容性</b>（LGPL 不可静态链进闭源产品——这是 Verilator 不能做闭源底座的原因）</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">4.2</span><h4>编译器基础设施</h4><span class="tag k">工具视角</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>LLVM</b>：IR 结构、Pass 体系（Analysis / Transform）、JIT（ORC）、后端代码生成 <span class="why">JIT 路线的仿真器直接依赖它</span></li>
+        <li><b>MLIR</b>：多级 dialect、渐进式降低（progressive lowering）、可扩展的操作定义 <span class="why">新一代 EDA 工具 IR 的主流选择，硬件综合与仿真 IR 都在往这边靠</span></li>
+        <li>解析器生成：ANTLR4、Flex + Bison、tree-sitter、手写递归下降的取舍</li>
+        <li><b>经典编译理论</b>：SSA、支配树、数据流分析框架、抽象解释、指针分析、类型系统与推导</li>
+        <li><b>硬件专属 IR</b>：UHDM（Surelog 的标准 IR）、RTLIL（Yosys）、FIRRTL</li>
+        <li>Python 与 C++ 的桥接：pybind11、nanobind、Cython</li>
+        <li>自研 DSL 的落地经验：规则 DSL、约束 DSL、测试激励 DSL</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">4.3</span><h4>并发与高性能计算</h4><span class="tag k">工具视角</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>线程模型</b>：<code>std::thread</code>、OpenMP、TBB、线程池；任务粒度划分</li>
+        <li><b>无锁与内存序</b>：原子操作、<code>memory_order</code>、ABA 问题、伪共享（false sharing）</li>
+        <li><b>SIMD</b>：SSE / AVX2 / AVX-512、编译器自动向量化、intrinsics 手写、位向量批量运算</li>
+        <li><b>缓存与内存</b>：cache line、NUMA、大页（huge page）、内存带宽瓶颈识别</li>
+        <li><b>分布式</b>：MPI、RDMA、跨机同步、任务分片与结果归并</li>
+        <li><b>GPU</b>：CUDA / SYCL / OpenCL —— 目前在 EDA 里的应用主要在仿真加速、形式化求解、机器学习环节</li>
+        <li>异步与 IO：epoll / io_uring、异步日志与波形写入</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">4.4</span><h4>软件质量与测试</h4><span class="tag core">核心</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>单元测试</b>：GTest / Catch2 / doctest；参数化测试、mock 与依赖注入</li>
+        <li><b>动态检查</b>：ASan（越界/泄漏）、TSan（数据竞争）、UBSan（未定义行为）、MSan（未初始化读）；常驻 CI</li>
+        <li><b>模糊测试</b>：libFuzzer / AFL++ —— <b>对解析器与 elaboration 是刚需</b>，能自动找到大量崩溃</li>
+        <li><b>静态分析</b>：clang-tidy、Coverity、PVS-Studio、cppcheck</li>
+        <li><b>覆盖率</b>：gcov / llvm-cov，并设定覆盖率门禁</li>
+        <li><b>回归体系</b>：用例管理、种子管理、并行调度、失败二分（bisect）、<b>性能回归门禁</b></li>
+        <li>对 EDA 特别重要的：<b>差分测试（differential testing）</b>——与参考实现（如 Verilator / 另一家商业工具）对比同一用例的输出，是发现语义偏差最有效的手段</li>
+        <li>缺陷管理：最小可复现用例（minimal repro）的构造能力，这是 EDA 工程师的核心手艺之一</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">4.5</span><h4>数据、存储与可视化</h4><span class="tag k">工具视角</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>波形格式</b>：VCD（IEEE 1364 附录，纯文本）、FSDB（Verdi）、FST（GTKWave / Surfer）、WLF；压缩算法与分块索引</li>
+        <li><b>嵌入式 / 本地数据库</b>：SQLite（轻）、LMDB（快、读多写少）、RocksDB（写密集）；覆盖数据库与设计数据库选型</li>
+        <li><b>列式存储</b>：Parquet / Arrow —— 大规模覆盖率与日志分析的新选择</li>
+        <li><b>桌面 GUI</b>：Qt（传统主流）、Electron（Web 技术栈）</li>
+        <li><b>Web 波形/调试前端</b>：Canvas / WebGL 渲染、虚拟滚动、WASM 把 C++ 内核搬进浏览器 <span class="why">云 EDA 与远程协作的关键能力，也是差异化竞争点</span></li>
+        <li>数据可视化原理：时间轴渲染、层次树折叠、信号搜索与相似波形聚类</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============================ L5 ============================ -->
+<section id="s6">
+  <div class="sec-h"><span class="ln">L5</span><h2>AI × EDA 前沿</h2><span class="en">AI Frontier · 技术路线已验证，产品格局未定</span></div>
+  <p class="sec-lead">2026 年是这个方向的产品化元年：Synopsys AgentEngineer、Cadence ChipStack / Verisium、华大九天 UCAgent、合见工软 UDA 2.0 都已落地。<strong>技术路线刚被验证，产品格局尚未定型——接下来两三年是方向定型期。</strong></p>
+
+  <div class="cmp">
+    <div class="col">
+      <h5>为什么是现在</h5>
+      <div class="role">技术条件与市场信号</div>
+      <ul>
+        <li><b>模型能力刚跨过门槛</b>：LLM 的代码理解与长上下文能力，到 2025–2026 才足以处理真实的设计文件与日志体量</li>
+        <li><b>这个领域天然可验证</b>：AI 给出的候选可以由形式化引擎或仿真证伪，是少数「结论对错能被机器兜底」的场景</li>
+        <li>三大厂与国产头部在 2026 年集中发布产品，说明技术路线已获市场验证，剩下的竞争转到产品化</li>
+        <li>客户痛点高频且可量化：调试慢、覆盖率收敛慢、日志读不懂，每一项都能折算成人天</li>
+      </ul>
+    </div>
+    <div class="col hl">
+      <h5>真正的难点</h5>
+      <div class="role">工程约束</div>
+      <ul>
+        <li><b>数据不能出客户门</b>：客户 RTL 是最高机密，云端 LLM 方案在多数场景不可行 → 私有化 / 端侧模型是前提</li>
+        <li><b>幻觉不可接受</b>：EDA 的结论必须可验证，AI 给的错误归因比不给更糟</li>
+        <li>上下文极长：一份设计 + 一段日志轻松超过模型窗口</li>
+        <li>效果评估难：没有标准 benchmark，落地容易被当成 demo</li>
+        <li>产品化路径长：从原型到进客户流程，中间还有可靠性、性能、集成三道坎</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:16px">
+
+    <article class="card">
+      <div class="card-h"><span class="num">5.1</span><h4>LLM 辅助验证</h4><span class="tag new">前沿</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>激励与 testbench 生成</b>：从规格或接口定义生成 UVM 组件骨架、随机约束、序列</li>
+        <li><b>断言生成与解释</b>：自然语言属性 → SVA；或反向把 SVA 翻译成人话 <span class="why">落点最实：断言是形式化的，生成结果可机器验证</span></li>
+        <li><b>覆盖率缺口分析</b>：读覆盖率报告 → 指出哪些 bins 为什么没覆盖到 → 建议激励调整</li>
+        <li><b>失败日志归因（log triage）</b>：从几十万行回归日志里找出真正的根因与相似聚类 <span class="why">客户每天都在做这件事，价值最直接可量化</span></li>
+        <li><b>时序违例智能归因</b>：静态分析给违例路径、动态仿真给波形，两者结合做根因定位 —— <b>验证领域 AI 落点最实的方向</b></li>
+        <li><b>X 传播收敛加速</b>：用模型预测哪些信号会变 X，缩小搜索空间</li>
+        <li>规格 ↔ RTL 一致性检查、代码评审辅助、回归失败自动分类与分派</li>
+        <li><b>代表产品</b>：Synopsys AgentEngineer、Cadence ChipStack + Verisium AI、Siemens Solido、华大九天 UCAgent、合见工软 UDA 2.0</li>
+        <li>技术底座：RAG（设计知识库 + 历史 bug 库）、Agent 编排、工具调用（LLM 调仿真器 / 调波形查看器）、微调（领域小模型）</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">5.2</span><h4>ML for EDA</h4><span class="tag new">前沿</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>时序预测</b>：布线前预测 post-route 时序，减少迭代轮次（工业界落地最成熟的 ML for EDA 方向）</li>
+        <li><b>布局 / 布线优化</b>：强化学习（RL）、图神经网络（GNN）、可微布局</li>
+        <li><b>逻辑综合与工艺映射</b>：用 GNN 预测综合结果、引导映射决策</li>
+        <li><b>验证相关</b>：激励空间探索（bandit / RL 选种子）、覆盖率收敛引导、故障诊断、测试向量压缩</li>
+        <li><b>物理设计</b>：DRC 热点评分、功耗预测、拥塞预测</li>
+        <li>方法论共性：把设计的图结构编码成 GNN 输入 → 预测某种后段指标 → 用来剪枝或排序</li>
+        <li>现实约束：训练数据难得（客户数据保密）、泛化性差（换工艺节点就失效）、收益需超过工程成本</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">5.3</span><h4>神经符号与形式化 × ML</h4><span class="tag new">前沿</span><span class="tag lv3">硬核</span></div>
+      <ul>
+        <li><b>学习引导的 SAT 求解</b>：用 ML 预测分支变量（branching heuristic），替代手工的 VSIDS</li>
+        <li><b>抽象精化策略学习</b>：用 RL 决定下一次抽象该细化哪里</li>
+        <li><b>不变式（invariant）自动生成</b>：ML 提出候选不变式，形式化工具验证</li>
+        <li><b>Neuro-symbolic</b>：神经网络负责启发式，符号引擎负责正确性 —— 在 EDA 场景比纯 ML 更匹配</li>
+        <li>为什么这个方向特别对：EDA 的本质是<b>「搜索 + 验证」</b>，恰好是 ML 擅长搜索、传统算法擅长验证的分工</li>
+        <li>学术热度高、工业落地少 —— 适合做论文与专利的选题池</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">5.4</span><h4>数据基础设施与飞轮</h4><span class="tag new">前沿</span><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>设计的图表示</b>：网表 → 异构图（器件、连线、属性）→ GNN 输入编码</li>
+        <li><b>训练数据生成</b>：RTL fuzzing、变异测试、合成设计生成（这是数据量的主要来源）</li>
+        <li><b>向量化与检索</b>：设计模式匹配、历史 bug 复用、相似波形聚类</li>
+        <li><b>数据飞轮</b>：客户现场 → 脱敏日志/用例 → 训练数据 → 模型 → 产品增强 → 更多客户。<span class="why">EDA 公司的 AI 竞争最终会落在这一步，而非模型本身</span></li>
+        <li><b>私有化部署</b>：私有化小模型 + RAG + 工具调用（Agent 架构），解决数据不能出门的硬约束</li>
+        <li><b>评估体系</b>：必须自建 benchmark（真实设计 + 人工标注根因），否则无法证明 AI 有效</li>
+      </ul>
+    </article>
+
+  </div>
+
+  <div class="focus" style="margin-top:20px">
+    <div class="ft">L5 的落地建议</div>
+    <p><b>不要从「做一个 AI 工具」开始，从「一个具体的重复性劳动」开始。</b>在验证流程里，每天被重复执行、且结果可机器验证的环节有三个：回归失败分类、覆盖率缺口归因、波形/日志的根因定位。这三个都满足「有大量历史数据、有明确对错、人工成本高」——是 AI 最容易做出可量化效果的地方。</p>
+    <p><b>必须避免的失败模式：</b>做出一个漂亮的 demo，但无法回答「它在真实客户流程里省了多少人天」。EDA 的采购决策看的是数字，不是演示。</p>
+  </div>
+</section>
+
+<!-- ============================ L6 ============================ -->
+<section id="s7">
+  <div class="sec-h"><span class="ln">L6</span><h2>产业与生态</h2><span class="en">Industry &amp; Ecosystem · 决定技术判断的边界</span></div>
+  <p class="sec-lead">技术能力决定你能走多快，产业认知决定你能走多远。这一层要能回答三个问题：<strong>市场上有哪些玩家、各自卡在什么位置、所在的方向未来几年是收缩还是扩张。</strong></p>
+
+  <div class="grid">
+
+    <article class="card">
+      <div class="card-h"><span class="num">6.1</span><h4>产业格局</h4><span class="tag core">核心</span><span class="tag lv1">基础</span></div>
+      <ul>
+        <li><b>三大巨头</b>：Synopsys（VCS / SpyGlass / VC Formal / ZeBu）、Cadence（Xcelium / JasperGold / Palladium / Verisium）、Siemens EDA（Questa / Veloce / Calibre）<span class="why">各自的产品矩阵与并购史，是理解行业逻辑的入口</span></li>
+        <li><b>验证细分卡位</b>：仿真（VCS/Xcelium/Questa 三足鼎立）· 形式化（JasperGold 一家独大）· Lint/CDC（SpyGlass 近垄断）· Emulation（Palladium/ZeBu/Veloce）</li>
+        <li><b>国产厂商</b>：华大九天（模拟强、数字补）、合见工软（UVS/UVD，数字验证全线）、芯华章（GalaxSim / FusionVerify）、国微思尔芯（Prototyping）、行芯、汤谷</li>
+        <li><b>国产替代的逻辑与边界</b>：模拟与定制电路已可替代；数字仿真与先进制程 sign-off 仍是短板</li>
+        <li><b>渗透率</b>：国产 EDA 整体渗透率已从 &lt;5% 升至 20%+，但数字前端验证工具的份额远低于此</li>
+        <li><b>商业模式</b>：License（node-locked / floating / token 计费）、订阅制、云 EDA；大客户年费与技术支持合同</li>
+        <li>行业属性：<b>高研发投入、长回报周期、客户粘性极强（切换成本高）</b>——一旦进流程就不容易被替换</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">6.2</span><h4>开源生态</h4><span class="tag k">工具视角</span><span class="tag lv1">基础</span></div>
+      <ul>
+        <li><b>仿真</b>：Verilator（LGPL，性能最强的开源仿真器）、Icarus Verilog（覆盖广、速度慢）</li>
+        <li><b>前端 / 解析</b>：slang（C++17，MIT，自带完整 elaboration）、Surelog（Apache-2.0）+ UHDM、Verible（只解析不展开）</li>
+        <li><b>综合与形式</b>：Yosys、SymbiYosys / sby、ABC</li>
+        <li><b>验证方法学</b>：Cocotb（Python testbench）、UVM 开源实现、cocotb-coverage</li>
+        <li><b>物理与全流程</b>：OpenROAD、OpenLane、KLayout、Magic</li>
+        <li><b>波形与调试</b>：GTKWave、Surfer（Rust + Web）、Vaporview（VSCode）</li>
+        <li><b>许可陷阱要清楚</b>：<b>LGPL（Verilator）不能静态链进闭源商业产品</b>；MIT / Apache-2.0（slang、Surelog）可商用。选型时必须先看 license</li>
+        <li>参与开源的价值：真实代码量、行业能见度、与学术圈连接 —— 是较少人走但回报明确的路</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">6.3</span><h4>标准组织与学术</h4><span class="tag k">工具视角</span><span class="tag lv1">基础</span></div>
+      <ul>
+        <li><b>标准组织</b>：IEEE（1800 SV / 1364 Verilog / 1076 VHDL / 1801 UPF / 1149 JTAG）、Accellera（UVM / PSL / SystemC / 早期 UPF）</li>
+        <li><b>顶级会议</b>：DAC、ICCAD、DATE、ASP-DAC、<b>DVCon（验证方向最对口）</b>、HOST、ISQED</li>
+        <li><b>期刊</b>：TCAD、TVLSI、TODAES、TCAD</li>
+        <li>研究方向地图：仿真算法与并行化、形式化与求解器、静态分析、ML for EDA、验证方法学</li>
+        <li><b>实际运用方式</b>：不必为了追会而追会。DVCon 的工业界论文最值得读——它们描述的是真实工程约束下的取舍</li>
+        <li>参与标准的路径：从提交 bug / 提出 clarification 请求开始，到成为工作组投票成员</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">6.4</span><h4>客户与场景</h4><span class="tag use">使用视角</span><span class="tag lv1">基础</span></div>
+      <ul>
+        <li><b>客户类型</b>：Fabless（IC 设计公司）、IDM、IP 供应商、系统公司（自研芯片）、Fab</li>
+        <li><b>典型场景与各自的硬指标</b>：SoC 集成验证（回归速度）· IP 验证（跨工具一致性）· GLS 签核（正确性压倒性能）· 低功耗验证（UPF 完整性）· Emulation（编译时间）</li>
+        <li><b>需求获取</b>：客户支持工单、现场驻场、竞品对比测试（benchmark）、销售反馈的丢单原因</li>
+        <li><b>一条实用经验</b>：EDA 的真实产品需求，超过一半来自「客户用竞品做得到、用你的做不到」这种具体对比，而不是来自产品规划会</li>
+        <li>客户关系：从工具供应商到流程伙伴（技术支持、联合调优、定制化）</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============================ L7 ============================ -->
+<section id="s8">
+  <div class="sec-h"><span class="ln">L7</span><h2>非技术能力</h2><span class="en">Meta Skills · 决定技术能否被看见</span></div>
+  <p class="sec-lead">在 EDA 这类技术壁垒极高的行业里，<strong>「做出来」和「被承认做出来」是两个独立的能力</strong>。这一层不做，前面六层的产出会被系统性地低估。</p>
+
+  <div class="grid">
+    <article class="card">
+      <div class="card-h"><span class="num">7.1</span><h4>技术写作与规范能力</h4><span class="tag lv1">基础</span></div>
+      <ul>
+        <li><b>设计文档</b>：把一段含糊的 LRM 条款翻译成明确的实现决策，并记录取舍理由</li>
+        <li><b>用户文档</b>：面向客户的能力边界说明 —— 说清「不支持什么」比「支持什么」更能减少工单</li>
+        <li>内部技术分享、设计评审材料、竞品分析报告</li>
+        <li>英文写作：提交上游 bug、参与标准讨论、撰写论文，都需要</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">7.2</span><h4>专利与论文</h4><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>可专利点通常长什么样</b>：某类 X 传播的判定规则、某种增量编译的失效传播算法、某种覆盖率合并的去重策略、某种混仿时间同步的优化</li>
+        <li>硬要求：<b>真实技术内容，禁止挂名</b>。EDA 圈子极小，挂名会被一眼看穿，反而扣分</li>
+        <li>与高校的合作路径：联合专利、会议论文（DAC / DATE / ICCAD / ASP-DAC / DVCon China）、技术交流</li>
+        <li>专利的工程价值：是可被客观识别、且长期有效的技术凭证</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">7.3</span><h4>需求分析与产品定义</h4><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li>从客户报障中提炼共性需求，而不是逐个打补丁</li>
+        <li>能力矩阵的构建与维护：把自己的工具与主流商业工具逐项对比（有/无/部分/更好）</li>
+        <li>优先级判断：影响面 × 严重度 × 实现成本 × 竞品压力</li>
+        <li>能说清「这个功能不做，客户会在哪一步流失」</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <div class="card-h"><span class="num">7.4</span><h4>跨团队协作与影响力</h4><span class="tag lv2">进阶</span></div>
+      <ul>
+        <li><b>跨模块</b>：仿真内核 ↔ 调试器 ↔ 覆盖率 ↔ 波形 ↔ GUI 的接口定义与协同排期</li>
+        <li><b>跨部门</b>：与 STA、模拟、DFT、产品、销售、客户支持的接口</li>
+        <li><b>跨 site</b>：分布式团队的沟通成本与能见度问题 —— 靠主动同步、文档沉淀、定期驻场解决</li>
+        <li><b>客户支持</b>：EDA 工程师特有的能力。能独立面对客户、在客户现场定位问题，是晋升的重要依据</li>
+        <li>技术影响力：内部技术文档与分享、对外技术输出（博客 / 会议 / 开源）</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ============================ S9 雷达图 ============================ -->
+<section id="s9">
+  <div class="sec-h"><span class="ln">09</span><h2>能力自评雷达</h2><span class="en">Self-Assessment · 拖动滑块校准</span></div>
+  <p class="sec-lead">下面六个维度是这张地图的「主轴」。拖动滑块记录你的自评，数值会保存在浏览器本地。<strong>评估的锚点不是「我懂不懂概念」，而是「给我一台空机器，我能不能从零把它做出来」。</strong></p>
+
+  <div class="radar-wrap">
+    <div>
+      <svg id="radar" viewBox="0 0 520 400" role="img" aria-label="能力自评雷达图"></svg>
+    </div>
+    <div class="sliders" id="sliders"></div>
+  </div>
+  <p class="radar-note">评分锚点参考：<b>0–20</b> 只听说过 ｜ <b>20–40</b> 读得懂能讨论 ｜ <b>40–60</b> 改得动别人的代码 ｜ <b>60–80</b> 能独立设计并实现模块 ｜ <b>80–100</b> 能定义技术方向、判断他人方案的优劣。</p>
+
+  <div class="focus" style="margin-top:18px">
+    <div class="ft">读图方式</div>
+    <p><b>看形状，不看面积。</b>一个健康的工具研发工程师剖面应该接近圆形偏右——没有低于 40 的凹口。任何一个维度掉到 30 以下，都会在实际工作中变成瓶颈：<b>形式化低 → 无法与形式验证团队对话；性能工程低 → 优化做不动；编译技术低 → 只能做维护不能做架构。</b></p>
+    <p><b>唯一允许暂时低的是「AI × EDA」</b>——因为它刚起步，整个行业都低。但也正因为如此，它是唯一一个「现在投入回报比最高」的维度。</p>
+  </div>
+</section>
+
+<!-- ============================ S10 学习路径 ============================ -->
+<section id="s10">
+  <div class="sec-h"><span class="ln">10</span><h2>知识补全路径</h2><span class="en">Learning Path · 按依赖顺序，不按难度顺序</span></div>
+  <p class="sec-lead">知识地图告诉你「有什么」，路径告诉你「先做什么」。<strong>排序原则是依赖关系而非难易：L4 的 C++ 工程能力是 L2 的前提，L2 是 L5 的前提。</strong>跳过前置直接攻上层，结果一定是能讲不能做。</p>
+
+  <div class="tl">
+    <div class="tl-item">
+      <h5>第一阶段 · 打通闭环（0–3 个月）</h5>
+      <div class="when">目标：把「知道」变成「做过」</div>
+      <ul>
+        <li><b>写一个最小可用仿真器</b>：支持 <code>module</code> / <code>always</code> / <code>wire</code> / <code>reg</code> / <code>assign</code> + 两态逻辑 + 事件队列。不求覆盖标准，求<b>跑通</b>：解析 → 展开 → 建调度 → 求值 → 输出波形 <span class="why">这一步的收益超过读三本书</span></li>
+        <li><b>精读 IEEE 1800 第 4 章（调度语义）与第 16 章（断言）</b>，读英文原文，逐条对照自己的实现</li>
+        <li><b>把 X 传播做成可切换的三档语义</b>（标准 / 乐观 / 悲观），用同一份 RTL 跑出三种结果并解释差异</li>
+        <li><b>建立差分测试习惯</b>：同一用例在自家工具与参考实现上跑，自动 diff 波形与日志</li>
+        <li>C++ 侧补齐：RAII、移动语义、模板特化、<code>constexpr</code>、内存布局与 cache 直觉</li>
+      </ul>
+    </div>
+
+    <div class="tl-item">
+      <h5>第二阶段 · 单点做出数字（3–9 个月）</h5>
+      <div class="when">目标：从「能做」变成「做得比别人快」</div>
+      <ul>
+        <li>选定一个性能战场（仿真吞吐 / 编译时间 / 内存峰值 / 波形 dump 开销），建立可复现的 benchmark 并拿到基线</li>
+        <li>用 perf / VTune 做一轮完整的热点分析，形成「瓶颈 → 优化 → 数字」的完整链路案例</li>
+        <li>吃透至少一个开源实现：<b>Verilator 的代码生成</b>或 <b>slang 的 elaboration</b>，读到一个能改的程度</li>
+        <li>补形式与静态分析的基础：SAT 求解入门、抽象解释概念、读 SpyGlass 的规则文档理解误报治理</li>
+        <li>积累可专利点：把实现过程中遇到的「标准留白处的取舍」记录下来，那通常是专利的原型</li>
+      </ul>
+    </div>
+
+    <div class="tl-item">
+      <h5>第三阶段 · 领域纵深（9–24 个月）</h5>
+      <div class="when">目标：从一个模块，扩展到一条链路</div>
+      <ul>
+        <li>横向打通 GLS / 混仿 / 低功耗 / DFT 的接口语义，理解各自的实现约束</li>
+        <li>把 AI 工程纳入工具箱：私有化小模型 + RAG + 工具调用（Agent 架构），能独立做出一个可评估的原型</li>
+        <li>建立「验证领域 AI」的具体落点：回归失败分类 / 覆盖率缺口归因 / 时序违例智能归因</li>
+        <li>开始在 DVCon China 或国内 EDA 会议上做技术输出</li>
+        <li>读产业：把三大巨头的产品矩阵与国产厂商做逐项能力矩阵对比</li>
+      </ul>
+    </div>
+
+    <div class="tl-item">
+      <h5>第四阶段 · 定义方向（2 年以上）</h5>
+      <div class="when">目标：从「实现者」变成「定义者」</div>
+      <ul>
+        <li>负责一个技术领域的完整路线图，并有能力判断他人方案的优劣</li>
+        <li>建立跨模块 / 跨部门的技术影响力（标准参与、专利、论文、开源）</li>
+        <li>能做抽象层级的决策：哪些能力自研、哪些复用开源、哪些走合作 <span class="why">这是架构师与高级工程师的分界线</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ S11 资源 ============================ -->
+<section id="s11">
+  <div class="sec-h"><span class="ln">11</span><h2>资源清单</h2><span class="en">Resources · 只列真正会被反复用的</span></div>
+  <p class="sec-lead">不追求数量。<strong>下面这些的共同点是「会被查第二遍」</strong>——标准与源码是字典，书是教材，论文是参照系。</p>
+
+  <div class="tbl-wrap"><table class="rt">
+    <thead><tr><th style="width:78px">类别</th><th style="width:250px">名称</th><th>为什么值得</th></tr></thead>
+    <tbody>
+      <tr><td><span class="cat">标准</span></td><td><b>IEEE 1800-2017 / 1800-2023 LRM</b></td><td>SystemVerilog 语言圣经。不是通读材料，是当字典用——实现任何一个特性前先查条款，避免凭印象实现</td></tr>
+      <tr><td><span class="cat">标准</span></td><td><b>IEEE 1364-2005</b>、<b>IEEE 1076（VHDL）</b></td><td>Verilog 与 VHDL 语法标准；混合语言仿真必查</td></tr>
+      <tr><td><span class="cat">标准</span></td><td><b>SDF（IEEE 1497）</b>、<b>Liberty</b></td><td>门级时序反标与库格式；GLS 场景的两个核心输入格式</td></tr>
+      <tr><td><span class="cat">标准</span></td><td><b>IEEE 1801-2018（UPF）</b></td><td>低功耗验证的标准基础，规则密集、细节多</td></tr>
+      <tr><td><span class="cat">开源</span></td><td><b>Verilator</b></td><td>性能最强的开源仿真器。读它的代码生成部分是理解「编译式仿真」最快的路径。<b>注意 LGPL，不可静态链进闭源产品</b></td></tr>
+      <tr><td><span class="cat">开源</span></td><td><b>slang</b>（C++17 / MIT）</td><td>目前最完整的开源 SV 前端，自带 elaboration。MIT 许可可商用。读它等于读一份高质量的前端教材</td></tr>
+      <tr><td><span class="cat">开源</span></td><td><b>Surelog + UHDM</b></td><td>Apache-2.0。UHDM 是可参考的标准 IR 设计</td></tr>
+      <tr><td><span class="cat">开源</span></td><td><b>Yosys</b>、<b>SymbiYosys / sby</b></td><td>综合与形式验证的开源入口，RTLIL 是学习硬件 IR 的好材料</td></tr>
+      <tr><td><span class="cat">开源</span></td><td><b>Cocotb</b>、<b>GTKWave / Surfer</b></td><td>Python testbench 与波形查看器实现参考（Surfer 是 Rust + Web 技术栈）</td></tr>
+      <tr><td><span class="cat">竞品</span></td><td><b>VCS / Xcelium / Questa</b></td><td>必须熟练到「知道它每个开关在干什么」。竞品分析是需求的主要来源</td></tr>
+      <tr><td><span class="cat">竞品</span></td><td><b>SpyGlass</b>、<b>JasperGold</b>、<b>ZeBu / Palladium</b></td><td>静态检查、形式化、硬件加速三个细分方向的标杆，各读一份用户手册</td></tr>
+      <tr><td><span class="cat">书</span></td><td><b>《SystemVerilog 验证：测试平台编写指南》</b>（Spear）</td><td>理解客户在干什么的最佳入口，工具研发工程师的必读</td></tr>
+      <tr><td><span class="cat">书</span></td><td><b>《UVM 实战》</b>（张强）</td><td>中文 UVM 首选，把方法学讲得比英文书清楚</td></tr>
+      <tr><td><span class="cat">书</span></td><td><b>《Engineering a Compiler》</b>／《编译原理》（龙书）</td><td>前者更贴近工程实现，后者更完整。做前端与 IR 必读</td></tr>
+      <tr><td><span class="cat">书</span></td><td><b>《深入理解计算机系统》</b>（CSAPP）</td><td>内存、缓存、并发、链接——性能工程的地基</td></tr>
+      <tr><td><span class="cat">书</span></td><td><b>《性能之巅》</b>（Brendan Gregg）</td><td>系统化的性能分析方法论，比零散的调优技巧有用得多</td></tr>
+      <tr><td><span class="cat">书</span></td><td><b>《计算机体系结构：量化研究方法》</b></td><td>理解被验证对象（处理器、缓存、互连）的行为，才能设计出好的验证语义</td></tr>
+      <tr><td><span class="cat">会议</span></td><td><b>DVCon（含 DVCon China）</b></td><td>验证方向最对口的会议，工业界论文描述的是真实工程约束下的取舍</td></tr>
+      <tr><td><span class="cat">会议</span></td><td><b>DAC / ICCAD / DATE / ASP-DAC</b></td><td>EDA 顶会。跟踪仿真并行化、形式化、ML for EDA 三条主线</td></tr>
+      <tr><td><span class="cat">组织</span></td><td><b>Accellera 工作组</b>、<b>IEEE 1800 WG</b></td><td>标准从提案到落地的过程本身就是最好的产品课。可从提交 clarification 起步</td></tr>
+      <tr><td><span class="cat">实践</span></td><td><b>写一个玩具仿真器（强烈推荐）</b></td><td>本清单中投入产出比最高的一项。完成一次，L2 的所有知识会从「记住」变成「理解」</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  <b>关于这份地图</b><br>
+  七个知识域、62 个模块，按「造工具的人」的视角组织。L1/L2/L4 是主干（约占 70% 篇幅），L3 是需求来源，L5 是前沿方向，L6/L7 决定产出能否被市场承认。<br>
+  自评数据保存在浏览器本地（localStorage），清除站点数据会重置为默认值。<br>
+  内容生成于 2026-09-15。标准版本、工具版本、厂商格局会变化，涉及具体产品与版本的信息建议以官方文档为准。
+</footer>
+
+
+</main>
+</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var AXES = [
+    { name: "语言与语义",   desc: "SV/Verilog/VHDL 语义 + IEEE 标准实现能力", v: 50 },
+    { name: "仿真内核实现", desc: "调度 / X 传播 / 设计数据库 / 高级特性",     v: 50 },
+    { name: "编译与代码生成", desc: "前端 / elaboration / IR / 优化 / JIT",     v: 50 },
+    { name: "性能工程",     desc: "profiling / 内存 / SIMD / 并行仿真",        v: 50 },
+    { name: "形式化与静态分析", desc: "SAT / 模型检验 / 数据流 / 抽象解释",     v: 50 },
+    { name: "AI × EDA",     desc: "LLM 辅助验证 / ML for EDA / 数据飞轮",      v: 50 }
+  ];
+
+  var KEY = "eda-km-radar-v2";
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved && saved.length === AXES.length) {
+      for (var i = 0; i < AXES.length; i++) {
+        var n = Number(saved[i]);
+        if (isFinite(n) && n >= 0 && n <= 100) AXES[i].v = n;
+      }
+    }
+  } catch (e) {}
+
+  var CX = 255, CY = 200, R = 122, N = AXES.length;
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.getElementById("radar");
+  if (!svg) return;
+
+  function pt(i, ratio) {
+    var deg = (360 / N) * i - 90;
+    var a = deg * Math.PI / 180;
+    return [CX + R * ratio * Math.cos(a), CY + R * ratio * Math.sin(a)];
+  }
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function poly(ratio, cls) {
+    var p = [];
+    for (var i = 0; i < N; i++) { var c = pt(i, ratio); p.push(c[0].toFixed(1) + "," + c[1].toFixed(1)); }
+    return p.join(" ");
+  }
+
+  // grid rings
+  [0.25, 0.5, 0.75, 1].forEach(function(r, idx) {
+    svg.appendChild(el("polygon", {
+      points: poly(r), fill: idx === 3 ? "#fbfcfe" : "none",
+      stroke: idx === 3 ? "#d0d7e2" : "#e8ecf2", "stroke-width": 1
+    }));
+  });
+
+  // spokes
+  for (var i = 0; i < N; i++) {
+    var c = pt(i, 1);
+    svg.appendChild(el("line", { x1: CX, y1: CY, x2: c[0].toFixed(1), y2: c[1].toFixed(1), stroke: "#e2e7ee", "stroke-width": 1 }));
+  }
+
+  // data polygon
+  var dataPoly = el("polygon", { points: "", fill: "rgba(31,95,168,.16)", stroke: "#1f5fa8", "stroke-width": 2, "stroke-linejoin": "round" });
+  svg.appendChild(dataPoly);
+
+  // vertex dots
+  var dots = [];
+  for (var j = 0; j < N; j++) {
+    var d = el("circle", { cx: CX, cy: CY, r: 4, fill: "#fff", stroke: "#1f5fa8", "stroke-width": 2 });
+    svg.appendChild(d); dots.push(d);
+  }
+
+  // labels
+  var labels = [];
+  for (var k = 0; k < N; k++) {
+    var lp = pt(k, 1.20);
+    var deg = (360 / N) * k - 90;
+    var anchor = "middle";
+    if (Math.cos(deg * Math.PI / 180) > 0.3) anchor = "start";
+    else if (Math.cos(deg * Math.PI / 180) < -0.3) anchor = "end";
+    var t1 = el("text", { x: lp[0].toFixed(1), y: lp[1].toFixed(1), "text-anchor": anchor, "font-size": 12, "font-weight": 600, fill: "#151a21", "font-family": "inherit" });
+    t1.textContent = AXES[k].name;
+    svg.appendChild(t1);
+    var t2 = el("text", { x: lp[0].toFixed(1), y: (lp[1] + 15).toFixed(1), "text-anchor": anchor, "font-size": 11.5, "font-weight": 700, fill: "#1f5fa8", "font-family": "inherit" });
+    t2.textContent = AXES[k].v;
+    svg.appendChild(t2);
+    labels.push([t1, t2]);
+  }
+
+  // center scale ticks
+  [25, 50, 75, 100].forEach(function(v) {
+    var p = pt(0, v / 100);
+    svg.appendChild(el("text", { x: (CX + 5).toFixed(1), y: (p[1] + 3).toFixed(1), "font-size": 9, fill: "#aab2bf", "font-family": "inherit" })).textContent = v;
+  });
+
+  // ---- sliders ----
+  var host = document.getElementById("sliders");
+  var inputs = [];
+  AXES.forEach(function(ax, idx) {
+    var row = document.createElement("div");
+    row.className = "sl";
+
+    var lab = document.createElement("label");
+    lab.innerHTML = "<b>" + ax.name + "</b> <span style='color:#828b9b;font-size:11.5px'>· " + ax.desc + "</span>";
+
+    var rng = document.createElement("input");
+    rng.type = "range"; rng.min = "0"; rng.max = "100"; rng.step = "1"; rng.value = ax.v;
+    rng.setAttribute("aria-label", ax.name);
+    rng.style.setProperty("--p", ax.v + "%");
+
+    var val = document.createElement("span");
+    val.className = "val"; val.textContent = ax.v;
+
+    rng.addEventListener("input", function() {
+      ax.v = Number(rng.value);
+      val.textContent = ax.v;
+      rng.style.setProperty("--p", ax.v + "%");
+      render();
+      persist();
+    });
+
+    row.appendChild(lab); row.appendChild(rng); row.appendChild(val);
+    host.appendChild(row);
+    inputs.push([rng, val]);
+  });
+
+  function render() {
+    var p = [];
+    for (var i = 0; i < N; i++) {
+      var c = pt(i, AXES[i].v / 100);
+      p.push(c[0].toFixed(1) + "," + c[1].toFixed(1));
+      dots[i].setAttribute("cx", c[0].toFixed(1));
+      dots[i].setAttribute("cy", c[1].toFixed(1));
+      labels[i][1].textContent = AXES[i].v;
+    }
+    dataPoly.setAttribute("points", p.join(" "));
+  }
+
+  var t = null;
+  function persist() {
+    if (t) clearTimeout(t);
+    t = setTimeout(function() {
+      try { localStorage.setItem(KEY, JSON.stringify(AXES.map(function(a) { return a.v; }))); } catch (e) {}
+    }, 250);
+  }
+
+  render();
+
+  // ---- TOC active highlight ----
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a[href^="#"]'));
+  var secs = links.map(function(a) { return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+  if ("IntersectionObserver" in window && secs.length) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function(l) { l.classList.remove("on"); });
+        var idx = secs.indexOf(en.target);
+        if (idx >= 0) links[idx].classList.add("on");
+      });
+    }, { rootMargin: "-12% 0px -78% 0px", threshold: 0 });
+    secs.forEach(function(s) { io.observe(s); });
+  }
+})();
+</script>
+
+</body>
+</html>

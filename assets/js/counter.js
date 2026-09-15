@@ -1,6 +1,6 @@
 /* 访客统计（前端）
  *
- * 流程：上报一次访问命中 → 拉取聚合数字 → 渲染到页脚。
+ * 流程：上报一次访问命中 → 用这次请求的返回直接渲染到页脚（只发一次请求）。
  * 本脚本只读取服务端返回的**聚合数字**（总次数 / 独立访客 / 城市分布），
  * 页面上不会出现任何单个访客的信息。
  *
@@ -22,18 +22,26 @@
   var wrap = document.querySelector('[data-visits-wrap]');
   var box = document.querySelector('[data-visits]');
 
-  // 1) 上报命中 —— 不等待、不阻塞渲染，失败静默。
-  //    放在展示位判断之前，这样没有展示位的页面同样计入访问量。
-  try {
-    fetch(ENDPOINT + '/hit', {
-      method: 'POST',
-      mode: 'cors',
-      keepalive: true
-    }).catch(function () {});
-  } catch (e) {}
+  // 1) 上报命中，并把服务端算好的聚合数字带回来。
+  //    失败静默 —— 统计拿不到不该影响页面的任何功能。
+  function hit(cb) {
+    try {
+      fetch(ENDPOINT + '/hit', {
+        method: 'POST',
+        mode: 'cors',
+        keepalive: true
+      })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { if (d && cb) cb(d); })
+        .catch(function () {});
+    } catch (e) {}
+  }
 
   // 没有展示位就到此为止：只计数，不显示。
-  if (!box) return;
+  if (!box) {
+    hit();
+    return;
+  }
 
   var summaryEl = box.querySelector('[data-visits-summary]');
   var citiesEl = box.querySelector('[data-visits-cities]');
@@ -81,11 +89,10 @@
     box.hidden = false;
   }
 
-  // 2) 拉取聚合数字
-  try {
-    fetch(ENDPOINT + '/stats', { mode: 'cors' })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) { if (d) render(d); })
-      .catch(function () {});
-  } catch (e) {}
+  // 2) 用 /hit 的返回直接渲染。
+  //    ⚠️ 不要写成「先 POST /hit 再 GET /stats」两个并发请求：
+  //    两者会几乎同时到达，/stats 可能先被处理，读到的是本次访问写入**之前**
+  //    的状态 —— 表现就是首次访问（或每次刷新）城市数显示 0。
+  //    服务端是在写完 KV 之后才算这份快照的，所以一次请求拿到的数字必定含本次。
+  hit(render);
 })();

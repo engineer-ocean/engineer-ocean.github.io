@@ -6,7 +6,8 @@
  * 收集什么
  *   - 总访问量 PV            → KV: `pv`
  *   - 独立访客（按日去重累加）→ KV: `uv:total`，去重靠 KV: `uv:<日期>:<哈希>`（TTL 24h）
- *   - 城市级计数             → KV: `city:<国家>|<城市>`，只累加数字
+ *   - 城市级计数             → KV: `cityAgg`，一个 JSON 对象
+ *                             （键是 `<国家>|<城市>`，值是计数，只累加数字）
  *
  * 明确**不**收集（这几条是硬约束，改代码时不要破坏）
  *   - 不存原始 IP：IP 只用于当场算一个哈希，算完即弃，从不写入 KV
@@ -71,6 +72,71 @@ async function bump(env, key) {
   return next;
 }
 
+// ---------------------------------------------------------------- 城市聚合
+//
+// 为什么不是「每个城市一个 KV 键 + list()」？
+//   因为 KV 的 list() 结果带缓存：刚 put 进去的键，list() 往往要几十秒后才认得，
+//   而 get() 在写入的那个机房是强一致的。早期版本正是用 list({prefix:'city:'})
+//   来数城市，于是出现了这个现象 —— 新访客明明已经写进 KV、直接从后台读都看得见，
+//   页面上却显示「来自 0 个城市」。不是没记上，是 list() 还没刷出来。
+//   现在整张城市表存成一个 JSON 值，只走 get()/put()，读到什么就是什么。
+//
+//   代价：读-改-写在大表 + 高并发时会有互相覆盖。个人站点量级下可忽略；
+//   真要做大，换成 Durable Object 或 Analytics Engine。
+const CITY_AGG_KEY = 'cityAgg';
+
+function parseCityKey(key) {
+  const sep = key.indexOf('|');
+  return {
+    country: sep === -1 ? key : key.slice(0, sep),
+    city: sep === -1 ? '' : key.slice(sep + 1),
+  };
+}
+
+async function readCityAgg(env) {
+  const raw = await env.COUNTER.get(CITY_AGG_KEY);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch (e) {
+      // 值坏了就重建 —— 不让一个坏键把统计永久打死
+    }
+  }
+
+  // 迁移：早期版本把计数存在分散的 `city:<国家>|<城市>` 键里。
+  // 首次读到空 cityAgg 时汇总一次，写回新格式，老数据不丢。
+  const agg = {};
+  const listed = await env.COUNTER.list({ prefix: 'city:' });
+  for (const k of listed.keys) {
+    const count = parseInt((await env.COUNTER.get(k.name)) || '0', 10) || 0;
+    if (count > 0) agg[k.name.slice('city:'.length)] = count;
+  }
+  if (Object.keys(agg).length) {
+    await env.COUNTER.put(CITY_AGG_KEY, JSON.stringify(agg));
+  }
+  return agg;
+}
+
+function topCities(agg, limit) {
+  return Object.keys(agg)
+    .map((key) => Object.assign(parseCityKey(key), { count: parseInt(agg[key], 10) || 0 }))
+    .filter((c) => c.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+// 一次算齐所有聚合数字。`hit` 与 `stats` 共用同一个快照函数，
+// 保证「刚上报完的这次访问」也出现在返回里 —— 前端一次请求即可渲染，无先后竞争。
+async function snapshot(env, agg) {
+  const pv = parseInt((await env.COUNTER.get('pv')) || '0', 10) || 0;
+  const uv = parseInt((await env.COUNTER.get('uv:total')) || '0', 10) || 0;
+  const cities = topCities(agg, Infinity);
+  return { pv, uv, cityCount: cities.length, topCities: cities.slice(0, 8) };
+}
+
 async function handleHit(request, env, cors) {
   const cf = request.cf || {};
   const country = typeof cf.country === 'string' ? cf.country : 'XX';
@@ -78,9 +144,11 @@ async function handleHit(request, env, cors) {
 
   await bump(env, 'pv');
 
-  // 城市级聚合：只累加计数，键里不含任何访客标识
+  // 城市级聚合：只累加计数，键名里不含任何访客标识
   const cityKey = city ? `${country}|${city}` : `${country}|`;
-  await bump(env, `city:${cityKey}`);
+  const agg = await readCityAgg(env);
+  agg[cityKey] = (parseInt(agg[cityKey], 10) || 0) + 1;
+  await env.COUNTER.put(CITY_AGG_KEY, JSON.stringify(agg));
 
   // 独立访客去重：算一个含当日盐的哈希，只把哈希写进 KV。
   // IP 与 UA 在这个函数返回后即不再被引用。
@@ -98,35 +166,14 @@ async function handleHit(request, env, cors) {
     }
   }
 
-  return json({ ok: true }, cors);
+  // 顺带把数字回给前端：省掉第二次往返，也避免两次请求落在不同机房时的时序差。
+  const stats = await snapshot(env, agg);
+  return json(Object.assign({ ok: true }, stats), cors);
 }
 
 async function handleStats(env, cors) {
-  const pv = parseInt((await env.COUNTER.get('pv')) || '0', 10) || 0;
-  const uv = parseInt((await env.COUNTER.get('uv:total')) || '0', 10) || 0;
-
-  // 城市键数量有限（个人站点通常几十个），一次 list + 逐键读取足够。
-  // 若城市数超过 1000，KV list 需要分页 —— 届时改成只维护 top N。
-  const listed = await env.COUNTER.list({ prefix: 'city:' });
-  const cities = [];
-  for (const k of listed.keys) {
-    const raw = k.name.slice('city:'.length);
-    const sep = raw.indexOf('|');
-    const count = parseInt((await env.COUNTER.get(k.name)) || '0', 10) || 0;
-    if (count > 0) {
-      cities.push({
-        country: sep === -1 ? raw : raw.slice(0, sep),
-        city: sep === -1 ? '' : raw.slice(sep + 1),
-        count,
-      });
-    }
-  }
-  cities.sort((a, b) => b.count - a.count);
-
-  return json(
-    { pv, uv, cityCount: cities.length, topCities: cities.slice(0, 8) },
-    cors
-  );
+  const agg = await readCityAgg(env);
+  return json(await snapshot(env, agg), cors);
 }
 
 export default {
