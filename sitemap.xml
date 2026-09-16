@@ -34,6 +34,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://engineer-ocean.github.io/notes/functional-verification-flow/</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://engineer-ocean.github.io/notes/vlsi2/</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>monthly</changefreq>

@@ -19,6 +19,8 @@
 ├── notes/
 │   ├── eda-knowledge-map/     数字前端验证工具研发 · 领域知识地图（单文件自包含）
 │   │   └── index.html
+│   ├── functional-verification-flow/  《全面的功能验证：完整的工业流程》中文译本
+│   │   └── index.html            （单文件 12 MB、262 张图全内联、23 张表）
 │   ├── vlsi2/                 VLSI 2 中文课堂讲义（自包含页面 + 160 张配图）
 │   │   ├── index.html
 │   │   └── img/
@@ -89,6 +91,7 @@ python -m http.server 8000
 - 展示名统一写 `Ocean`，品牌标记 `EO`，**不要**写回其他名字
 - 站内**不得**出现任何指向旧账号的链接、`@handle` 文本或域名
 - 对外入口只有本站、`yyang16@126.com`、`/notes/vlsi2/`、
+  `/notes/eda-knowledge-map/`、`/notes/functional-verification-flow/`、
   `/notes/formal-verification/`、`/notes/systemverilog-1800-2023/`
 - 新增页面时，`<title>` 后缀、页脚版权、导航 brand 都要用 `Ocean`
 
