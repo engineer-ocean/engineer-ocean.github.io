@@ -26,8 +26,10 @@
 │   │   └── img/
 │   ├── formal-verification/   《形式验证》第二版中文译本（单文件、图片全内联）
 │   │   └── index.html
-│   └── systemverilog-1800-2023/  《IEEE 1800-2023 SystemVerilog 标准》中文译本
-│       └── index.html            （单文件 14 MB、286 张图全内联、41 章）
+│   ├── systemverilog-1800-2023/  《IEEE 1800-2023 SystemVerilog 标准》中文译本
+│   │   └── index.html            （单文件 14 MB、286 张图全内联、41 章）
+│   └── static-timing-analysis/   《静态时序分析（纳米级设计）》中文译本
+│       └── index.html            （单文件 17 MB、216 张图全内联、10 章 + 2 附录）
 ├── assets/
 │   ├── css/style.css          设计系统（全部样式，含明暗双主题）
 │   ├── js/main.js             交互（主题切换、移动端菜单、标签筛选）
@@ -92,7 +94,8 @@ python -m http.server 8000
 - 站内**不得**出现任何指向旧账号的链接、`@handle` 文本或域名
 - 对外入口只有本站、`yyang16@126.com`、`/notes/vlsi2/`、
   `/notes/eda-knowledge-map/`、`/notes/functional-verification-flow/`、
-  `/notes/formal-verification/`、`/notes/systemverilog-1800-2023/`
+  `/notes/formal-verification/`、`/notes/systemverilog-1800-2023/`、
+  `/notes/static-timing-analysis/`
 - 新增页面时，`<title>` 后缀、页脚版权、导航 brand 都要用 `Ocean`
 
 改动后跑一次自查，**应无输出**。它扫描**所有文件类型** —— 不只是 HTML：
