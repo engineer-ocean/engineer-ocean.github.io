@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ocean — SoC 验证 / 逻辑仿真 / X 态语义</title>
-<meta name="description" content="逻辑仿真器研发工程师。负责 GLS 中的 X 态语义与左移验证；关注 RTL 级仿真中的 XProp 与 SDC，门级仿真中的 SDF 反标、时序检查与 X 态悲观去除。技术笔记与领域知识记录。">
+<meta name="description" content="逻辑仿真器研发工程师。负责 GLS 中的 X 态语义与左移验证；关注 RTL 级仿真中的 XProp 与 SDC，门级仿真中的 SDF 反标、时序检查与 X 态悲观去除。技术笔记与领域经典记录。">
 <meta name="author" content="Ocean">
 <link rel="canonical" href="https://engineer-ocean.github.io/">
 
@@ -47,7 +47,7 @@
         <li><a href="#about">关于</a></li>
         <li><a href="#focus">方向</a></li>
         <li><a href="#experience">经历</a></li>
-        <li><a href="#work">领域知识</a></li>
+        <li><a href="#work">领域经典</a></li>
         <li><a href="/blog/">技术笔记</a></li>
         <li><a href="#contact">联系</a></li>
       </ul>
@@ -257,8 +257,8 @@
       <div class="sec-head">
         <span class="sec-num">04</span>
         <div>
-          <h2 class="sec-title">领域知识</h2>
-          <p class="sec-sub">踩过的坑、定过的规则，以及整理成册的地图、讲义与译本</p>
+          <h2 class="sec-title">领域经典</h2>
+          <p class="sec-sub">整理成册的地图、讲义与译本</p>
         </div>
       </div>
 
@@ -299,42 +299,6 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
             </a>
           </div>
-        </article>
-
-        <article class="note">
-          <div class="note-head">
-            <h3>X 态语义与 SDC 约束</h3>
-            <span class="chip chip-doing">持续更新</span>
-          </div>
-          <p>
-            RTL 侧是 XProp 的乐观与悲观策略之争，门级侧则叠加了未初始化寄存器、多驱动冲突、
-            亚稳态，以及 SDF 反标本身引入的不确定性；再加上同一份 SDC 在静态分析里被当作约束、
-            在仿真里被当作检查判据，两边读出的语义并不完全一致。这些问题的共同点是 —— 查文档解决不了。
-          </p>
-        </article>
-
-        <article class="note">
-          <div class="note-head">
-            <h3>门级时序检查与 SDF 反标</h3>
-            <span class="chip chip-doing">持续更新</span>
-          </div>
-          <p>
-            setup / hold / recovery / removal / pulse-width 五类检查，加上反标的覆盖范围与工艺角口径。
-            核心问题只有一个：什么条件下该报违例、什么条件下不该报。标准在这里留了太多解释空间，
-            工具默认行为又不一致，只能靠真实设计一遍遍对出来。
-          </p>
-        </article>
-
-        <article class="note">
-          <div class="note-head">
-            <h3>X 态悲观去除的判定规则</h3>
-            <span class="chip chip-plan">梳理中</span>
-          </div>
-          <p>
-            X 在时序检查里的角色很尴尬：既可能是真实的不定态，也可能只是建模过度悲观带来的幻影。
-            哪些 X 可以安全地当作 don't-care 收敛掉、哪些必须显式报出，业界至今没有统一标准。
-            这里需要的是可判定的规则，而不是经验主义的默契。
-          </p>
         </article>
 
         <article class="note">
@@ -400,8 +364,6 @@
             一本把时序这条线讲到底的功底书：从纳米级互连的串扰与噪声讲起，逐层铺开标准单元库、
             互连寄生参数与延时计算，再落到 STA 环境的配置、时序检查的口径、接口分析与鲁棒验证，
             附录收着 SDC 与标准延时格式（SDF）。十个章节、两个附录、两百余张原书插图。
-            它和「门级时序检查与 SDF 反标」那条笔记是同一个问题的两面 ——
-            那条是我在工具里一遍遍对出来的口径，这本是标准与教材给出的说法。
           </p>
           <div style="margin-top:16px;">
             <a class="btn" href="/notes/static-timing-analysis/">
