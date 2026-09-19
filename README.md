@@ -8,14 +8,8 @@
 
 ```
 .
-├── index.html                 首页（关于 / 方向 / 经历 / 领域经典 / 笔记 / 联系）
+├── index.html                 首页（关于 / 专注方向 / 经历 / 领域经典 / 联系）
 ├── 404.html                   404 页面
-├── blog/
-│   ├── index.html             技术笔记列表（含标签筛选）
-│   └── posts/                 文章正文
-│       ├── gls-x-propagation.html
-│       ├── sdf-sta-consistency.html
-│       └── gls-profiling-notes.html
 ├── notes/
 │   ├── eda-knowledge-map/     数字前端验证工具研发 · 领域知识地图（单文件自包含）
 │   │   └── index.html
@@ -47,20 +41,24 @@
   每个页面 `<head>` 里有一段内联脚本在首次绘制前设定 `data-theme`，避免闪白 ——
   新增页面时记得带上它。
 - **字体**：系统字体栈，中文优先 PingFang SC / 微软雅黑；等宽用于标签与元信息。
-- **路径**：全部使用站点根路径（`/assets/...`、`/blog/...`），
+- **路径**：全部使用站点根路径（`/assets/...`、`/notes/...`），
   因为这是用户站点（`<username>.github.io`），部署在域名根目录下。
 
-## 新增一篇文章
+## 新增一份领域经典
 
-1. 复制 `blog/posts/gls-profiling-notes.html` 作为模板。
-2. 修改 `<title>`、`<meta name="description">`、`<link rel="canonical">`、
-   `<h1>`、`.article-desc`、`.article-bar` 里的日期与标签。
-3. 正文写在 `<div class="prose">` 里。可用元素：
-   `h2` / `h3` / `p` / `ul` / `ol` / `blockquote` / `table` / `pre > code` / `hr`。
-4. 在 `blog/index.html` 的 `<ul class="post-list">` 里加一条
-   `<li class="post-item" data-tags="标签A 标签B">`（标签用空格分隔，**标签名内不要有空格**，
-   否则筛选会失效）。
-5. 在首页 `index.html` 的「技术笔记」段落同步最新的三条，并在 `sitemap.xml` 里补一条 URL。
+首页 `#work` 是「领域经典」章节，每个条目一个 `<article class="note">`
+（知识地图 / 讲义 / 译本），内容放在 `notes/<slug>/index.html`。
+
+1. 把自包含单文件页放到 `notes/<slug>/index.html`，模板与收编脚本见
+   `ingest_*.py`（收编时要补：CRLF→LF、SEO 三件套、返回首页链接、
+   `<table>` 的 `.tbl-wrap` 滚动容器）。
+2. 在首页 `index.html` 的 `#work` 里加一条 `<article class="note">`，
+   chip 用 `<span class="chip chip-doc">译本</span>`（或 `讲义` / `知识地图`）。
+3. **同步改 `.dev/shot_checks.py` 里的条数断言**（当前 6 条），否则断言会静默失真。
+4. 在 `sitemap.xml` 里补一条 URL。
+
+> 本仓库**已不再有 `blog/`**（2026-09-19 整块下线，含 3 篇文章）。
+> 旧页面仍可从分支历史里取回：`.dev/_blog_removed/` 留了一份本地副本。
 
 ## 本地预览
 

@@ -7,27 +7,6 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://engineer-ocean.github.io/blog/</loc>
-    <lastmod>2026-09-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://engineer-ocean.github.io/blog/posts/gls-x-propagation.html</loc>
-    <lastmod>2026-09-06</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://engineer-ocean.github.io/blog/posts/sdf-sta-consistency.html</loc>
-    <lastmod>2026-08-24</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://engineer-ocean.github.io/blog/posts/gls-profiling-notes.html</loc>
-    <lastmod>2026-07-29</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://engineer-ocean.github.io/notes/eda-knowledge-map/</loc>
     <lastmod>2026-09-15</lastmod>
     <changefreq>monthly</changefreq>
