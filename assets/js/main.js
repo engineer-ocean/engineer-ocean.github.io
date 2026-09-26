@@ -143,6 +143,89 @@
     }
   }
 
+  /* ---------------------------------------------------------- image lightbox
+     [data-lit] 的链接点击后开大图，不跳转。
+     - 只接管带 data-lit 的链接，微信等外链照常新窗口打开
+     - 中键 / Ctrl 点击仍按浏览器默认行为（新标签页打开原图）
+     - 打开时锁页面滚动；Esc / 点背景 / 点关闭 都能退
+     - 非 HTML 文档、或页面里没有 lightbox 节点时，这段整体跳过
+     ---------------------------------------------------------- */
+  function initLightbox() {
+    var lb = document.getElementById('lightbox');
+    var litLinks = document.querySelectorAll('[data-lit]');
+    if (!lb || !litLinks.length) return;
+
+    var lbImg = lb.querySelector('img');
+    var lbCap = lb.querySelector('.lb-cap');
+    var lbCount = lb.querySelector('.lb-count');
+    var lbList = Array.prototype.slice.call(litLinks);
+    var lbAt = 0;
+    var lbOpener = null;
+
+    function lbRender() {
+      var a = lbList[lbAt];
+      lbImg.src = a.getAttribute('href');
+      lbImg.alt = a.getAttribute('alt') || '';
+      if (lbCap) {
+        lbCap.textContent = a.getAttribute('data-lit') || lbImg.alt || '';
+      }
+      if (lbCount) lbCount.textContent = (lbAt + 1) + ' / ' + lbList.length;
+    }
+
+    function lbOpen(i, opener) {
+      lbAt = i;
+      lbOpener = opener || lbList[i];
+      lbRender();
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      var closer = lb.querySelector('.lb-close');
+      if (closer) closer.focus();
+    }
+
+    function lbClose() {
+      lb.classList.remove('open');
+      document.body.style.overflow = '';
+      if (lbOpener) lbOpener.focus();
+    }
+
+    function lbStep(d) {
+      lbAt = (lbAt + d + lbList.length) % lbList.length;
+      lbRender();
+    }
+
+    Array.prototype.forEach.call(litLinks, function (a, i) {
+      a.setAttribute('role', 'button');
+      a.setAttribute('aria-haspopup', 'dialog');
+      a.addEventListener('click', function (ev) {
+        /* 新标签页打开（中键 / Ctrl 点击）不拦，尊重浏览器默认行为 */
+        if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.button) return;
+        ev.preventDefault();
+        lbOpen(i, a);
+      });
+    });
+
+    lb.addEventListener('click', function (ev) {
+      if (ev.target.closest('[data-lit-close]')) { lbClose(); return; }
+      /* 点图片本身不关，点四周留白关 */
+      if (!ev.target.closest('figure')) lbClose();
+    });
+
+    document.addEventListener('keydown', function (ev) {
+      if (!lb.classList.contains('open')) return;
+      if (ev.key === 'Escape') { lbClose(); return; }
+      if (ev.key === 'ArrowRight' && lbList.length > 1) { ev.preventDefault(); lbStep(1); }
+      if (ev.key === 'ArrowLeft' && lbList.length > 1) { ev.preventDefault(); lbStep(-1); }
+    });
+  }
+
+  /* script 带 defer：DOM 解析完才执行，但 DOMContentLoaded 未必已经派发过，
+     所以这里要判一次 readyState，否则会漏掉整段初始化（灯箱点了没反应）。 */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLightbox);
+  } else {
+    initLightbox();
+  }
+
   /* ---------------------------------------------------------- footer year */
   Array.prototype.forEach.call(
     document.querySelectorAll('[data-year]'),
