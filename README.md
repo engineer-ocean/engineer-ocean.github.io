@@ -28,8 +28,9 @@
 │       └── index.html            （单文件 2.3 MB、无图、14 章 + 2 附录、400+ 代码块）
 ├── assets/
 │   ├── css/style.css          设计系统（全部样式，含明暗双主题）
-│   ├── js/main.js             交互（主题切换、移动端菜单、标签筛选）
-│   └── img/favicon.svg        站点图标
+│   ├── js/main.js             交互（主题切换、移动端菜单、标签筛选、图片灯箱）
+│   ├── img/favicon.svg        站点图标
+│   └── img/fudan-outstanding-graduate-2023.jpg  优秀毕业生荣誉证书（首页经历区点开看大图）
 ├── robots.txt
 ├── sitemap.xml
 └── .nojekyll                  跳过 Jekyll 处理，加快构建
@@ -45,6 +46,24 @@
 - **字体**：系统字体栈，中文优先 PingFang SC / 微软雅黑；等宽用于标签与元信息。
 - **路径**：全部使用站点根路径（`/assets/...`、`/notes/...`），
   因为这是用户站点（`<username>.github.io`），部署在域名根目录下。
+
+## 图片灯箱
+
+首页经历区的荣誉证书用「文字链接 + 点开看大图」的形式，不占版面：
+
+```html
+<a class="entry-lit" href="assets/img/xxx.jpg"
+   data-lit="说明文字（显示在灯箱底部）">链接文案</a>
+```
+
+- `href` 指向原图，`data-lit` 是灯箱里的说明；链接文字会带一条主色下划线表示可点。
+- 交互在 `assets/js/main.js` 的 `initLightbox()`：Esc / 点背景 / 点「关闭」都能退，
+  打开时锁页面滚动，关闭后焦点回到原链接；多张图可用 ←/→ 切换，计数显示 `n / m`。
+- 中键 / Ctrl 点击仍然按浏览器默认行为在新标签页打开原图。
+- 灯箱节点 `<div id="lightbox">` 放在 `index.html` 页脚之后；页面里没有它时脚本整体跳过。
+- ⚠️ `main.js` 是 `defer` 加载的，脚本在 DOM 解析后、`DOMContentLoaded` **之前**执行，
+  所以初始化必须判一次 `document.readyState`（否则 `querySelectorAll` 拿到空集，
+  灯箱点了没反应，而 `getElementById('lightbox')` 却能拿到，问题很隐蔽）。
 
 ## 新增一份领域经典
 
